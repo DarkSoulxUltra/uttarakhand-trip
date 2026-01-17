@@ -3,31 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Uttarakhand Trip Console</title>
+<title>JARVIS – Uttarakhand Trip Console</title>
 
 <style>
-body{margin:0;font-family:system-ui;background:radial-gradient(circle at top,#0f172a,#000);color:#67e8f9}
-h1{text-align:center;letter-spacing:2px}
-.container{max-width:1200px;margin:auto;padding:14px}
-.layout{display:flex;gap:14px;flex-wrap:wrap}
-.timeline{min-width:220px;flex:1}
-.card{border:1px solid #164e63;border-radius:12px;padding:10px;margin-bottom:8px;cursor:pointer}
+body{margin:0;font-family:system-ui;background:#020617;color:#67e8f9}
+h1{text-align:center}
+.container{max-width:1200px;margin:auto;padding:12px}
+.layout{display:flex;flex-wrap:wrap;gap:12px}
+.timeline{flex:1;min-width:200px}
+.card{border:1px solid #164e63;border-radius:10px;padding:8px;margin-bottom:6px;cursor:pointer}
 .card.active{background:#022c22;border-color:#22d3ee}
-.card:hover{background:#022c22}
 .content{flex:3;min-width:280px}
-.hero{width:100%;height:240px;object-fit:cover;border-radius:12px;border:1px solid #164e63}
-.gallery{display:flex;gap:8px;overflow-x:auto;margin:6px 0}
-.gallery img{height:70px;border-radius:8px;border:1px solid #164e63;cursor:pointer}
-iframe{width:100%;height:220px;border-radius:12px;border:1px solid #164e63}
-.routebar{height:6px;background:#164e63;border-radius:10px;overflow:hidden;margin:6px 0}
-.routebar span{display:block;height:100%;background:#22d3ee;width:0%;animation:move 2s forwards}
-@keyframes move{to{width:100%}}
-.meter{height:8px;background:#164e63;border-radius:8px;overflow:hidden}
+.hero{width:100%;height:230px;object-fit:cover;border-radius:10px;border:1px solid #164e63}
+.gallery{display:flex;gap:6px;overflow-x:auto}
+.gallery img{height:60px;border-radius:8px;border:1px solid #164e63;cursor:pointer}
+canvas{background:#020617;border:1px solid #164e63;border-radius:10px;width:100%;height:220px}
+.meter{height:8px;background:#164e63;border-radius:8px}
 .meter span{display:block;height:100%;background:#22d3ee}
-.tag{border:1px solid #164e63;border-radius:999px;padding:4px 10px;font-size:12px;display:inline-block;margin:4px}
-.btn{background:#22d3ee;color:black;border:none;padding:10px 16px;border-radius:8px;font-weight:600;cursor:pointer}
-.btn:hover{background:#67e8f9}
-.checklist label{display:block}
+.btn{background:#22d3ee;color:black;border:none;padding:8px 14px;border-radius:8px;font-weight:600}
+input{padding:6px;border-radius:6px;border:none}
+.section{border:1px solid #164e63;border-radius:10px;padding:10px;margin:10px 0}
 </style>
 </head>
 
@@ -35,167 +30,111 @@ iframe{width:100%;height:220px;border-radius:12px;border:1px solid #164e63}
 
 <div class="container">
 <h1>J.A.R.V.I.S — Uttarakhand Trip Console</h1>
-<p id="countdown" style="text-align:center"></p>
+
+<canvas id="map"></canvas>
 
 <div class="layout">
-<div class="timeline" id="timeline"></div>
-<div class="content" id="content"></div>
+  <div class="timeline" id="timeline"></div>
+  <div class="content" id="content"></div>
 </div>
+
+<div class="section">
+<h3>👥 Participants & Voting</h3>
+<input id="name" placeholder="Name">
+<button class="btn" onclick="addPerson()">Add</button>
+<ul id="people"></ul>
+</div>
+
+<div class="section">
+<h3>💸 Expense Split</h3>
+Total Expense ₹ <input id="total" type="number">
+<button class="btn" onclick="split()">Split</button>
+<p id="splitResult"></p>
+</div>
+
 </div>
 
 <script>
-const tripDate = new Date("2026-03-15T00:00:00");
-
-setInterval(()=>{
- const now=new Date();
- const d=Math.max(0,Math.floor((tripDate-now)/(1000*60*60*24)));
- document.getElementById("countdown").innerText=`⏳ ${d} days to go!`;
-},1000);
-
 const days=[
-{
-day:"Sunday", city:"Delhi → Haridwar",
-title:"Train → Delhi → Night Bus",
-crowd:20, distance:"Train + Bus", time:"Overnight",
-budget:2500,
-places:["Hazrat Nizamuddin","Kashmere Gate ISBT"],
-cafes:["Station food courts"], hotels:["Overnight bus"],
-img:[
-"https://upload.wikimedia.org/wikipedia/commons/7/77/Kashmere_Gate_ISBT.jpg",
-"https://upload.wikimedia.org/wikipedia/commons/5/59/Delhi_bus_terminal.jpg"
-],
-map:"https://www.google.com/maps?q=Kashmere+Gate+ISBT&output=embed"
-},
-{
-day:"Monday", city:"Haridwar",
-title:"Haridwar – Ganga Aarti",
-crowd:85, distance:"Local", time:"Walk + Ropeway",
-budget:3000,
-places:["Har Ki Pauri","Mansa Devi Temple"],
-cafes:["Chotiwala","Hoshiyar Puri"],
-hotels:["Hotel Ganga Lahari","Alpana Hotel"],
-img:[
-"https://upload.wikimedia.org/wikipedia/commons/6/6f/Ganga_Aarti_at_Haridwar.jpg",
-"https://upload.wikimedia.org/wikipedia/commons/5/55/Har_ki_Pauri_Ghat.jpg"
-],
-map:"https://www.google.com/maps?q=Har+Ki+Pauri&output=embed"
-},
-{
-day:"Tuesday", city:"Rishikesh → Dehradun",
-title:"Rishikesh Shiva + FRI",
-crowd:60, distance:"75 km", time:"3.5 hrs",
-budget:3500,
-places:["Shiva Statue","Parmarth Niketan","FRI"],
-cafes:["Little Buddha Cafe","Free Spirit Cafe"],
-hotels:["MJ Residency","Hotel Ashrey"],
-img:[
-"https://upload.wikimedia.org/wikipedia/commons/3/3e/Shiva_statue_Rishikesh.jpg",
-"https://upload.wikimedia.org/wikipedia/commons/2/2b/Forest_Research_Institute_Dehradun.jpg"
-],
-map:"https://www.google.com/maps?q=Ram+Jhula+Rishikesh&output=embed"
-},
-{
-day:"Wednesday", city:"Dehradun → Mussoorie",
-title:"Buddha Temple + Gardens",
-crowd:70, distance:"35 km", time:"1.5 hrs",
-budget:3000,
-places:["Buddha Temple","Company Garden"],
-cafes:["Cafe Ivy","Little Llama Cafe"],
-hotels:["Royal Orchid Fort","Sun N Snow"],
-img:[
-"https://upload.wikimedia.org/wikipedia/commons/8/89/Buddha_Temple_Dehradun.jpg",
-"https://upload.wikimedia.org/wikipedia/commons/2/2a/Company_Garden_Mussoorie.jpg"
-],
-map:"https://www.google.com/maps?q=Mussoorie+Mall+Road&output=embed"
-},
-{
-day:"Thursday", city:"Mussoorie",
-title:"Kempty Falls & Camel’s Back",
-crowd:90, distance:"Local", time:"Full day",
-budget:2500,
-places:["Kempty Falls","Camel's Back Road"],
-cafes:["Cafe de Tavern","Lovely Omelette Centre"],
-hotels:["Same stay"],
-img:[
-"https://upload.wikimedia.org/wikipedia/commons/5/5c/Kempty_Falls_Mussoorie.jpg",
-"https://upload.wikimedia.org/wikipedia/commons/d/d0/Camels_Back_Road_Mussoorie.jpg"
-],
-map:"https://www.google.com/maps?q=Kempty+Falls+Mussoorie&output=embed"
-}
+{city:"Delhi",title:"Night Bus",crowd:20,budget:2500,images:["images/delhi_bus.jpg"]},
+{city:"Haridwar",title:"Ganga Aarti",crowd:85,budget:3000,images:["images/haridwar_aarti.jpg"]},
+{city:"Rishikesh/Dehradun",title:"Shiva + FRI",crowd:60,budget:3500,images:["images/rishikesh_shiva.jpg","images/fri_dehradun.jpg"]},
+{city:"Dehradun/Mussoorie",title:"Buddha + Garden",crowd:70,budget:3000,images:["images/buddha_temple.jpg","images/company_garden.jpg"]},
+{city:"Mussoorie",title:"Falls + Camel Road",crowd:90,budget:2500,images:["images/kempty_falls.jpg","images/camels_back.jpg"]}
 ];
 
-let active=0,img=0,startX=null;
+let active=0,img=0;
 
 const timeline=document.getElementById("timeline");
 const content=document.getElementById("content");
 
+/* -------- TIMELINE -------- */
 days.forEach((d,i)=>{
- const div=document.createElement("div");
+ let div=document.createElement("div");
  div.className="card"+(i===0?" active":"");
- div.innerHTML=`<b>${d.day}</b><br><small>${d.city}</small>`;
+ div.innerHTML=`<b>${d.city}</b><br>${d.title}`;
  div.onclick=()=>select(i);
  timeline.appendChild(div);
 });
 
+/* -------- MAP -------- */
+const map=document.getElementById("map");
+const ctx=map.getContext("2d");
+
+function drawMap(){
+ map.width=map.offsetWidth;
+ map.height=map.offsetHeight;
+ const pts=[80,150,250,420,600];
+ ctx.clearRect(0,0,map.width,map.height);
+ ctx.strokeStyle="#22d3ee";ctx.lineWidth=3;
+ ctx.beginPath();
+ ctx.moveTo(pts[0],110);
+ for(let i=1;i<pts.length;i++) ctx.lineTo(pts[i],110);
+ ctx.stroke();
+ pts.forEach((x,i)=>{
+   ctx.fillStyle=i===active?"#22d3ee":"#164e63";
+   ctx.beginPath();ctx.arc(x,110,8,0,Math.PI*2);ctx.fill();
+ });
+}
+window.onresize=drawMap;
+
+/* -------- CONTENT -------- */
 function render(){
  const d=days[active];
  const total=days.reduce((a,b)=>a+b.budget,0);
-
  content.innerHTML=`
  <h2>${d.title}</h2>
- <div class="routebar"><span></span></div>
-
- <b>Distance:</b> ${d.distance} | <b>Travel Time:</b> ${d.time}<br><br>
-
- <b>Crowd Level</b>
  <div class="meter"><span style="width:${d.crowd}%"></span></div>
- <small>${d.crowd}% busy</small><br><br>
-
- <img class="hero" src="${d.img[img]}">
+ <p>${d.crowd}% crowd</p>
+ <img class="hero" src="${d.images[img]}">
  <div class="gallery">
-   ${d.img.map((x,i)=>`<img src="${x}" onclick="img=${i};render()">`).join("")}
+   ${d.images.map((x,i)=>`<img src="${x}" onclick="img=${i};render()">`).join("")}
  </div>
-
- <p><b>Nearby Places:</b> ${d.places.join(", ")}</p>
- <p><b>Cafés:</b> ${d.cafes.join(", ")}</p>
- <p><b>Hotels:</b> ${d.hotels.join(", ")}</p>
-
- <iframe src="${d.map}" loading="lazy"></iframe><br><br>
-
- <b>Group Checklist</b>
- <div class="checklist">
-   <label><input type="checkbox"> Train booked</label>
-   <label><input type="checkbox"> Bus booked</label>
-   <label><input type="checkbox"> Hotel confirmed</label>
-   <label><input type="checkbox"> Local cab arranged</label>
- </div><br>
-
- <b>Budget Today:</b> ₹${d.budget}<br>
- <b>Total Trip Est:</b> ₹${total}<br><br>
-
- <button class="btn" onclick="share()">Share on WhatsApp</button>
- <a href="Uttarakhand_Group_Trip_Itinerary.pdf" download>
-   <button class="btn">Download PDF</button>
- </a>
+ <p><b>Budget Today:</b> ₹${d.budget}</p>
+ <p><b>Total Trip Est:</b> ₹${total}</p>
  `;
  document.querySelectorAll(".card").forEach((c,i)=>c.classList.toggle("active",i===active));
-}
-
-function share(){
- const text="Check out our Uttarakhand trip plan! 🚍🏔️";
- window.open(`https://wa.me/?text=${encodeURIComponent(text)}`);
+ drawMap();
 }
 
 function select(i){active=i;img=0;render();}
 
-document.body.addEventListener("touchstart",e=>startX=e.touches[0].clientX);
-document.body.addEventListener("touchend",e=>{
- if(startX===null) return;
- let dx=e.changedTouches[0].clientX-startX;
- if(dx>60 && active>0) select(active-1);
- if(dx<-60 && active<days.length-1) select(active+1);
- startX=null;
-});
+/* -------- PARTICIPANTS -------- */
+let people=[];
+function addPerson(){
+ const n=document.getElementById("name").value;
+ if(!n) return;
+ people.push(n);
+ document.getElementById("people").innerHTML=people.map(p=>`<li>${p}</li>`).join("");
+}
+
+/* -------- SPLIT -------- */
+function split(){
+ const total=document.getElementById("total").value;
+ if(!total||people.length===0) return;
+ const per=(total/people.length).toFixed(2);
+ document.getElementById("splitResult").innerText=`Each pays: ₹${per}`;
+}
 
 render();
 </script>
