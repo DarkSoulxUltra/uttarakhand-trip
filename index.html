@@ -8,15 +8,15 @@
 <style>
 body{margin:0;font-family:system-ui;background:#020617;color:#67e8f9}
 h1{text-align:center;margin:8px 0}
-.container{max-width:1200px;margin:auto;padding:12px;padding-bottom:170px}
+.container{max-width:1200px;margin:auto;padding:12px;padding-bottom:200px}
 .stickyTop{position:sticky;top:0;background:#020617;z-index:5}
 
-/* ---------- SATELLITE NAV ---------- */
+/* ===== TOP SATELLITE NAV ===== */
 .routeBox{
   border:1px solid #164e63;border-radius:14px;padding:10px;margin-bottom:8px;
   background:url("https://i.imgur.com/Qr6QF9Z.jpg") center/cover no-repeat;
 }
-.routeOverlay{background:rgba(2,6,23,.8);border-radius:12px;padding:10px}
+.routeOverlay{background:rgba(2,6,23,.82);border-radius:12px;padding:10px}
 
 .progressText{text-align:center;color:#22d3ee;font-weight:600;margin-bottom:6px}
 
@@ -31,28 +31,38 @@ h1{text-align:center;margin:8px 0}
 
 .vehicle{position:absolute;top:-24px;transition:.6s cubic-bezier(.4,0,.2,1)}
 
-.routeLabels{display:flex;justify-content:space-between;font-size:12px;margin-top:4px;opacity:.85}
+.routeLabels{display:flex;justify-content:space-between;font-size:12px;margin-top:4px;opacity:.9}
 
-/* ---------- CANVAS ROUTE ---------- */
-canvas{width:100%;height:160px;border:1px solid #164e63;border-radius:12px;margin-top:6px}
-
-/* ---------- LAYOUT ---------- */
+/* ===== LAYOUT ===== */
 .layout{display:flex;flex-wrap:wrap;gap:12px}
 .timeline{flex:1;min-width:220px}
 .content{flex:3;min-width:280px}
 
-.card{border:1px solid #164e63;border-radius:10px;padding:10px;margin-bottom:8px;cursor:pointer}
-.card.active{background:#022c22;border-color:#22d3ee}
+/* ===== DAY CARDS ===== */
+.card{
+  border:1px solid #164e63;border-radius:12px;padding:10px;margin-bottom:8px;
+  cursor:pointer;
+  background:
+    linear-gradient(rgba(2,6,23,.85),rgba(2,6,23,.85)),
+    url("https://i.imgur.com/Qr6QF9Z.jpg") center/cover no-repeat;
+}
+.card.active{
+  border-color:#22d3ee;
+  box-shadow:0 0 12px rgba(34,211,238,.5);
+}
 
+/* ===== IMAGES ===== */
 .imageWrap{border:1px solid #164e63;border-radius:12px;overflow:hidden;background:#020617}
 .imageWrap img{width:100%;height:auto;max-height:320px;object-fit:contain}
 
 .gallery{display:flex;gap:8px;overflow-x:auto;padding:6px 0}
 .gallery img{height:60px;border-radius:8px;border:1px solid #164e63;cursor:pointer}
 
+/* ===== DETAILS ===== */
 details{border:1px solid #164e63;border-radius:10px;padding:8px;margin:8px 0}
 summary{cursor:pointer;font-weight:600}
 
+/* ===== MOBILE NAV ===== */
 .mobileNav{
   position:fixed;bottom:0;left:0;right:0;
   background:#020617;border-top:1px solid #164e63;
@@ -94,10 +104,9 @@ iframe{width:100%;height:220px;border-radius:10px;border:1px solid #164e63;margi
       </div>
 
       <div class="routeLabels">
-        <span>Delhi</span><span>Haridwar</span><span>Rishikesh</span><span>Dehradun</span><span>Mussoorie</span><span>Return</span>
+        <span>Delhi</span><span>Haridwar</span><span>Rishikesh</span>
+        <span>Dehradun</span><span>Mussoorie</span><span>Return</span>
       </div>
-
-      <canvas id="routeMap"></canvas>
 
     </div>
   </div>
@@ -128,11 +137,6 @@ const tripDates=[
  "Wed – Dehradun → Mussoorie",
  "Thu – Mussoorie",
  "Fri – Return to Delhi"
-];
-
-// ================= ROUTE POINTS =================
-const routePoints=[
- {x:40,y:90},{x:140,y:70},{x:230,y:60},{x:330,y:80},{x:440,y:50},{x:520,y:90}
 ];
 
 // ================= ITINERARY =================
@@ -210,13 +214,7 @@ spots:[
  {n:"Pacific Mall Dehradun",m:"https://maps.google.com/?q=Pacific+Mall+Dehradun"}
 ],
 schedule:{morning:"Checkout",afternoon:"Dehradun",evening:"Night bus"},
-steps:[
-"Checkout Mussoorie hotel",
-"Optional George Everest view point",
-"Drive to Dehradun",
-"Mall & dinner",
-"Night Volvo to Delhi"
-],
+steps:["Checkout hotel","George Everest stop","Drive to DDN","Mall & dinner","Night Volvo"],
 map:"https://www.google.com/maps?q=Mussoorie+to+Dehradun+ISBT&output=embed",
 images:["images/return_bus.jpg"]
 }
@@ -226,39 +224,16 @@ let active=0,img=0;
 const timeline=document.getElementById("timeline");
 const content=document.getElementById("content");
 
-// ================= ROUTE MAP =================
-const canvas=document.getElementById("routeMap");
-const ctx=canvas.getContext("2d");
-
-function resizeCanvas(){
- canvas.width=canvas.offsetWidth;
- canvas.height=canvas.offsetHeight;
- drawRoute();
-}
-
-function drawRoute(){
- ctx.clearRect(0,0,canvas.width,canvas.height);
- ctx.strokeStyle="#164e63";ctx.lineWidth=3;
- ctx.beginPath();
- routePoints.forEach((p,i)=>{
-  const x=p.x*canvas.width/600,y=p.y*canvas.height/120;
-  if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
- });
- ctx.stroke();
-
- ctx.strokeStyle="#22d3ee";ctx.beginPath();
- routePoints.forEach((p,i)=>{
-  if(i>active)return;
-  const x=p.x*canvas.width/600,y=p.y*canvas.height/120;
-  if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
- });
- ctx.stroke();
-
- routePoints.forEach((p,i)=>{
-  const x=p.x*canvas.width/600,y=p.y*canvas.height/120;
-  ctx.fillStyle=i===active?"#22d3ee":"#164e63";
-  ctx.beginPath();ctx.arc(x,y,6,0,Math.PI*2);ctx.fill();
- });
+// ================= MONEY LOGIC =================
+function calcSettlement(){
+ const paid={};
+ participants.forEach(p=>paid[p]=0);
+ expenses.forEach(e=>paid[e.paidBy]+=e.amount);
+ const total=expenses.reduce((a,b)=>a+b.amount,0);
+ const share=participants.length?total/participants.length:0;
+ const balance={};
+ participants.forEach(p=>balance[p]=Math.round(paid[p]-share));
+ return {balance,total,share:Math.round(share)};
 }
 
 // ================= RENDER =================
@@ -275,6 +250,7 @@ function buildTimeline(){
 
 function render(){
  const d=days[active];
+ const {balance,total,share}=calcSettlement();
 
  content.innerHTML=`
  <h2>${d.title}</h2>
@@ -290,9 +266,43 @@ function render(){
  <ul>${d.spots.map(s=>`<li><a href="${s.m}" target="_blank" style="color:#22d3ee">${s.n}</a></li>`).join("")}</ul>
  </details>
 
- <details open><summary>🧭 Step-by-Step Route</summary><ul>${d.steps.map(x=>`<li>${x}</li>`).join("")}</ul></details>
+ <details open><summary>🧭 Step-by-Step Route</summary>
+ <ul>${d.steps.map(x=>`<li>${x}</li>`).join("")}</ul>
+ </details>
 
- <details><summary>🗺 Day Route Map</summary><iframe src="${d.map}" loading="lazy"></iframe></details>
+ <details><summary>🗺 Day Route Map</summary>
+ <button onclick="toggleMap()">🗺 View Day Route Map</button>
+ <div id="mapBox" style="display:none">
+   <iframe src="${d.map}" loading="lazy"></iframe>
+ </div>
+ </details>
+
+ <hr>
+
+ <details open><summary>👥 Participants</summary>
+ <input id="newName" placeholder="Add name">
+ <button onclick="addPerson()">Add</button>
+ <ul>${participants.map((p,i)=>`<li>${p} <button onclick="removePerson(${i})">❌</button></li>`).join("")}</ul>
+ </details>
+
+ <details open><summary>💳 Add Expense</summary>
+ <input id="expTitle" placeholder="Expense name">
+ <input id="expAmt" type="number" placeholder="Amount ₹">
+ <select id="paidBy">${participants.map(p=>`<option>${p}</option>`).join("")}</select>
+ <button onclick="addExpense()">Add</button>
+ </details>
+
+ <details open><summary>📊 Settlement</summary>
+ Total: ₹${total} | Per Person: ₹${share}
+ <ul>
+ ${Object.keys(balance).map(p=>{
+   if(balance[p]>0) return `<li>${p} gets ₹${balance[p]}</li>`;
+   if(balance[p]<0) return `<li>${p} pays ₹${Math.abs(balance[p])}</li>`;
+   return `<li>${p} settled</li>`;
+ }).join("")}
+ </ul>
+ <button onclick="shareWA()">📲 Share on WhatsApp</button>
+ </details>
  `;
 
  document.getElementById("progressText").innerText=`${tripDates[active]} — ${d.city}`;
@@ -301,15 +311,60 @@ function render(){
  document.getElementById("vehicle").style.left=`calc(${active*(100/(days.length-1))}% - 12px)`;
 
  buildTimeline();
- drawRoute();
+ saveData();
 }
 
+function toggleMap(){
+ const box=document.getElementById("mapBox");
+ box.style.display=box.style.display==="none"?"block":"none";
+}
+
+// ================= MONEY ACTIONS =================
+function addPerson(){
+ const n=document.getElementById("newName").value.trim();
+ if(!n) return;
+ participants.push(n);
+ render();
+}
+
+function removePerson(i){
+ const name=participants[i];
+ expenses=expenses.filter(e=>e.paidBy!==name);
+ participants.splice(i,1);
+ render();
+}
+
+function addExpense(){
+ const t=document.getElementById("expTitle").value;
+ const a=parseInt(document.getElementById("expAmt").value);
+ const p=document.getElementById("paidBy").value;
+ if(!t||!a) return alert("Enter expense & amount");
+ expenses.push({title:t,amount:a,paidBy:p});
+ render();
+}
+
+function saveData(){
+ localStorage.setItem("participants",JSON.stringify(participants));
+ localStorage.setItem("expenses",JSON.stringify(expenses));
+}
+
+function shareWA(){
+ const {balance,total,share}=calcSettlement();
+ let msg=`Uttarakhand Trip Settlement\nTotal: ₹${total}\nPer Person: ₹${share}\n\nBalances:\n`;
+ Object.keys(balance).forEach(p=>{
+  if(balance[p]>0) msg+=`${p} gets ₹${balance[p]}\n`;
+  else if(balance[p]<0) msg+=`${p} pays ₹${Math.abs(balance[p])}\n`;
+  else msg+=`${p} settled\n`;
+ });
+ window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
+}
+
+// ================= NAV =================
 function select(i){active=i;img=0;render();}
 function next(){active=(active+1)%days.length;render();}
 function prev(){active=(active-1+days.length)%days.length;render();}
 
-window.addEventListener("resize",resizeCanvas);
-resizeCanvas();render();
+render();
 </script>
 </body>
 </html>
