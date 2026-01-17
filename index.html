@@ -45,8 +45,9 @@ summary{cursor:pointer;font-weight:600}
 }
 
 input,select{padding:6px;border-radius:6px;border:none;margin:4px}
-
 button{background:#22d3ee;border:none;border-radius:6px;padding:6px 12px;font-weight:600;cursor:pointer}
+
+iframe{width:100%;height:220px;border-radius:10px;border:1px solid #164e63;margin-top:6px}
 
 @media(max-width:768px){
   .layout{flex-direction:column}
@@ -91,25 +92,125 @@ button{background:#22d3ee;border:none;border-radius:6px;padding:6px 12px;font-we
 </div>
 
 <script>
-// ---------- STORAGE ----------
+// ---------------- STORAGE ----------------
 let participants = JSON.parse(localStorage.getItem("participants")) || ["You","Spouse"];
 let expenses = JSON.parse(localStorage.getItem("expenses")) || [];
 
-// ---------- ITINERARY ----------
-const tripDates=["Sun – Arrival","Mon – Haridwar","Tue – Rishikesh → DDN","Wed – Mussoorie","Thu – Mussoorie"];
+// ---------------- DATES ----------------
+const tripDates=[
+ "Sun – Arrival Night",
+ "Mon – Haridwar",
+ "Tue – Rishikesh → Dehradun",
+ "Wed – Dehradun → Mussoorie",
+ "Thu – Mussoorie"
+];
+
+// ---------------- ITINERARY ----------------
 const days=[
-{city:"Delhi Arrival",title:"Station → Bus Transfer",images:["images/delhi_bus.jpg"]},
-{city:"Haridwar",title:"Ganga Aarti Day",images:["images/haridwar_aarti.jpg"]},
-{city:"Rishikesh → Dehradun",title:"Shiva + FRI",images:["images/rishikesh_shiva.jpg","images/fri_dehradun.jpg"]},
-{city:"Dehradun → Mussoorie",title:"Robber’s Cave",images:["images/robbers_cave.jpg","images/company_garden.jpg"]},
-{city:"Mussoorie",title:"Kempty + Sunset",images:["images/kempty_falls.jpg","images/camels_back.jpg"]}
+{
+city:"Delhi Arrival",
+title:"Station → Dinner → Bus Transfer",
+schedule:{morning:"—",afternoon:"Train journey",evening:"Freshen up + Volvo Bus"},
+luggage:["Cloak room / retiring room at station","Bus luggage compartment"],
+steps:[
+"Arrive H Nizamuddin ~7 PM",
+"Freshen up at station washroom / retiring room",
+"Dinner at food court",
+"Cab/Metro to Kashmere Gate ISBT (45–60 min buffer)",
+"Board Volvo to Haridwar (10–11 PM)"
+],
+buffers:["30–45 min transfer buffer","15 min boarding buffer"],
+food:["Station food court","ISBT McD / stalls"],
+tea:["ISBT tea stalls"],
+map:"https://www.google.com/maps?q=H+Nizamuddin+to+Kashmere+Gate+ISBT&output=embed",
+images:["images/delhi_bus.jpg"]
+},
+
+{
+city:"Haridwar",
+title:"Temples + Ganga Aarti",
+schedule:{morning:"Mansa Devi Ropeway",afternoon:"Rest + Lunch",evening:"Ganga Aarti"},
+luggage:["Hotel reception storage"],
+steps:[
+"Bus drop early morning",
+"Auto to hotel, rest 2–3 hrs",
+"Ropeway to Mansa Devi",
+"Optional Chandi Devi",
+"Evening Ganga Aarti at Har Ki Pauri",
+"Market walk & dinner"
+],
+buffers:["Extra rest after night travel"],
+food:["Chotiwala","Hoshiyar Puri"],
+tea:["Tea near ghat"],
+map:"https://www.google.com/maps?q=Har+Ki+Pauri+Haridwar&output=embed",
+images:["images/haridwar_aarti.jpg"]
+},
+
+{
+city:"Rishikesh → Dehradun",
+title:"Shiva Statue, Café & FRI",
+schedule:{morning:"Rishikesh sightseeing",afternoon:"Café + Drive",evening:"FRI Garden"},
+luggage:["Carry luggage in cab","Hotel check-in before FRI"],
+steps:[
+"Cab Haridwar → Rishikesh (1.5 hrs)",
+"Visit Shiva Statue & Ram Jhula",
+"Optional Parmarth Niketan ghat",
+"Lunch at riverside café",
+"Drive to Dehradun (1 hr)",
+"Hotel check-in, then FRI walk"
+],
+buffers:["Bridge traffic buffer","Hotel check-in wait"],
+food:["Little Buddha Cafe","Free Spirit Cafe"],
+tea:["Tea stalls near FRI gate"],
+map:"https://www.google.com/maps?q=Haridwar+to+Rishikesh+to+Dehradun&output=embed",
+images:["images/rishikesh_shiva.jpg","images/fri_dehradun.jpg"]
+},
+
+{
+city:"Dehradun → Mussoorie",
+title:"Robber’s Cave → Hotel → Mall Road",
+schedule:{morning:"Robber’s Cave",afternoon:"Hotel + Hill Drive",evening:"Mall Road"},
+luggage:["Leave luggage at Dehradun hotel","Carry after checkout to Mussoorie"],
+steps:[
+"Cab to Robber’s Cave (carry towel + spare clothes)",
+"Return to Dehradun hotel",
+"Freshen up, pack luggage, checkout",
+"Drive to Mussoorie (1.5 hrs)",
+"Check-in Mussoorie hotel",
+"Company Garden + Mall Road"
+],
+buffers:["Hill road slow traffic","Hotel check-in wait"],
+food:["Mall Road cafés","Lovely Omelette Centre"],
+tea:["View-point tea stalls"],
+map:"https://www.google.com/maps?q=Robbers+Cave+Dehradun+to+Mussoorie+Mall+Road&output=embed",
+images:["images/robbers_cave.jpg","images/company_garden.jpg"]
+},
+
+{
+city:"Mussoorie",
+title:"Kempty Falls & Camel’s Back Road",
+schedule:{morning:"Kempty Falls",afternoon:"Rest + Lunch",evening:"Sunset walk"},
+luggage:["Hotel storage till evening departure"],
+steps:[
+"Early cab to Kempty Falls",
+"Optional ropeway",
+"Return to hotel, lunch & rest",
+"Evening Camel’s Back Road walk",
+"Café hopping on Mall Road"
+],
+buffers:["Crowd at falls","Return traffic"],
+food:["Cafe Ivy","Kalsang Friends Corner"],
+tea:["Camel’s Back Road vendors"],
+map:"https://www.google.com/maps?q=Kempty+Falls+Mussoorie&output=embed",
+images:["images/kempty_falls.jpg","images/camels_back.jpg"]
+}
 ];
 
 let active=0,img=0;
 const timeline=document.getElementById("timeline");
 const content=document.getElementById("content");
 
-// ---------- HELPERS ----------
+// ---------------- SETTLEMENT ----------------
 function calcSettlement(){
  const paid={};
  participants.forEach(p=>paid[p]=0);
@@ -123,7 +224,7 @@ function calcSettlement(){
  return {paid,balance,total,share:Math.round(share)};
 }
 
-// ---------- RENDER ----------
+// ---------------- RENDER ----------------
 function buildTimeline(){
  timeline.innerHTML="";
  days.forEach((d,i)=>{
@@ -137,7 +238,7 @@ function buildTimeline(){
 
 function render(){
  const d=days[active];
- const {paid,balance,total,share}=calcSettlement();
+ const {balance,total,share}=calcSettlement();
 
  content.innerHTML=`
  <h2>${d.title}</h2>
@@ -145,35 +246,42 @@ function render(){
  <div class="imageWrap"><img src="${d.images[img]}"></div>
  <div class="gallery">${d.images.map((x,i)=>`<img src="${x}" onclick="img=${i};render()">`).join("")}</div>
 
- <details open>
- <summary>👥 Participants</summary>
+ <details open><summary>📅 Schedule</summary>
+ <b>Morning:</b> ${d.schedule.morning}<br>
+ <b>Afternoon:</b> ${d.schedule.afternoon}<br>
+ <b>Evening:</b> ${d.schedule.evening}
+ </details>
+
+ <details open><summary>🧭 Step-by-Step Route</summary><ul>${d.steps.map(x=>`<li>${x}</li>`).join("")}</ul></details>
+ <details><summary>📍 Luggage</summary><ul>${d.luggage.map(x=>`<li>${x}</li>`).join("")}</ul></details>
+ <details><summary>🕒 Buffers</summary><ul>${d.buffers.map(x=>`<li>${x}</li>`).join("")}</ul></details>
+ <details><summary>🍴 Food Stops</summary><ul>${d.food.map(x=>`<li>${x}</li>`).join("")}</ul></details>
+ <details><summary>☕ Tea Stops</summary><ul>${d.tea.map(x=>`<li>${x}</li>`).join("")}</ul></details>
+
+ <details><summary>🗺 Route Map</summary><iframe src="${d.map}" loading="lazy"></iframe></details>
+
+ <hr>
+
+ <details open><summary>👥 Participants</summary>
  <input id="newName" placeholder="Add name">
  <button onclick="addPerson()">Add</button>
  <ul>${participants.map((p,i)=>`<li>${p} <button onclick="removePerson(${i})">❌</button></li>`).join("")}</ul>
  </details>
 
- <details open>
- <summary>💳 Add Expense</summary>
+ <details open><summary>💳 Add Expense</summary>
  <input id="expTitle" placeholder="Expense name">
  <input id="expAmt" type="number" placeholder="Amount ₹">
  <select id="paidBy">${participants.map(p=>`<option>${p}</option>`).join("")}</select>
  <button onclick="addExpense()">Add</button>
  </details>
 
- <details open>
- <summary>📊 Expense Summary</summary>
- Total: ₹${total}<br>
- Per Person Share: ₹${share}
- <ul>${expenses.map((e,i)=>`<li>${e.title}: ₹${e.amount} (Paid by ${e.paidBy}) <button onclick="delExp(${i})">❌</button></li>`).join("")}</ul>
- </details>
-
- <details open>
- <summary>💳 Settlement (Who Pays Whom)</summary>
+ <details open><summary>📊 Expense & Settlement</summary>
+ Total: ₹${total} | Per Person: ₹${share}
  <ul>
  ${Object.keys(balance).map(p=>{
    if(balance[p]>0) return `<li>${p} should receive ₹${balance[p]}</li>`;
    if(balance[p]<0) return `<li>${p} should pay ₹${Math.abs(balance[p])}</li>`;
-   return `<li>${p} is settled</li>`;
+   return `<li>${p} settled</li>`;
  }).join("")}
  </ul>
  <button onclick="shareWA()">📲 Share on WhatsApp</button>
@@ -189,7 +297,7 @@ function render(){
  saveData();
 }
 
-// ---------- ACTIONS ----------
+// ---------------- ACTIONS ----------------
 function addPerson(){
  const n=document.getElementById("newName").value.trim();
  if(!n) return;
@@ -213,11 +321,6 @@ function addExpense(){
  render();
 }
 
-function delExp(i){
- expenses.splice(i,1);
- render();
-}
-
 function saveData(){
  localStorage.setItem("participants",JSON.stringify(participants));
  localStorage.setItem("expenses",JSON.stringify(expenses));
@@ -225,16 +328,16 @@ function saveData(){
 
 function shareWA(){
  const {balance,total,share}=calcSettlement();
- let msg=`Trip Expense Settlement\nTotal: ₹${total}\nPer Person: ₹${share}\n\nBalances:\n`;
+ let msg=`Uttarakhand Trip Settlement\nTotal: ₹${total}\nPer Person: ₹${share}\n\nBalances:\n`;
  Object.keys(balance).forEach(p=>{
-  if(balance[p]>0) msg+=`${p} should receive ₹${balance[p]}\n`;
-  else if(balance[p]<0) msg+=`${p} should pay ₹${Math.abs(balance[p])}\n`;
+  if(balance[p]>0) msg+=`${p} gets ₹${balance[p]}\n`;
+  else if(balance[p]<0) msg+=`${p} pays ₹${Math.abs(balance[p])}\n`;
   else msg+=`${p} settled\n`;
  });
  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
 }
 
-// ---------- NAV ----------
+// ---------------- NAV ----------------
 function select(i){active=i;img=0;render();}
 function next(){active=(active+1)%days.length;render();}
 function prev(){active=(active-1+days.length)%days.length;render();}
