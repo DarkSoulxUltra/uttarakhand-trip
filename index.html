@@ -3,35 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>JARVIS – Uttarakhand Trip Console</title>
+<title>Uttarakhand Trip Console</title>
 
 <style>
-body{margin:0;font-family:system-ui,Segoe UI;background:radial-gradient(circle at top,#0f172a,#000);color:#67e8f9}
+body{margin:0;font-family:system-ui;background:radial-gradient(circle at top,#0f172a,#000);color:#67e8f9}
 h1{text-align:center;letter-spacing:2px}
 .container{max-width:1200px;margin:auto;padding:14px}
 .layout{display:flex;gap:14px;flex-wrap:wrap}
-.timeline{min-width:210px;flex:1}
+.timeline{min-width:220px;flex:1}
 .card{border:1px solid #164e63;border-radius:12px;padding:10px;margin-bottom:8px;cursor:pointer}
 .card.active{background:#022c22;border-color:#22d3ee}
 .card:hover{background:#022c22}
 .content{flex:3;min-width:280px}
 .hero{width:100%;height:240px;object-fit:cover;border-radius:12px;border:1px solid #164e63}
+.gallery{display:flex;gap:8px;overflow-x:auto;margin:6px 0}
+.gallery img{height:70px;border-radius:8px;border:1px solid #164e63;cursor:pointer}
 iframe{width:100%;height:220px;border-radius:12px;border:1px solid #164e63}
 .routebar{height:6px;background:#164e63;border-radius:10px;overflow:hidden;margin:6px 0}
 .routebar span{display:block;height:100%;background:#22d3ee;width:0%;animation:move 2s forwards}
 @keyframes move{to{width:100%}}
 .meter{height:8px;background:#164e63;border-radius:8px;overflow:hidden}
 .meter span{display:block;height:100%;background:#22d3ee}
-.tag{border:1px solid #164e63;border-radius:999px;padding:4px 10px;font-size:12px;display:inline-block;margin:4px;cursor:pointer}
-.gallery{display:flex;gap:8px;overflow-x:auto;margin-top:6px}
-.gallery img{height:60px;border-radius:8px;border:1px solid #164e63;cursor:pointer}
+.tag{border:1px solid #164e63;border-radius:999px;padding:4px 10px;font-size:12px;display:inline-block;margin:4px}
 .btn{background:#22d3ee;color:black;border:none;padding:10px 16px;border-radius:8px;font-weight:600;cursor:pointer}
 .btn:hover{background:#67e8f9}
-.checklist label{display:block;margin:4px 0}
-.budget{display:flex;gap:8px;flex-wrap:wrap}
-.budget span{border:1px solid #164e63;padding:6px 10px;border-radius:10px}
-.route-icons{display:flex;align-items:center;gap:8px}
-.route-icons span{cursor:pointer}
+.checklist label{display:block}
 </style>
 </head>
 
@@ -39,17 +35,23 @@ iframe{width:100%;height:220px;border-radius:12px;border:1px solid #164e63}
 
 <div class="container">
 <h1>J.A.R.V.I.S — Uttarakhand Trip Console</h1>
+<p id="countdown" style="text-align:center"></p>
 
 <div class="layout">
-
 <div class="timeline" id="timeline"></div>
-
 <div class="content" id="content"></div>
-
 </div>
 </div>
 
 <script>
+const tripDate = new Date("2026-03-15T00:00:00");
+
+setInterval(()=>{
+ const now=new Date();
+ const d=Math.max(0,Math.floor((tripDate-now)/(1000*60*60*24)));
+ document.getElementById("countdown").innerText=`⏳ ${d} days to go!`;
+},1000);
+
 const days=[
 {
 day:"Sunday", city:"Delhi → Haridwar",
@@ -59,8 +61,8 @@ budget:2500,
 places:["Hazrat Nizamuddin","Kashmere Gate ISBT"],
 cafes:["Station food courts"], hotels:["Overnight bus"],
 img:[
-"https://images.unsplash.com/photo-1584132967334-10e028bd69f7",
-"https://images.unsplash.com/photo-1524499982521-1ffd58dd89ea"
+"https://upload.wikimedia.org/wikipedia/commons/7/77/Kashmere_Gate_ISBT.jpg",
+"https://upload.wikimedia.org/wikipedia/commons/5/59/Delhi_bus_terminal.jpg"
 ],
 map:"https://www.google.com/maps?q=Kashmere+Gate+ISBT&output=embed"
 },
@@ -73,50 +75,50 @@ places:["Har Ki Pauri","Mansa Devi Temple"],
 cafes:["Chotiwala","Hoshiyar Puri"],
 hotels:["Hotel Ganga Lahari","Alpana Hotel"],
 img:[
-"https://images.unsplash.com/photo-1602576666092-bf6447a729fc",
-"https://images.unsplash.com/photo-1587300003388-59208cc962cb"
+"https://upload.wikimedia.org/wikipedia/commons/6/6f/Ganga_Aarti_at_Haridwar.jpg",
+"https://upload.wikimedia.org/wikipedia/commons/5/55/Har_ki_Pauri_Ghat.jpg"
 ],
 map:"https://www.google.com/maps?q=Har+Ki+Pauri&output=embed"
 },
 {
 day:"Tuesday", city:"Rishikesh → Dehradun",
-title:"Rishikesh → Dehradun",
+title:"Rishikesh Shiva + FRI",
 crowd:60, distance:"75 km", time:"3.5 hrs",
 budget:3500,
-places:["Ram Jhula","Parmarth Niketan","FRI"],
+places:["Shiva Statue","Parmarth Niketan","FRI"],
 cafes:["Little Buddha Cafe","Free Spirit Cafe"],
 hotels:["MJ Residency","Hotel Ashrey"],
 img:[
-"https://images.unsplash.com/photo-1595846519845-68e298c2edd8",
-"https://images.unsplash.com/photo-1582719478170-2b6b1b22d6c4"
+"https://upload.wikimedia.org/wikipedia/commons/3/3e/Shiva_statue_Rishikesh.jpg",
+"https://upload.wikimedia.org/wikipedia/commons/2/2b/Forest_Research_Institute_Dehradun.jpg"
 ],
 map:"https://www.google.com/maps?q=Ram+Jhula+Rishikesh&output=embed"
 },
 {
 day:"Wednesday", city:"Dehradun → Mussoorie",
-title:"Hill Drive to Mussoorie",
+title:"Buddha Temple + Gardens",
 crowd:70, distance:"35 km", time:"1.5 hrs",
 budget:3000,
-places:["Buddha Temple","Mall Road"],
+places:["Buddha Temple","Company Garden"],
 cafes:["Cafe Ivy","Little Llama Cafe"],
 hotels:["Royal Orchid Fort","Sun N Snow"],
 img:[
-"https://images.unsplash.com/photo-1589187155478-cc02c1b7d5f3",
-"https://images.unsplash.com/photo-1593697821252-0c9137d9fc45"
+"https://upload.wikimedia.org/wikipedia/commons/8/89/Buddha_Temple_Dehradun.jpg",
+"https://upload.wikimedia.org/wikipedia/commons/2/2a/Company_Garden_Mussoorie.jpg"
 ],
 map:"https://www.google.com/maps?q=Mussoorie+Mall+Road&output=embed"
 },
 {
 day:"Thursday", city:"Mussoorie",
-title:"Mussoorie Full Day",
+title:"Kempty Falls & Camel’s Back",
 crowd:90, distance:"Local", time:"Full day",
 budget:2500,
 places:["Kempty Falls","Camel's Back Road"],
 cafes:["Cafe de Tavern","Lovely Omelette Centre"],
 hotels:["Same stay"],
 img:[
-"https://images.unsplash.com/photo-1602407294553-6b7d3c8f4b5b",
-"https://images.unsplash.com/photo-1610568781018-995405522539"
+"https://upload.wikimedia.org/wikipedia/commons/5/5c/Kempty_Falls_Mussoorie.jpg",
+"https://upload.wikimedia.org/wikipedia/commons/d/d0/Camels_Back_Road_Mussoorie.jpg"
 ],
 map:"https://www.google.com/maps?q=Kempty+Falls+Mussoorie&output=embed"
 }
@@ -137,16 +139,12 @@ days.forEach((d,i)=>{
 
 function render(){
  const d=days[active];
- const totalBudget=days.reduce((a,b)=>a+b.budget,0);
+ const total=days.reduce((a,b)=>a+b.budget,0);
 
  content.innerHTML=`
  <h2>${d.title}</h2>
-
- <div class="route-icons">
- 🚆 ➜ 🚌 ➜ 🏔
- </div>
-
  <div class="routebar"><span></span></div>
+
  <b>Distance:</b> ${d.distance} | <b>Travel Time:</b> ${d.time}<br><br>
 
  <b>Crowd Level</b>
@@ -164,21 +162,28 @@ function render(){
 
  <iframe src="${d.map}" loading="lazy"></iframe><br><br>
 
- <b>Booking Checklist</b>
+ <b>Group Checklist</b>
  <div class="checklist">
-   <label><input type="checkbox"> Train</label>
-   <label><input type="checkbox"> Bus/Cab</label>
-   <label><input type="checkbox"> Hotel</label>
+   <label><input type="checkbox"> Train booked</label>
+   <label><input type="checkbox"> Bus booked</label>
+   <label><input type="checkbox"> Hotel confirmed</label>
+   <label><input type="checkbox"> Local cab arranged</label>
  </div><br>
 
  <b>Budget Today:</b> ₹${d.budget}<br>
- <b>Total Trip Est:</b> ₹${totalBudget}<br><br>
+ <b>Total Trip Est:</b> ₹${total}<br><br>
 
+ <button class="btn" onclick="share()">Share on WhatsApp</button>
  <a href="Uttarakhand_Group_Trip_Itinerary.pdf" download>
-   <button class="btn">Download Full Itinerary PDF</button>
+   <button class="btn">Download PDF</button>
  </a>
  `;
  document.querySelectorAll(".card").forEach((c,i)=>c.classList.toggle("active",i===active));
+}
+
+function share(){
+ const text="Check out our Uttarakhand trip plan! 🚍🏔️";
+ window.open(`https://wa.me/?text=${encodeURIComponent(text)}`);
 }
 
 function select(i){active=i;img=0;render();}
@@ -194,6 +199,5 @@ document.body.addEventListener("touchend",e=>{
 
 render();
 </script>
-
 </body>
 </html>
