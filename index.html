@@ -1,1 +1,201 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>J.A.R.V.I.S — Uttarakhand Trip Console</title>
+
+  <style>
+    body{
+      margin:0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: radial-gradient(circle at top, #0f172a, #000);
+      color:#67e8f9;
+    }
+    h1{text-align:center;letter-spacing:2px;}
+    .container{padding:16px;max-width:1200px;margin:auto;}
+    .layout{display:flex;gap:16px;flex-wrap:wrap;}
+    .timeline{min-width:220px;flex:1;}
+    .card{
+      border:1px solid #164e63;
+      border-radius:12px;
+      padding:10px;
+      margin-bottom:10px;
+      cursor:pointer;
+      transition:.2s;
+    }
+    .card.active{border-color:#22d3ee;background:#022c22;}
+    .card:hover{background:#022c22;}
+    .content{flex:3;min-width:280px;}
+    img.hero{
+      width:100%;
+      height:240px;
+      object-fit:cover;
+      border-radius:12px;
+      border:1px solid #164e63;
+    }
+    .dots button{
+      background:none;border:none;color:#22d3ee;
+      font-size:18px;cursor:pointer;
+    }
+    iframe{width:100%;height:240px;border-radius:12px;border:1px solid #164e63;}
+    .tag{
+      display:inline-block;
+      border:1px solid #164e63;
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:12px;
+      margin:4px 4px 0 0;
+    }
+    .btn{
+      background:#22d3ee;color:black;
+      border:none;padding:10px 16px;
+      border-radius:8px;cursor:pointer;
+      font-weight:600;
+    }
+    .btn:hover{background:#67e8f9;}
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+  <h1>J.A.R.V.I.S — Uttarakhand Trip Console</h1>
+
+  <div class="layout">
+    <div class="timeline" id="timeline"></div>
+
+    <div class="content">
+      <h2 id="title"></h2>
+      <p><b>Expected Crowd:</b> <span id="crowd"></span></p>
+
+      <img id="image" class="hero" />
+
+      <div class="dots" id="dots"></div>
+
+      <p><b>Nearby Places:</b> <span id="places"></span></p>
+      <p><b>Cafés:</b> <span id="cafes"></span></p>
+      <p><b>Hotels:</b> <span id="hotels"></span></p>
+
+      <iframe id="map" loading="lazy"></iframe>
+
+      <br/><br/>
+      <a href="Uttarakhand_Group_Trip_Itinerary.pdf" download>
+        <button class="btn">Download Full Itinerary (PDF)</button>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+const days = [
+{
+ day:"Sunday",
+ title:"Delhi → Haridwar (Overnight Bus)",
+ crowd:"Low (night travel)",
+ places:["Hazrat Nizamuddin","Kashmere Gate ISBT"],
+ cafes:["Station food courts"],
+ hotels:["Overnight bus"],
+ images:[
+ "https://images.unsplash.com/photo-1548013146-72479768bada",
+ "https://images.unsplash.com/photo-1583573636246-18cb2246692f"
+ ],
+ map:"https://www.google.com/maps?q=Kashmere+Gate+ISBT&output=embed"
+},
+{
+ day:"Monday",
+ title:"Haridwar – Spiritual Day",
+ crowd:"High in evening (Aarti)",
+ places:["Har Ki Pauri","Mansa Devi Ropeway"],
+ cafes:["Chotiwala","Hoshiyar Puri"],
+ hotels:["Hotel Ganga Lahari","Alpana Hotel"],
+ images:[
+ "https://images.unsplash.com/photo-1587300003388-59208cc962cb",
+ "https://images.unsplash.com/photo-1602576666092-bf6447a729fc"
+ ],
+ map:"https://www.google.com/maps?q=Har+Ki+Pauri&output=embed"
+},
+{
+ day:"Tuesday",
+ title:"Rishikesh → Dehradun",
+ crowd:"Medium",
+ places:["Ram Jhula","Parmarth Niketan","FRI Dehradun"],
+ cafes:["Little Buddha Cafe","Free Spirit Cafe"],
+ hotels:["MJ Residency","Hotel Ashrey"],
+ images:[
+ "https://images.unsplash.com/photo-1595846519845-68e298c2edd8",
+ "https://images.unsplash.com/photo-1616787619949-7f93dba1bda5"
+ ],
+ map:"https://www.google.com/maps?q=Ram+Jhula+Rishikesh&output=embed"
+},
+{
+ day:"Wednesday",
+ title:"Dehradun → Mussoorie",
+ crowd:"Medium to High",
+ places:["Buddha Temple","Mall Road"],
+ cafes:["Cafe Ivy","Little Llama Cafe"],
+ hotels:["Royal Orchid Fort Resort","Sun N Snow"],
+ images:[
+ "https://images.unsplash.com/photo-1589187155478-cc02c1b7d5f3",
+ "https://images.unsplash.com/photo-1593697821252-0c9137d9fc45"
+ ],
+ map:"https://www.google.com/maps?q=Mussoorie+Mall+Road&output=embed"
+},
+{
+ day:"Thursday",
+ title:"Mussoorie Full Day",
+ crowd:"High",
+ places:["Kempty Falls","Camel's Back Road"],
+ cafes:["Cafe de Tavern","Lovely Omelette Centre"],
+ hotels:["Same stay"],
+ images:[
+ "https://images.unsplash.com/photo-1602407294553-6b7d3c8f4b5b",
+ "https://images.unsplash.com/photo-1610568781018-995405522539"
+ ],
+ map:"https://www.google.com/maps?q=Kempty+Falls+Mussoorie&output=embed"
+}
+];
+
+let active=0, img=0;
+
+const timeline=document.getElementById("timeline");
+
+days.forEach((d,i)=>{
+ const div=document.createElement("div");
+ div.className="card"+(i===0?" active":"");
+ div.innerHTML=`<b>${d.day}</b><br><small>${d.title}</small>`;
+ div.onclick=()=>selectDay(i);
+ timeline.appendChild(div);
+});
+
+function render(){
+ const d=days[active];
+ document.getElementById("title").innerText=d.title;
+ document.getElementById("crowd").innerText=d.crowd;
+ document.getElementById("image").src=d.images[img];
+ document.getElementById("places").innerText=d.places.join(", ");
+ document.getElementById("cafes").innerText=d.cafes.join(", ");
+ document.getElementById("hotels").innerText=d.hotels.join(", ");
+ document.getElementById("map").src=d.map;
+
+ const dots=document.getElementById("dots");
+ dots.innerHTML="";
+ d.images.forEach((_,i)=>{
+   const b=document.createElement("button");
+   b.innerText="●";
+   b.onclick=()=>{img=i;render();}
+   dots.appendChild(b);
+ });
+
+ document.querySelectorAll(".card").forEach((c,i)=>{
+   c.classList.toggle("active",i===active);
+ });
+}
+
+function selectDay(i){active=i;img=0;render();}
+render();
+</script>
+
+</body>
+</html>
