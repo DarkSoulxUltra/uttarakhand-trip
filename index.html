@@ -8,8 +8,7 @@
 <style>
 body{margin:0;font-family:system-ui;background:#020617;color:#67e8f9}
 h1{text-align:center;margin:8px 0}
-.container{max-width:1200px;margin:auto;padding:12px;padding-bottom:80px}
-
+.container{max-width:1200px;margin:auto;padding:12px;padding-bottom:90px}
 .stickyTop{position:sticky;top:0;background:#020617;z-index:5}
 
 .routeBox{border:1px solid #164e63;border-radius:14px;padding:12px;margin-bottom:8px}
@@ -24,7 +23,7 @@ h1{text-align:center;margin:8px 0}
 .routeLabels{display:flex;justify-content:space-between;font-size:12px;margin-top:4px;opacity:.8}
 
 .layout{display:flex;flex-wrap:wrap;gap:12px}
-.timeline{flex:1;min-width:210px}
+.timeline{flex:1;min-width:220px}
 .content{flex:3;min-width:280px}
 
 .card{border:1px solid #164e63;border-radius:10px;padding:10px;margin-bottom:8px;cursor:pointer}
@@ -39,11 +38,6 @@ h1{text-align:center;margin:8px 0}
 details{border:1px solid #164e63;border-radius:10px;padding:8px;margin:8px 0}
 summary{cursor:pointer;font-weight:600}
 
-.meter{height:8px;background:#164e63;border-radius:8px;margin:6px 0}
-.meter span{display:block;height:100%;background:#22d3ee}
-
-.btn{background:#22d3ee;color:black;border:none;padding:10px 16px;border-radius:8px;font-weight:600;cursor:pointer;margin:4px}
-
 .mobileNav{
   position:fixed;bottom:0;left:0;right:0;
   background:#020617;border-top:1px solid #164e63;
@@ -52,14 +46,8 @@ summary{cursor:pointer;font-weight:600}
 
 iframe{width:100%;height:230px;border-radius:10px;border:1px solid #164e63;margin-top:8px}
 
-.scheduleBox{
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr;
-  gap:8px;
-}
-.scheduleItem{
-  border:1px solid #164e63;border-radius:8px;padding:6px;font-size:13px
-}
+.scheduleBox{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.scheduleItem{border:1px solid #164e63;border-radius:8px;padding:6px;font-size:13px}
 
 @media(max-width:768px){
   .layout{flex-direction:column}
@@ -102,96 +90,120 @@ iframe{width:100%;height:230px;border-radius:10px;border:1px solid #164e63;margi
 </div>
 
 <div class="mobileNav">
-  <button class="btn" onclick="prev()">⏮ Prev</button>
-  <button class="btn" onclick="shareBudget()">📲 Share</button>
-  <button class="btn" onclick="next()">Next ⏭</button>
+  <button onclick="prev()">⏮ Prev</button>
+  <button onclick="next()">Next ⏭</button>
 </div>
 
 <script>
+const tripDates=[
+ "Sun 15 Mar – Arrival Night",
+ "Mon 16 Mar – Haridwar",
+ "Tue 17 Mar – Rishikesh → Dehradun",
+ "Wed 18 Mar – Dehradun → Mussoorie",
+ "Thu 19 Mar – Mussoorie"
+];
+
 const days=[
 {
-city:"H Nizamuddin → Haridwar",
-title:"Arrival + Night Bus",
-crowd:20,
-trainAC3:1200,hotel:0,travel:800,food:400,entry:0,
-luggage:["Cloak room at H Nizamuddin","Retiring room storage","Bus luggage compartment"],
-schedule:{
-morning:"—",
-afternoon:"Train journey",
-evening:"Freshen up, dinner, bus boarding"
-},
-routeSteps:["Arrive at station","Freshen up","Go to Kashmere Gate ISBT","Board bus"],
-map:"https://www.google.com/maps?q=H+Nizamuddin+Railway+Station+to+Kashmere+Gate+ISBT&output=embed",
+city:"Delhi Arrival",
+title:"Station → Dinner → Bus Transfer",
+schedule:{morning:"—",afternoon:"Train journey",evening:"Freshen up + Bus"},
+luggage:["Cloak room or retiring room at station","Bus luggage compartment"],
+steps:[
+"Arrive H Nizamuddin around 7 PM",
+"Freshen up at station washroom / retiring room",
+"Dinner at food court",
+"Cab/Metro to Kashmere Gate ISBT (45–60 min buffer)",
+"Board Volvo bus by 10–11 PM"
+],
+buffers:["30 min for delays","15 min boarding buffer"],
+food:["Station food court","McDonalds near ISBT"],
+tea:["Tea stalls at ISBT"],
+map:"https://www.google.com/maps?q=H+Nizamuddin+to+Kashmere+Gate+ISBT&output=embed",
 images:["images/delhi_bus.jpg"]
 },
 
 {
 city:"Haridwar",
-title:"Ganga Aarti Day",
-crowd:85,
-trainAC3:0,hotel:900,travel:300,food:600,entry:200,
-luggage:["Keep at hotel reception while sightseeing"],
-schedule:{
-morning:"Temple & ropeway",
-afternoon:"Lunch + rest",
-evening:"Ganga Aarti"
-},
-routeSteps:["Bus to hotel","Temple visit","Evening ghat visit"],
+title:"Temples + Ganga Aarti",
+schedule:{morning:"Mansa Devi Ropeway",afternoon:"Rest + Lunch",evening:"Ganga Aarti"},
+luggage:["Hotel reception storage"],
+steps:[
+"Bus drops near bus stand early morning",
+"Auto to hotel, rest 2–3 hrs",
+"Ropeway to Mansa Devi Temple",
+"Optional Chandi Devi if time",
+"Evening Ganga Aarti at Har Ki Pauri",
+"Market walk + dinner"
+],
+buffers:["Extra 1 hr rest after overnight travel"],
+food:["Chotiwala Restaurant","Hoshiyar Puri"],
+tea:["Tea near Har Ki Pauri ghat"],
 map:"https://www.google.com/maps?q=Har+Ki+Pauri+Haridwar&output=embed",
 images:["images/haridwar_aarti.jpg"]
 },
 
 {
-city:"Haridwar → Rishikesh → Dehradun",
-title:"Shiva & FRI",
-crowd:60,
-trainAC3:0,hotel:1000,travel:500,food:700,entry:100,
-luggage:["Cab boot during transfers","Hotel storage after checkout"],
-schedule:{
-morning:"Drive to Rishikesh",
-afternoon:"Café lunch + FRI",
-evening:"Hotel rest"
-},
-routeSteps:["Cab to Rishikesh","Visit statue","Drive to Dehradun"],
+city:"Rishikesh → Dehradun",
+title:"Shiva Statue, Café & FRI",
+schedule:{morning:"Rishikesh sightseeing",afternoon:"Café + Drive",evening:"FRI Garden"},
+luggage:["Carry luggage in cab","Hotel check-in before FRI"],
+steps:[
+"Cab from Haridwar to Rishikesh (1.5 hrs + 30 min buffer)",
+"Visit Shiva Statue & Ram Jhula",
+"Optional Parmarth Niketan",
+"Lunch at river café",
+"Drive to Dehradun (1 hr)",
+"Check-in hotel, then FRI evening walk"
+],
+buffers:["Traffic near Rishikesh bridges","Hotel check-in time buffer"],
+food:["Little Buddha Cafe","Free Spirit Cafe"],
+tea:["Tea stalls near FRI gate"],
 map:"https://www.google.com/maps?q=Haridwar+to+Rishikesh+to+Dehradun&output=embed",
 images:["images/rishikesh_shiva.jpg","images/fri_dehradun.jpg"]
 },
 
 {
 city:"Dehradun → Mussoorie",
-title:"Robber’s Cave + Mall Road",
-crowd:70,
-trainAC3:0,hotel:1200,travel:600,food:700,entry:150,
-luggage:["Hotel storage till checkout","Cab boot while sightseeing"],
-schedule:{
-morning:"Robber’s Cave",
-afternoon:"Drive to Mussoorie",
-evening:"Mall Road walk"
-},
-routeSteps:["Visit cave","Change clothes","Drive uphill to Mussoorie"],
+title:"Robber’s Cave → Hotel → Mall Road",
+schedule:{morning:"Robber’s Cave",afternoon:"Hotel + Hill Drive",evening:"Mall Road"},
+luggage:["Leave luggage at Dehradun hotel","Carry after checkout to Mussoorie"],
+steps:[
+"Cab to Robber’s Cave (carry towel + spare clothes)",
+"Return to Dehradun hotel",
+"Freshen up, pack luggage, checkout",
+"Drive to Mussoorie (1.5 hrs hill road)",
+"Check-in Mussoorie hotel, rest",
+"Company Garden + Mall Road cafés"
+],
+buffers:["30 min extra on hill road","Hotel check-in waiting time"],
+food:["Mall Road cafés","Lovely Omelette Centre"],
+tea:["Tea point at Mussoorie view bends"],
 map:"https://www.google.com/maps?q=Robbers+Cave+Dehradun+to+Mussoorie&output=embed",
 images:["images/robbers_cave.jpg","images/company_garden.jpg"]
 },
 
 {
 city:"Mussoorie",
-title:"Kempty Falls Day",
-crowd:90,
-trainAC3:0,hotel:1200,travel:300,food:800,entry:200,
+title:"Kempty Falls + Camel’s Back Road",
+schedule:{morning:"Kempty Falls",afternoon:"Rest + Lunch",evening:"Sunset Walk"},
 luggage:["Hotel storage till evening departure"],
-schedule:{
-morning:"Kempty Falls",
-afternoon:"Rest & lunch",
-evening:"Camel’s Back walk"
-},
-routeSteps:["Cab to Kempty","Return to hotel","Evening walk"],
+steps:[
+"Early cab to Kempty Falls (avoid crowd)",
+"Optional ropeway",
+"Return to hotel, lunch & rest",
+"Evening Camel’s Back Road walk",
+"Café hopping on Mall Road"
+],
+buffers:["Extra time at falls if crowded"],
+food:["Cafe Ivy","Kalsang Friends Corner"],
+tea:["Tea vendors on Camel’s Back Road"],
 map:"https://www.google.com/maps?q=Kempty+Falls+Mussoorie&output=embed",
 images:["images/kempty_falls.jpg","images/camels_back.jpg"]
 }
 ];
 
 let active=0,img=0;
-
 const timeline=document.getElementById("timeline");
 const content=document.getElementById("content");
 
@@ -200,7 +212,7 @@ function buildTimeline(){
  days.forEach((d,i)=>{
   let div=document.createElement("div");
   div.className="card"+(i===active?" active":"");
-  div.innerHTML=`<b>${d.city}</b><br>${d.title}`;
+  div.innerHTML=`<b>${tripDates[i]}</b><br>${d.city}`;
   div.onclick=()=>select(i);
   timeline.appendChild(div);
  });
@@ -208,14 +220,9 @@ function buildTimeline(){
 
 function render(){
  const d=days[active];
- const dayTotal=d.trainAC3+d.hotel+d.travel+d.food+d.entry;
- const tripTotal=days.reduce((a,b)=>a+b.trainAC3+b.hotel+b.travel+b.food+b.entry,0);
 
  content.innerHTML=`
  <h2>${d.title}</h2>
-
- <div class="meter"><span style="width:${d.crowd}%"></span></div>
- <small>${d.crowd}% crowd</small>
 
  <div class="imageWrap"><img src="${d.images[img]}"></div>
  <div class="gallery">${d.images.map((x,i)=>`<img src="${x}" onclick="img=${i};render()">`).join("")}</div>
@@ -230,24 +237,28 @@ function render(){
  </details>
 
  <details open>
- <summary>📍 Luggage Storage</summary>
+ <summary>📍 Luggage Handling</summary>
  <ul>${d.luggage.map(x=>`<li>${x}</li>`).join("")}</ul>
  </details>
 
- <details>
- <summary>🧭 Travel Steps</summary>
- <ul>${d.routeSteps.map(x=>`<li>${x}</li>`).join("")}</ul>
+ <details open>
+ <summary>🧭 Step-by-Step Travel Route</summary>
+ <ul>${d.steps.map(x=>`<li>${x}</li>`).join("")}</ul>
  </details>
 
  <details>
- <summary>💰 Budget</summary>
- Train: ₹${d.trainAC3}<br>
- Hotel: ₹${d.hotel}<br>
- Travel: ₹${d.travel}<br>
- Food: ₹${d.food}<br>
- Entry: ₹${d.entry}<br>
- <b>Day Total: ₹${dayTotal}</b><br>
- <b>Trip Total: ₹${tripTotal}</b>
+ <summary>🕒 Buffers & Delays</summary>
+ <ul>${d.buffers.map(x=>`<li>${x}</li>`).join("")}</ul>
+ </details>
+
+ <details>
+ <summary>🍴 Food Stops</summary>
+ <ul>${d.food.map(x=>`<li>${x}</li>`).join("")}</ul>
+ </details>
+
+ <details>
+ <summary>☕ Tea / Fuel Stops</summary>
+ <ul>${d.tea.map(x=>`<li>${x}</li>`).join("")}</ul>
  </details>
 
  <details>
@@ -257,7 +268,7 @@ function render(){
  `;
 
  document.getElementById("progressText").innerText=
-  `Day ${active+1} of ${days.length} — ${d.city}`;
+  `${tripDates[active]} — ${d.city}`;
 
  document.querySelectorAll(".card").forEach((c,i)=>c.classList.toggle("active",i===active));
  document.querySelectorAll(".node").forEach((n,i)=>n.classList.toggle("active",i===active));
@@ -270,12 +281,6 @@ function render(){
 function select(i){active=i;img=0;render();}
 function next(){active=(active+1)%days.length;render();}
 function prev(){active=(active-1+days.length)%days.length;render();}
-
-function shareBudget(){
- const tripTotal=days.reduce((a,b)=>a+b.trainAC3+b.hotel+b.travel+b.food+b.entry,0);
- const msg=`Uttarakhand Trip Plan\nRoute: Delhi → Haridwar → Rishikesh → Dehradun → Mussoorie\nTotal Est: ₹${tripTotal}\nPer Person (approx): ₹${Math.round(tripTotal/4)}`;
- window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
-}
 
 render();
 </script>
