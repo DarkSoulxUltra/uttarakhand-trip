@@ -8,7 +8,7 @@
 <style>
 body{margin:0;font-family:system-ui;background:#020617;color:#67e8f9}
 h1{text-align:center;margin:8px 0}
-.container{max-width:1200px;margin:auto;padding:12px;padding-bottom:220px}
+.container{max-width:1200px;margin:auto;padding:12px;padding-bottom:230px}
 .stickyTop{position:sticky;top:0;background:#020617;z-index:5}
 
 /* ===== MAP STYLE BACKGROUND ===== */
@@ -26,7 +26,7 @@ h1{text-align:center;margin:8px 0}
   content:"";
   position:absolute;inset:-40%;
   background:conic-gradient(from 0deg, transparent 0deg, rgba(34,211,238,.12) 40deg, transparent 80deg);
-  animation:radar 10s linear infinite;
+  animation:radar 12s linear infinite;
 }
 @keyframes radar{to{transform:rotate(360deg)}}
 
@@ -39,10 +39,7 @@ h1{text-align:center;margin:8px 0}
 .routeLine{position:relative;display:flex;justify-content:space-between;align-items:center;height:42px;z-index:2}
 .routeLine::before{content:'';position:absolute;left:0;right:0;top:50%;height:3px;background:#164e63}
 
-.node{
- width:18px;height:18px;background:#164e63;border-radius:50%;cursor:pointer;z-index:3;
- box-shadow:0 0 0 2px #020617;
-}
+.node{width:18px;height:18px;background:#164e63;border-radius:50%;cursor:pointer;z-index:3;box-shadow:0 0 0 2px #020617}
 .node.active{background:#22d3ee;box-shadow:0 0 12px #22d3ee}
 
 .vehicle{
@@ -63,9 +60,7 @@ h1{text-align:center;margin:8px 0}
 .card.active{border-color:#22d3ee;box-shadow:0 0 12px rgba(34,211,238,.5)}
 
 /* ===== IMAGES ===== */
-.imageWrap{
- border:1px solid #164e63;border-radius:12px;overflow:hidden;background:#020617;
-}
+.imageWrap{border:1px solid #164e63;border-radius:12px;overflow:hidden;background:#020617}
 .imageWrap.night{
  background:
    radial-gradient(circle at 30% 30%, #0f172a 0%, #020617 60%),
@@ -155,6 +150,9 @@ const tripDates=[
  "Fri – Return to Delhi"
 ];
 
+// ================= DISTANCES (KM APPROX) =================
+const distances=[30,80,70,35,25,300];
+
 // ================= BUDGET ESTIMATES =================
 const budgets=[
  {stay:0,food:400,travel:600,entry:0},
@@ -179,7 +177,6 @@ steps:["Arrive station","Freshen up","Dinner","Transfer to ISBT","Night Volvo"],
 map:"https://www.google.com/maps?q=H+Nizamuddin+to+Kashmere+Gate+ISBT&output=embed",
 images:["images/delhi_bus.jpg"]
 },
-
 {
 city:"Haridwar",
 title:"Mansa Devi + Ganga Aarti",
@@ -192,7 +189,6 @@ steps:["Hotel rest","Ropeway","Lunch","Aarti","Market"],
 map:"https://www.google.com/maps?q=Har+Ki+Pauri+Haridwar&output=embed",
 images:["images/haridwar_aarti.jpg"]
 },
-
 {
 city:"Rishikesh → Dehradun",
 title:"Shiva Statue + FRI",
@@ -205,7 +201,6 @@ steps:["Temple","Café lunch","Drive to DDN","Hotel","FRI walk"],
 map:"https://www.google.com/maps?q=Haridwar+to+Rishikesh+to+Dehradun&output=embed",
 images:["images/rishikesh_shiva.jpg","images/fri_dehradun.jpg"]
 },
-
 {
 city:"Dehradun → Mussoorie",
 title:"Robber’s Cave + Mall Road",
@@ -218,7 +213,6 @@ steps:["Cave visit","Hotel freshen","Drive","Check-in","Evening stroll"],
 map:"https://www.google.com/maps?q=Robbers+Cave+to+Mussoorie&output=embed",
 images:["images/robbers_cave.jpg","images/company_garden.jpg"]
 },
-
 {
 city:"Mussoorie",
 title:"Kempty + Camel’s Back",
@@ -231,7 +225,6 @@ steps:["Falls","Lunch","Rest","Sunset walk"],
 map:"https://www.google.com/maps?q=Kempty+Falls+Mussoorie&output=embed",
 images:["images/kempty_falls.jpg","images/camels_back.jpg"]
 },
-
 {
 city:"Return Journey",
 title:"Mussoorie → Dehradun → Night Bus",
@@ -250,7 +243,7 @@ let active=0,img=0;
 const timeline=document.getElementById("timeline");
 const content=document.getElementById("content");
 
-// ================= MONEY LOGIC =================
+// ================= MONEY =================
 function calcSettlement(){
  const paid={};
  participants.forEach(p=>paid[p]=0);
@@ -277,11 +270,16 @@ function buildTimeline(){
 function render(){
  const d=days[active];
  const {balance,total,share}=calcSettlement();
+ const b=budgets[active];
+ const dayEst=b.stay+b.food+b.travel+b.entry;
+ const tripEst=budgets.reduce((s,x)=>s+x.stay+x.food+x.travel+x.entry,0);
+ const perEst=Math.round(tripEst/participants.length);
+ const diff=total-tripEst;
 
  content.innerHTML=`
  <h2>${d.title}</h2>
 
- <div class="imageWrap"><img src="${d.images[img]}"></div>
+ <div class="imageWrap ${active===0?"night":""}"><img src="${d.images[img]}"></div>
  <div class="gallery">${d.images.map((x,i)=>`<img src="${x}" onclick="img=${i};render()">`).join("")}</div>
 
  <details open><summary>📅 Schedule</summary>
@@ -292,36 +290,25 @@ function render(){
  <ul>${d.spots.map(s=>`<li><a href="${s.m}" target="_blank" style="color:#22d3ee">${s.n}</a></li>`).join("")}</ul>
  </details>
 
- <details open><summary>🧭 Step-by-Step Route</summary>
- <ul>${d.steps.map(x=>`<li>${x}</li>`).join("")}</ul>
- </details>
+ <details open><summary>🧭 Step-by-Step Route</summary><ul>${d.steps.map(x=>`<li>${x}</li>`).join("")}</ul></details>
 
  <details><summary>🗺 Day Route Map</summary>
  <button onclick="toggleMap()">🗺 View Day Route Map</button>
- <div id="mapBox" style="display:none">
-   <iframe src="${d.map}" loading="lazy"></iframe>
- </div>
+ <div id="mapBox" style="display:none"><iframe src="${d.map}" loading="lazy"></iframe></div>
  </details>
 
-<hr>
+ <details open><summary>💰 Estimated Budget</summary>
+ Day: ₹${dayEst} | Distance: ~${distances[active]} km<br>
+ Stay ₹${b.stay} | Food ₹${b.food} | Travel ₹${b.travel} | Entry ₹${b.entry}<hr>
+ Trip Est: ₹${tripEst} | Per Person Est: ₹${perEst}
+ </details>
 
- // ---- Budget UI ----
-const b=budgets[active];
-const dayTotal=b.stay+b.food+b.travel+b.entry;
-const tripTotal=budgets.reduce((s,x)=>s+x.stay+x.food+x.travel+x.entry,0);
-const perPerson=Math.round(tripTotal/participants.length);
+ <details open><summary>📊 Actual vs Estimated</summary>
+ Actual Spend: ₹${total}<br>
+ Difference: <b style="color:${diff>0?"#f87171":"#4ade80"}">${diff>0?"+":""}${diff}</b>
+ </details>
 
-budgetHTML=`
-<details open><summary>💰 Estimated Budget</summary>
-Day Total: ₹${dayTotal}<br>
-Stay: ₹${b.stay} | Food: ₹${b.food} | Travel: ₹${b.travel} | Entry: ₹${b.entry}
-<hr>
-Trip Total (est.): ₹${tripTotal}<br>
-Per Person Est.: ₹${perPerson}
-</details>`;
-
-  ${budgetHTML}
- 
+ <hr>
 
  <details open><summary>👥 Participants</summary>
  <input id="newName" placeholder="Add name">
@@ -370,14 +357,12 @@ function addPerson(){
  participants.push(n);
  render();
 }
-
 function removePerson(i){
  const name=participants[i];
  expenses=expenses.filter(e=>e.paidBy!==name);
  participants.splice(i,1);
  render();
 }
-
 function addExpense(){
  const t=document.getElementById("expTitle").value;
  const a=parseInt(document.getElementById("expAmt").value);
@@ -386,12 +371,10 @@ function addExpense(){
  expenses.push({title:t,amount:a,paidBy:p});
  render();
 }
-
 function saveData(){
  localStorage.setItem("participants",JSON.stringify(participants));
  localStorage.setItem("expenses",JSON.stringify(expenses));
 }
-
 function shareWA(){
  const {balance,total,share}=calcSettlement();
  let msg=`Uttarakhand Trip Settlement\nTotal: ₹${total}\nPer Person: ₹${share}\n\nBalances:\n`;
