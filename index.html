@@ -323,6 +323,23 @@ function render(){
  <button onclick="addExpense()">Add</button>
  </details>
 
+<details open><summary>💳 Add Expense</summary>
+...
+</details>
+
+<details open><summary>🧾 Expense Log</summary>
+<ul>
+${expenses.length===0
+ ? "<li>No expenses added yet</li>"
+ : expenses.map((e,i)=>`
+   <li>
+     ${e.title} — ₹${e.amount} (Paid by ${e.paidBy})
+     <button onclick="deleteExpense(${i})">❌</button>
+   </li>`).join("")}
+</ul>
+</details>
+
+
  <details open><summary>📊 Settlement</summary>
  Total: ₹${total} | Per Person: ₹${share}
  <ul>
@@ -371,6 +388,11 @@ function addExpense(){
  expenses.push({title:t,amount:a,paidBy:p});
  render();
 }
+function deleteExpense(i){
+  expenses.splice(i,1);
+  render();
+}
+
 function saveData(){
  localStorage.setItem("participants",JSON.stringify(participants));
  localStorage.setItem("expenses",JSON.stringify(expenses));
