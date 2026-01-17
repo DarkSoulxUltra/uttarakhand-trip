@@ -50,11 +50,21 @@ summary{cursor:pointer;font-weight:600}
   display:flex;justify-content:space-around;padding:8px;z-index:10;
 }
 
-iframe{width:100%;height:220px;border-radius:10px;border:1px solid #164e63;margin-top:8px}
+iframe{width:100%;height:230px;border-radius:10px;border:1px solid #164e63;margin-top:8px}
+
+.scheduleBox{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:8px;
+}
+.scheduleItem{
+  border:1px solid #164e63;border-radius:8px;padding:6px;font-size:13px
+}
 
 @media(max-width:768px){
   .layout{flex-direction:column}
   .timeline{order:3}
+  .scheduleBox{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -100,53 +110,81 @@ iframe{width:100%;height:220px;border-radius:10px;border:1px solid #164e63;margi
 <script>
 const days=[
 {
-city:"Delhi → Haridwar", title:"Train + Night Bus",
+city:"H Nizamuddin → Haridwar",
+title:"Arrival + Night Bus",
 crowd:20,
-trainAC3:1200, hotel:0, travel:800, food:400, entry:0,
-hotels:[],
-map:"https://www.google.com/maps?q=Delhi+to+Haridwar&output=embed",
+trainAC3:1200,hotel:0,travel:800,food:400,entry:0,
+luggage:["Cloak room at H Nizamuddin","Retiring room storage","Bus luggage compartment"],
+schedule:{
+morning:"—",
+afternoon:"Train journey",
+evening:"Freshen up, dinner, bus boarding"
+},
+routeSteps:["Arrive at station","Freshen up","Go to Kashmere Gate ISBT","Board bus"],
+map:"https://www.google.com/maps?q=H+Nizamuddin+Railway+Station+to+Kashmere+Gate+ISBT&output=embed",
 images:["images/delhi_bus.jpg"]
 },
+
 {
-city:"Haridwar", title:"Ganga Aarti & Ropeway",
+city:"Haridwar",
+title:"Ganga Aarti Day",
 crowd:85,
-trainAC3:0, hotel:900, travel:300, food:600, entry:200,
-hotels:[
- {name:"Hotel Ganga Lahari",link:"https://maps.google.com/?q=Hotel+Ganga+Lahari+Haridwar"},
- {name:"Alpana Hotel",link:"https://maps.google.com/?q=Alpana+Hotel+Haridwar"}
-],
+trainAC3:0,hotel:900,travel:300,food:600,entry:200,
+luggage:["Keep at hotel reception while sightseeing"],
+schedule:{
+morning:"Temple & ropeway",
+afternoon:"Lunch + rest",
+evening:"Ganga Aarti"
+},
+routeSteps:["Bus to hotel","Temple visit","Evening ghat visit"],
 map:"https://www.google.com/maps?q=Har+Ki+Pauri+Haridwar&output=embed",
 images:["images/haridwar_aarti.jpg"]
 },
+
 {
-city:"Rishikesh + FRI", title:"Shiva Statue & Gardens",
+city:"Haridwar → Rishikesh → Dehradun",
+title:"Shiva & FRI",
 crowd:60,
-trainAC3:0, hotel:1000, travel:500, food:700, entry:100,
-hotels:[
- {name:"MJ Residency",link:"https://maps.google.com/?q=MJ+Residency+Dehradun"},
- {name:"Hotel Ashrey",link:"https://maps.google.com/?q=Hotel+Ashrey+Dehradun"}
-],
-map:"https://www.google.com/maps?q=Ram+Jhula+Rishikesh&output=embed",
+trainAC3:0,hotel:1000,travel:500,food:700,entry:100,
+luggage:["Cab boot during transfers","Hotel storage after checkout"],
+schedule:{
+morning:"Drive to Rishikesh",
+afternoon:"Café lunch + FRI",
+evening:"Hotel rest"
+},
+routeSteps:["Cab to Rishikesh","Visit statue","Drive to Dehradun"],
+map:"https://www.google.com/maps?q=Haridwar+to+Rishikesh+to+Dehradun&output=embed",
 images:["images/rishikesh_shiva.jpg","images/fri_dehradun.jpg"]
 },
+
 {
-city:"Dehradun → Mussoorie", title:"Robber’s Cave + Mall Road",
+city:"Dehradun → Mussoorie",
+title:"Robber’s Cave + Mall Road",
 crowd:70,
-trainAC3:0, hotel:1200, travel:600, food:700, entry:150,
-hotels:[
- {name:"Sun N Snow Mussoorie",link:"https://maps.google.com/?q=Sun+N+Snow+Mussoorie"},
- {name:"Royal Orchid Fort",link:"https://maps.google.com/?q=Royal+Orchid+Fort+Mussoorie"}
-],
-map:"https://www.google.com/maps?q=Robbers+Cave+Dehradun&output=embed",
+trainAC3:0,hotel:1200,travel:600,food:700,entry:150,
+luggage:["Hotel storage till checkout","Cab boot while sightseeing"],
+schedule:{
+morning:"Robber’s Cave",
+afternoon:"Drive to Mussoorie",
+evening:"Mall Road walk"
+},
+routeSteps:["Visit cave","Change clothes","Drive uphill to Mussoorie"],
+map:"https://www.google.com/maps?q=Robbers+Cave+Dehradun+to+Mussoorie&output=embed",
 images:["images/robbers_cave.jpg","images/company_garden.jpg"]
 },
+
 {
-city:"Mussoorie", title:"Kempty Falls + Camel Road",
+city:"Mussoorie",
+title:"Kempty Falls Day",
 crowd:90,
-trainAC3:0, hotel:1200, travel:300, food:800, entry:200,
-hotels:[
- {name:"Same hotel",link:"#"}
-],
+trainAC3:0,hotel:1200,travel:300,food:800,entry:200,
+luggage:["Hotel storage till evening departure"],
+schedule:{
+morning:"Kempty Falls",
+afternoon:"Rest & lunch",
+evening:"Camel’s Back walk"
+},
+routeSteps:["Cab to Kempty","Return to hotel","Evening walk"],
 map:"https://www.google.com/maps?q=Kempty+Falls+Mussoorie&output=embed",
 images:["images/kempty_falls.jpg","images/camels_back.jpg"]
 }
@@ -172,7 +210,6 @@ function render(){
  const d=days[active];
  const dayTotal=d.trainAC3+d.hotel+d.travel+d.food+d.entry;
  const tripTotal=days.reduce((a,b)=>a+b.trainAC3+b.hotel+b.travel+b.food+b.entry,0);
- const perPerson=Math.round(tripTotal/4); // assuming 4 people
 
  content.innerHTML=`
  <h2>${d.title}</h2>
@@ -184,24 +221,37 @@ function render(){
  <div class="gallery">${d.images.map((x,i)=>`<img src="${x}" onclick="img=${i};render()">`).join("")}</div>
 
  <details open>
- <summary>💰 Budget Breakdown</summary>
- Train (3AC): ₹${d.trainAC3}<br>
+ <summary>📅 Day Schedule</summary>
+ <div class="scheduleBox">
+   <div class="scheduleItem"><b>🌅 Morning</b><br>${d.schedule.morning}</div>
+   <div class="scheduleItem"><b>☀️ Afternoon</b><br>${d.schedule.afternoon}</div>
+   <div class="scheduleItem"><b>🌙 Evening</b><br>${d.schedule.evening}</div>
+ </div>
+ </details>
+
+ <details open>
+ <summary>📍 Luggage Storage</summary>
+ <ul>${d.luggage.map(x=>`<li>${x}</li>`).join("")}</ul>
+ </details>
+
+ <details>
+ <summary>🧭 Travel Steps</summary>
+ <ul>${d.routeSteps.map(x=>`<li>${x}</li>`).join("")}</ul>
+ </details>
+
+ <details>
+ <summary>💰 Budget</summary>
+ Train: ₹${d.trainAC3}<br>
  Hotel: ₹${d.hotel}<br>
- Local Travel: ₹${d.travel}<br>
+ Travel: ₹${d.travel}<br>
  Food: ₹${d.food}<br>
- Entry Fees: ₹${d.entry}<br>
+ Entry: ₹${d.entry}<br>
  <b>Day Total: ₹${dayTotal}</b><br>
- <b>Trip Total: ₹${tripTotal}</b><br>
- <b>Per Person Est: ₹${perPerson}</b>
+ <b>Trip Total: ₹${tripTotal}</b>
  </details>
 
  <details>
- <summary>🏨 Suggested Hotels</summary>
- ${d.hotels.map(h=>`<div><a href="${h.link}" target="_blank">${h.name}</a></div>`).join("")}
- </details>
-
- <details>
- <summary>🗺 Route / Area Map</summary>
+ <summary>🗺 Route Map</summary>
  <iframe src="${d.map}" loading="lazy"></iframe>
  </details>
  `;
@@ -223,7 +273,7 @@ function prev(){active=(active-1+days.length)%days.length;render();}
 
 function shareBudget(){
  const tripTotal=days.reduce((a,b)=>a+b.trainAC3+b.hotel+b.travel+b.food+b.entry,0);
- const msg=`Uttarakhand Trip Budget Summary:\nTotal Est: ₹${tripTotal}\nPer Person: ₹${Math.round(tripTotal/4)}\nRoute: Delhi → Haridwar → Rishikesh → Dehradun → Mussoorie`;
+ const msg=`Uttarakhand Trip Plan\nRoute: Delhi → Haridwar → Rishikesh → Dehradun → Mussoorie\nTotal Est: ₹${tripTotal}\nPer Person (approx): ₹${Math.round(tripTotal/4)}`;
  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
 }
 
