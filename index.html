@@ -8,22 +8,35 @@
 <style>
 body{margin:0;font-family:system-ui;background:#020617;color:#67e8f9}
 h1{text-align:center;margin:8px 0}
-.container{max-width:1200px;margin:auto;padding:12px;padding-bottom:160px}
+.container{max-width:1200px;margin:auto;padding:12px;padding-bottom:170px}
 .stickyTop{position:sticky;top:0;background:#020617;z-index:5}
 
-.routeBox{border:1px solid #164e63;border-radius:14px;padding:12px;margin-bottom:8px}
-.progressText{text-align:center;color:#22d3ee;font-weight:600;margin-bottom:4px}
+/* ---------- SATELLITE NAV ---------- */
+.routeBox{
+  border:1px solid #164e63;border-radius:14px;padding:10px;margin-bottom:8px;
+  background:url("https://i.imgur.com/Qr6QF9Z.jpg") center/cover no-repeat;
+}
+.routeOverlay{background:rgba(2,6,23,.8);border-radius:12px;padding:10px}
 
-.routeLine{position:relative;display:flex;justify-content:space-between;align-items:center;height:40px}
+.progressText{text-align:center;color:#22d3ee;font-weight:600;margin-bottom:6px}
+
+.routeLine{position:relative;display:flex;justify-content:space-between;align-items:center;height:42px}
 .routeLine::before{content:'';position:absolute;left:0;right:0;top:50%;height:3px;background:#164e63}
-.node{width:16px;height:16px;background:#164e63;border-radius:50%;cursor:pointer;z-index:2}
-.node.active{background:#22d3ee}
-.vehicle{position:absolute;top:-22px;transition:.6s cubic-bezier(.4,0,.2,1)}
 
-.routeLabels{display:flex;justify-content:space-between;font-size:12px;margin-top:4px;opacity:.8}
+.node{
+ width:18px;height:18px;background:#164e63;border-radius:50%;cursor:pointer;z-index:2;
+ box-shadow:0 0 0 2px #020617;
+}
+.node.active{background:#22d3ee;box-shadow:0 0 12px #22d3ee}
 
+.vehicle{position:absolute;top:-24px;transition:.6s cubic-bezier(.4,0,.2,1)}
+
+.routeLabels{display:flex;justify-content:space-between;font-size:12px;margin-top:4px;opacity:.85}
+
+/* ---------- CANVAS ROUTE ---------- */
 canvas{width:100%;height:160px;border:1px solid #164e63;border-radius:12px;margin-top:6px}
 
+/* ---------- LAYOUT ---------- */
 .layout{display:flex;flex-wrap:wrap;gap:12px}
 .timeline{flex:1;min-width:220px}
 .content{flex:3;min-width:280px}
@@ -43,7 +56,7 @@ summary{cursor:pointer;font-weight:600}
 .mobileNav{
   position:fixed;bottom:0;left:0;right:0;
   background:#020617;border-top:1px solid #164e63;
-  display:flex;justify-content:space-around;padding:8px;z-index:10;
+  display:flex;justify-content:space-around;padding:10px;z-index:10;
 }
 
 input,select{padding:6px;border-radius:6px;border:none;margin:4px}
@@ -66,23 +79,27 @@ iframe{width:100%;height:220px;border-radius:10px;border:1px solid #164e63;margi
 
 <div class="stickyTop">
   <div class="routeBox">
-    <div class="progressText" id="progressText"></div>
+    <div class="routeOverlay">
 
-    <div class="routeLine">
-      <div id="vehicle" class="vehicle">🚌</div>
-      <div class="node" onclick="select(0)"></div>
-      <div class="node" onclick="select(1)"></div>
-      <div class="node" onclick="select(2)"></div>
-      <div class="node" onclick="select(3)"></div>
-      <div class="node" onclick="select(4)"></div>
+      <div class="progressText" id="progressText"></div>
+
+      <div class="routeLine">
+        <div id="vehicle" class="vehicle">🚌</div>
+        <div class="node" onclick="select(0)"></div>
+        <div class="node" onclick="select(1)"></div>
+        <div class="node" onclick="select(2)"></div>
+        <div class="node" onclick="select(3)"></div>
+        <div class="node" onclick="select(4)"></div>
+        <div class="node" onclick="select(5)"></div>
+      </div>
+
+      <div class="routeLabels">
+        <span>Delhi</span><span>Haridwar</span><span>Rishikesh</span><span>Dehradun</span><span>Mussoorie</span><span>Return</span>
+      </div>
+
+      <canvas id="routeMap"></canvas>
+
     </div>
-
-    <div class="routeLabels">
-      <span>Delhi</span><span>Haridwar</span><span>Rishikesh</span><span>Dehradun</span><span>Mussoorie</span>
-    </div>
-
-    <!-- Animated Route Map -->
-    <canvas id="routeMap"></canvas>
   </div>
 </div>
 
@@ -99,89 +116,109 @@ iframe{width:100%;height:220px;border-radius:10px;border:1px solid #164e63;margi
 </div>
 
 <script>
-// ---------------- STORAGE ----------------
+// ================= STORAGE =================
 let participants = JSON.parse(localStorage.getItem("participants")) || ["You","Spouse"];
 let expenses = JSON.parse(localStorage.getItem("expenses")) || [];
 
-// ---------------- DATES ----------------
+// ================= DATES =================
 const tripDates=[
- "Sun – Arrival Night",
- "Mon",
- "Tue",
- "Wed",
- "Thu"
+ "Sun – Delhi Arrival",
+ "Mon – Haridwar",
+ "Tue – Rishikesh → Dehradun",
+ "Wed – Dehradun → Mussoorie",
+ "Thu – Mussoorie",
+ "Fri – Return to Delhi"
 ];
 
-// ---------------- ROUTE COORDS (RELATIVE) ----------------
+// ================= ROUTE POINTS =================
 const routePoints=[
- {x:40,y:90},   // Delhi
- {x:140,y:70},  // Haridwar
- {x:230,y:60},  // Rishikesh
- {x:330,y:80},  // Dehradun
- {x:440,y:50}   // Mussoorie
+ {x:40,y:90},{x:140,y:70},{x:230,y:60},{x:330,y:80},{x:440,y:50},{x:520,y:90}
 ];
 
-// ---------------- ITINERARY ----------------
-const days=[ /* SAME AS BEFORE — unchanged for brevity */ 
+// ================= ITINERARY =================
+const days=[
 {
 city:"Delhi Arrival",
-title:"Station → Dinner → Bus Transfer",
-schedule:{morning:"—",afternoon:"Train journey",evening:"Freshen up + Volvo Bus"},
-luggage:["Cloak room / retiring room at station","Bus luggage compartment"],
-steps:["Arrive H Nizamuddin ~7 PM","Freshen up","Dinner","Cab/Metro to ISBT","Board Volvo"],
-buffers:["Transfer buffer","Boarding buffer"],
-food:["Station food court","ISBT stalls"],
-tea:["ISBT tea stalls"],
+title:"Station → Dinner → Volvo Bus",
+spots:[
+ {n:"H Nizamuddin Station",m:"https://maps.google.com/?q=Hazrat+Nizamuddin+Railway+Station"},
+ {n:"Kashmere Gate ISBT",m:"https://maps.google.com/?q=Kashmere+Gate+ISBT"}
+],
+schedule:{morning:"—",afternoon:"Train journey",evening:"Freshen + Bus"},
+steps:["Arrive station","Freshen up","Dinner","Transfer to ISBT","Night Volvo"],
 map:"https://www.google.com/maps?q=H+Nizamuddin+to+Kashmere+Gate+ISBT&output=embed",
 images:["images/delhi_bus.jpg"]
 },
+
 {
 city:"Haridwar",
-title:"Temples + Ganga Aarti",
-schedule:{morning:"Mansa Devi",afternoon:"Rest + Lunch",evening:"Aarti"},
-luggage:["Hotel reception"],
-steps:["Hotel rest","Ropeway","Lunch","Ghat visit","Dinner"],
-buffers:["Extra rest"],
-food:["Chotiwala","Hoshiyar Puri"],
-tea:["Tea near ghat"],
+title:"Mansa Devi + Ganga Aarti",
+spots:[
+ {n:"Mansa Devi Temple",m:"https://maps.google.com/?q=Mansa+Devi+Temple+Haridwar"},
+ {n:"Har Ki Pauri",m:"https://maps.google.com/?q=Har+Ki+Pauri"}
+],
+schedule:{morning:"Temple",afternoon:"Rest",evening:"Aarti"},
+steps:["Hotel rest","Ropeway","Lunch","Aarti","Market"],
 map:"https://www.google.com/maps?q=Har+Ki+Pauri+Haridwar&output=embed",
 images:["images/haridwar_aarti.jpg"]
 },
+
 {
 city:"Rishikesh → Dehradun",
-title:"Shiva Statue, Café & FRI",
+title:"Shiva Statue + FRI",
+spots:[
+ {n:"Shiva Statue",m:"https://maps.google.com/?q=Shiva+Statue+Rishikesh"},
+ {n:"Forest Research Institute",m:"https://maps.google.com/?q=Forest+Research+Institute+Dehradun"}
+],
 schedule:{morning:"Rishikesh",afternoon:"Drive",evening:"FRI"},
-luggage:["Carry luggage","Hotel check-in"],
-steps:["Temple","Lunch","Drive","FRI walk"],
-buffers:["Bridge traffic"],
-food:["Little Buddha Cafe"],
-tea:["FRI gate stalls"],
+steps:["Temple","Café lunch","Drive to DDN","Hotel","FRI walk"],
 map:"https://www.google.com/maps?q=Haridwar+to+Rishikesh+to+Dehradun&output=embed",
 images:["images/rishikesh_shiva.jpg","images/fri_dehradun.jpg"]
 },
+
 {
 city:"Dehradun → Mussoorie",
-title:"Robber’s Cave → Mall Road",
+title:"Robber’s Cave + Mall Road",
+spots:[
+ {n:"Robber’s Cave",m:"https://maps.google.com/?q=Robbers+Cave+Dehradun"},
+ {n:"Mall Road Mussoorie",m:"https://maps.google.com/?q=Mall+Road+Mussoorie"}
+],
 schedule:{morning:"Cave",afternoon:"Drive",evening:"Mall"},
-luggage:["Hotel storage","Carry after checkout"],
-steps:["Cave","Hotel freshen up","Drive","Check-in"],
-buffers:["Hill traffic"],
-food:["Mall cafés"],
-tea:["Viewpoint tea"],
-map:"https://www.google.com/maps?q=Robbers+Cave+Dehradun+to+Mussoorie&output=embed",
+steps:["Cave visit","Hotel freshen","Drive","Check-in","Evening stroll"],
+map:"https://www.google.com/maps?q=Robbers+Cave+to+Mussoorie&output=embed",
 images:["images/robbers_cave.jpg","images/company_garden.jpg"]
 },
+
 {
 city:"Mussoorie",
-title:"Kempty & Camel’s Back",
+title:"Kempty + Camel’s Back",
+spots:[
+ {n:"Kempty Falls",m:"https://maps.google.com/?q=Kempty+Falls"},
+ {n:"Camel’s Back Road",m:"https://maps.google.com/?q=Camel+Back+Road+Mussoorie"}
+],
 schedule:{morning:"Kempty",afternoon:"Rest",evening:"Sunset"},
-luggage:["Hotel storage"],
-steps:["Falls","Lunch","Sunset walk"],
-buffers:["Crowd"],
-food:["Cafe Ivy","Kalsang"],
-tea:["Camel road stalls"],
+steps:["Falls","Lunch","Rest","Sunset walk"],
 map:"https://www.google.com/maps?q=Kempty+Falls+Mussoorie&output=embed",
 images:["images/kempty_falls.jpg","images/camels_back.jpg"]
+},
+
+{
+city:"Return Journey",
+title:"Mussoorie → Dehradun → Night Bus",
+spots:[
+ {n:"George Everest",m:"https://maps.google.com/?q=George+Everest+Mussoorie"},
+ {n:"Pacific Mall Dehradun",m:"https://maps.google.com/?q=Pacific+Mall+Dehradun"}
+],
+schedule:{morning:"Checkout",afternoon:"Dehradun",evening:"Night bus"},
+steps:[
+"Checkout Mussoorie hotel",
+"Optional George Everest view point",
+"Drive to Dehradun",
+"Mall & dinner",
+"Night Volvo to Delhi"
+],
+map:"https://www.google.com/maps?q=Mussoorie+to+Dehradun+ISBT&output=embed",
+images:["images/return_bus.jpg"]
 }
 ];
 
@@ -189,7 +226,7 @@ let active=0,img=0;
 const timeline=document.getElementById("timeline");
 const content=document.getElementById("content");
 
-// ---------------- ROUTE MAP DRAW ----------------
+// ================= ROUTE MAP =================
 const canvas=document.getElementById("routeMap");
 const ctx=canvas.getContext("2d");
 
@@ -201,49 +238,30 @@ function resizeCanvas(){
 
 function drawRoute(){
  ctx.clearRect(0,0,canvas.width,canvas.height);
- ctx.strokeStyle="#164e63";
- ctx.lineWidth=3;
+ ctx.strokeStyle="#164e63";ctx.lineWidth=3;
  ctx.beginPath();
  routePoints.forEach((p,i)=>{
-  const x=p.x*canvas.width/500;
-  const y=p.y*canvas.height/120;
-  if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  const x=p.x*canvas.width/600,y=p.y*canvas.height/120;
+  if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
  });
  ctx.stroke();
 
- // progress line
- ctx.strokeStyle="#22d3ee";
- ctx.beginPath();
+ ctx.strokeStyle="#22d3ee";ctx.beginPath();
  routePoints.forEach((p,i)=>{
-  if(i>active) return;
-  const x=p.x*canvas.width/500;
-  const y=p.y*canvas.height/120;
-  if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  if(i>active)return;
+  const x=p.x*canvas.width/600,y=p.y*canvas.height/120;
+  if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
  });
  ctx.stroke();
 
- // nodes
  routePoints.forEach((p,i)=>{
-  const x=p.x*canvas.width/500;
-  const y=p.y*canvas.height/120;
+  const x=p.x*canvas.width/600,y=p.y*canvas.height/120;
   ctx.fillStyle=i===active?"#22d3ee":"#164e63";
   ctx.beginPath();ctx.arc(x,y,6,0,Math.PI*2);ctx.fill();
  });
 }
 
-// ---------------- SETTLEMENT ----------------
-function calcSettlement(){
- const paid={};
- participants.forEach(p=>paid[p]=0);
- expenses.forEach(e=>paid[e.paidBy]+=e.amount);
- const total=expenses.reduce((a,b)=>a+b.amount,0);
- const share=participants.length?total/participants.length:0;
- const balance={};
- participants.forEach(p=>balance[p]=Math.round(paid[p]-share));
- return {balance,total,share:Math.round(share)};
-}
-
-// ---------------- RENDER ----------------
+// ================= RENDER =================
 function buildTimeline(){
  timeline.innerHTML="";
  days.forEach((d,i)=>{
@@ -257,10 +275,10 @@ function buildTimeline(){
 
 function render(){
  const d=days[active];
- const {balance,total,share}=calcSettlement();
 
  content.innerHTML=`
  <h2>${d.title}</h2>
+
  <div class="imageWrap"><img src="${d.images[img]}"></div>
  <div class="gallery">${d.images.map((x,i)=>`<img src="${x}" onclick="img=${i};render()">`).join("")}</div>
 
@@ -268,22 +286,19 @@ function render(){
  Morning: ${d.schedule.morning}<br>Afternoon: ${d.schedule.afternoon}<br>Evening: ${d.schedule.evening}
  </details>
 
- <details open><summary>🧭 Route</summary><ul>${d.steps.map(x=>`<li>${x}</li>`).join("")}</ul></details>
- <details><summary>🍴 Food</summary><ul>${d.food.map(x=>`<li>${x}</li>`).join("")}</ul></details>
- <details><summary>🗺 Map</summary><iframe src="${d.map}" loading="lazy"></iframe></details>
-
- <hr>
-
- <details open><summary>💳 Settlement</summary>
- Total ₹${total} | Per Person ₹${share}
- <ul>${Object.keys(balance).map(p=>balance[p]>0?`<li>${p} gets ₹${balance[p]}</li>`:balance[p]<0?`<li>${p} pays ₹${-balance[p]}</li>`:`<li>${p} settled</li>`).join("")}</ul>
+ <details open><summary>📍 Spots (Clickable)</summary>
+ <ul>${d.spots.map(s=>`<li><a href="${s.m}" target="_blank" style="color:#22d3ee">${s.n}</a></li>`).join("")}</ul>
  </details>
+
+ <details open><summary>🧭 Step-by-Step Route</summary><ul>${d.steps.map(x=>`<li>${x}</li>`).join("")}</ul></details>
+
+ <details><summary>🗺 Day Route Map</summary><iframe src="${d.map}" loading="lazy"></iframe></details>
  `;
 
  document.getElementById("progressText").innerText=`${tripDates[active]} — ${d.city}`;
  document.querySelectorAll(".card").forEach((c,i)=>c.classList.toggle("active",i===active));
  document.querySelectorAll(".node").forEach((n,i)=>n.classList.toggle("active",i===active));
- document.getElementById("vehicle").style.left=`calc(${active*(100/(days.length-1))}% - 10px)`;
+ document.getElementById("vehicle").style.left=`calc(${active*(100/(days.length-1))}% - 12px)`;
 
  buildTimeline();
  drawRoute();
