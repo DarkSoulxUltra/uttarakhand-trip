@@ -317,27 +317,35 @@ function render(){
  </details>
 
  <details open><summary>💳 Add Expense</summary>
- <input id="expTitle" placeholder="Expense name">
- <input id="expAmt" type="number" placeholder="Amount ₹">
- <select id="paidBy">${participants.map(p=>`<option>${p}</option>`).join("")}</select>
- <button onclick="addExpense()">Add</button>
- </details>
-
-<details open><summary>💳 Add Expense</summary>
-...
+<input id="expTitle" placeholder="Expense name">
+<input id="expAmt" type="number" placeholder="Amount ₹">
+<select id="paidBy">${participants.map(p=>`<option>${p}</option>`).join("")}</select>
+<select id="expDay">
+  ${tripDates.map((d,i)=>`<option value="${i}" ${i===active?"selected":""}>${d}</option>`).join("")}
+</select>
+<button onclick="addExpense()">Add</button>
 </details>
 
-<details open><summary>🧾 Expense Log</summary>
-<ul>
-${expenses.length===0
- ? "<li>No expenses added yet</li>"
- : expenses.map((e,i)=>`
-   <li>
-     ${e.title} — ₹${e.amount} (Paid by ${e.paidBy})
-     <button onclick="deleteExpense(${i})">❌</button>
-   </li>`).join("")}
-</ul>
+<details open><summary>🧾 Expense Log (Day-wise)</summary>
+
+${tripDates.map((d,di)=>{
+  const list = expenses.filter(e=>e.day===di);
+  return `
+  <b>${d}</b>
+  <ul>
+   ${list.length===0
+     ? "<li>No expenses</li>"
+     : list.map((e,i)=>`
+        <li>
+         ${e.title} — ₹${e.amount} (Paid by ${e.paidBy})
+         <button onclick="deleteExpense(${expenses.indexOf(e)})">❌</button>
+        </li>
+       `).join("")}
+  </ul>`;
+}).join("")}
+
 </details>
+
 
 
  <details open><summary>📊 Settlement</summary>
@@ -385,7 +393,8 @@ function addExpense(){
  const a=parseInt(document.getElementById("expAmt").value);
  const p=document.getElementById("paidBy").value;
  if(!t||!a) return alert("Enter expense & amount");
- expenses.push({title:t,amount:a,paidBy:p});
+ expenses.push({title:t,amount:a,paidBy:p,day:active});
+
  render();
 }
 function deleteExpense(i){
