@@ -23,6 +23,67 @@ canvas{background:#020617;border:1px solid #164e63;border-radius:10px;width:100%
 .btn{background:#22d3ee;color:black;border:none;padding:8px 14px;border-radius:8px;font-weight:600;cursor:pointer}
 input{padding:6px;border-radius:6px;border:none}
 .section{border:1px solid #164e63;border-radius:10px;padding:10px;margin:10px 0}
+.routeBox{
+  border:1px solid #164e63;
+  border-radius:14px;
+  padding:16px;
+  margin-bottom:12px;
+}
+
+.progressText{
+  text-align:center;
+  margin-bottom:10px;
+  font-weight:600;
+  color:#22d3ee;
+}
+
+.routeLine{
+  position:relative;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  height:40px;
+}
+
+.routeLine::before{
+  content:'';
+  position:absolute;
+  left:0;right:0;
+  top:50%;
+  height:3px;
+  background:#164e63;
+  z-index:0;
+}
+
+.node{
+  width:16px;height:16px;
+  background:#164e63;
+  border-radius:50%;
+  position:relative;
+  z-index:2;
+  cursor:pointer;
+  transition:.2s;
+}
+.node:hover{transform:scale(1.3);background:#22d3ee}
+
+.node.active{background:#22d3ee}
+
+.vehicle{
+  position:absolute;
+  top:-22px;
+  left:0;
+  transition:0.6s cubic-bezier(.4,0,.2,1);
+  z-index:3;
+}
+
+.routeLabels{
+  display:flex;
+  justify-content:space-between;
+  font-size:12px;
+  margin-top:6px;
+  opacity:0.8;
+}
+
 </style>
 </head>
 
@@ -31,7 +92,28 @@ input{padding:6px;border-radius:6px;border:none}
 <div class="container">
 <h1>Uttarakhand Group Trip Planner</h1>
 
-<canvas id="map"></canvas>
+<div id="routeBox" class="routeBox">
+  <div id="progressText" class="progressText"></div>
+
+  <div class="routeLine">
+    <div id="vehicle" class="vehicle">🚌</div>
+
+    <div class="node" onclick="select(0)" title="Delhi – Night Bus"></div>
+    <div class="node" onclick="select(1)" title="Haridwar – Ganga Aarti"></div>
+    <div class="node" onclick="select(2)" title="Rishikesh + FRI"></div>
+    <div class="node" onclick="select(3)" title="Robber’s Cave + Mussoorie"></div>
+    <div class="node" onclick="select(4)" title="Mussoorie Sightseeing"></div>
+  </div>
+
+  <div class="routeLabels">
+    <span>Delhi</span>
+    <span>Haridwar</span>
+    <span>Rishikesh</span>
+    <span>Dehradun</span>
+    <span>Mussoorie</span>
+  </div>
+</div>
+
 
 <div class="layout">
   <div class="timeline" id="timeline"></div>
@@ -176,6 +258,15 @@ function render(){
  <b>Total Trip Est:</b> ₹${total}
  `;
  document.querySelectorAll(".card").forEach((c,i)=>c.classList.toggle("active",i===active));
+  document.getElementById("progressText").innerText =
+  `Day ${active+1} of ${days.length} — ${days[active].city}`;
+
+const nodes=document.querySelectorAll(".node");
+nodes.forEach((n,i)=>n.classList.toggle("active",i===active));
+
+const vehicle=document.getElementById("vehicle");
+vehicle.style.left = `calc(${active*(100/(days.length-1))}% - 10px)`;
+
  drawMap();
 }
 
