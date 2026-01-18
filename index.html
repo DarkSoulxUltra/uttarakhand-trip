@@ -389,14 +389,25 @@ function removePerson(i){
  render();
 }
 function addExpense(){
- const t=document.getElementById("expTitle").value;
- const a=parseInt(document.getElementById("expAmt").value);
- const p=document.getElementById("paidBy").value;
- if(!t||!a) return alert("Enter expense & amount");
- expenses.push({title:t,amount:a,paidBy:p,day:active});
+  const t = document.getElementById("expTitle").value;
+  const a = parseInt(document.getElementById("expAmt").value);
+  const p = document.getElementById("paidBy").value;
+  const dayInput = document.getElementById("expDay").value;
 
- render();
+  if (!t || !a) return alert("Enter expense & amount");
+
+  // Make sure day is a number
+  const day = Number(dayInput);
+
+  expenses.push({ title: t, amount: a, paidBy: p, day: day });
+  expenses = expenses.map(e => ({
+  ...e,
+  day: Number(e.day)
+}));
+
+  render();
 }
+
 function deleteExpense(i){
   expenses.splice(i,1);
   render();
