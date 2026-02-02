@@ -11,7 +11,6 @@ h1{text-align:center;margin:8px 0}
 .container{max-width:1200px;margin:auto;padding:12px;padding-bottom:230px}
 .stickyTop{position:sticky;top:0;background:#020617;z-index:5}
 
-/* ===== MAP STYLE BACKGROUND ===== */
 .mapBG{
   position:relative;
   background:
@@ -20,8 +19,6 @@ h1{text-align:center;margin:8px 0}
     linear-gradient(135deg, #020617, #020617);
   overflow:hidden;
 }
-
-/* ===== RADAR SWEEP ===== */
 .mapBG::after{
   content:"";
   position:absolute;inset:-40%;
@@ -30,81 +27,49 @@ h1{text-align:center;margin:8px 0}
 }
 @keyframes radar{to{transform:rotate(360deg)}}
 
-/* ===== TOP NAV ===== */
 .routeBox{border:1px solid #164e63;border-radius:14px;padding:10px;margin-bottom:8px}
 .routeOverlay{border-radius:12px;padding:10px;position:relative}
-
 .progressText{text-align:center;color:#22d3ee;font-weight:600;margin-bottom:6px;position:relative;z-index:2}
 
 .routeLine{position:relative;display:flex;justify-content:space-between;align-items:center;height:42px;z-index:2}
 .routeLine::before{content:'';position:absolute;left:0;right:0;top:50%;height:3px;background:#164e63}
-
 .node{width:18px;height:18px;background:#164e63;border-radius:50%;cursor:pointer;z-index:3;box-shadow:0 0 0 2px #020617}
 .node.active{background:#22d3ee;box-shadow:0 0 12px #22d3ee}
+.vehicle{position:absolute;top:-26px;z-index:4;transition:.6s cubic-bezier(.4,0,.2,1)}
 
-.vehicle{
- position:absolute;top:-26px;z-index:4;
- filter:drop-shadow(0 0 8px #22d3ee);
- transition:.6s cubic-bezier(.4,0,.2,1)
-}
+.routeLabels{display:flex;justify-content:space-between;font-size:12px;margin-top:4px;opacity:.9}
 
-.routeLabels{display:flex;justify-content:space-between;font-size:12px;margin-top:4px;opacity:.9;z-index:2;position:relative}
-
-/* ===== LAYOUT ===== */
 .layout{display:flex;flex-wrap:wrap;gap:12px}
 .timeline{flex:1;min-width:220px}
 .content{flex:3;min-width:280px}
 
-/* ===== DAY CARDS ===== */
 .card{border:1px solid #164e63;border-radius:12px;padding:10px;margin-bottom:8px;cursor:pointer}
 .card.active{border-color:#22d3ee;box-shadow:0 0 12px rgba(34,211,238,.5)}
 
-/* ===== IMAGES ===== */
-.imageWrap{border:1px solid #164e63;border-radius:12px;overflow:hidden;background:#020617}
-.imageWrap.night{
- background:
-   radial-gradient(circle at 30% 30%, #0f172a 0%, #020617 60%),
-   repeating-radial-gradient(circle at 80% 20%, rgba(255,255,255,.15) 0 1px, transparent 1px 10px);
-}
-.imageWrap img{width:100%;height:auto;max-height:320px;object-fit:contain}
+.imageWrap{border:1px solid #164e63;border-radius:12px;overflow:hidden}
+.imageWrap img{width:100%;max-height:320px;object-fit:contain}
 
-.gallery{display:flex;gap:8px;overflow-x:auto;padding:6px 0}
-.gallery img{height:60px;border-radius:8px;border:1px solid #164e63;cursor:pointer}
-
-/* ===== DETAILS ===== */
 details{border:1px solid #164e63;border-radius:10px;padding:8px;margin:8px 0}
 summary{cursor:pointer;font-weight:600}
 
-/* ===== MOBILE NAV ===== */
 .mobileNav{
  position:fixed;bottom:0;left:0;right:0;
  background:#020617;border-top:1px solid #164e63;
  display:flex;justify-content:space-around;padding:10px;z-index:10;
 }
-
-input,select{padding:6px;border-radius:6px;border:none;margin:4px}
 button{background:#22d3ee;border:none;border-radius:6px;padding:6px 12px;font-weight:600;cursor:pointer}
-
 iframe{width:100%;height:220px;border-radius:10px;border:1px solid #164e63;margin-top:6px}
-
-@media(max-width:768px){
- .layout{flex-direction:column}
- .timeline{order:3}
-}
 </style>
 </head>
 
 <body>
-
 <div class="container">
-
 <h1>Uttarakhand Group Trip Planner</h1>
 
 <div class="stickyTop">
  <div class="routeBox mapBG">
   <div class="routeOverlay">
    <div class="progressText" id="progressText"></div>
-
    <div class="routeLine">
     <div id="vehicle" class="vehicle">🚌</div>
     <div class="node" onclick="select(0)"></div>
@@ -114,10 +79,9 @@ iframe{width:100%;height:220px;border-radius:10px;border:1px solid #164e63;margi
     <div class="node" onclick="select(4)"></div>
     <div class="node" onclick="select(5)"></div>
    </div>
-
    <div class="routeLabels">
     <span>Delhi</span><span>Haridwar</span><span>Rishikesh</span>
-    <span>Dehradun</span><span>Mussoorie</span><span>Return</span>
+    <span>Dehradun</span><span>Mussoorie</span><span>Delhi</span>
    </div>
   </div>
  </div>
@@ -127,7 +91,6 @@ iframe{width:100%;height:220px;border-radius:10px;border:1px solid #164e63;margi
  <div class="timeline" id="timeline"></div>
  <div class="content" id="content"></div>
 </div>
-
 </div>
 
 <div class="mobileNav">
@@ -136,106 +99,93 @@ iframe{width:100%;height:220px;border-radius:10px;border:1px solid #164e63;margi
 </div>
 
 <script>
-// ================= STORAGE =================
-let participants = JSON.parse(localStorage.getItem("participants")) || ["You","Spouse"];
+let participants = JSON.parse(localStorage.getItem("participants")) || ["You","Spouse","Couple-2A","Couple-2B"];
 let expenses = JSON.parse(localStorage.getItem("expenses")) || [];
 
-// ================= DATES =================
-const tripDates=[
- "Sun",
- "Mon",
- "Tue",
- "Wed",
- "Thu",
- "Fri"
-];
+const tripDates=["Sun","Mon","Tue","Wed","Thu","Fri"];
+const distances=[220,30,10,45,35,300];
 
-// ================= DISTANCES (KM APPROX) =================
-const distances=[30,80,70,35,25,300];
-
-// ================= BUDGET ESTIMATES =================
 const budgets=[
- {stay:0,food:400,travel:600,entry:0},
- {stay:1200,food:500,travel:300,entry:150},
- {stay:1200,food:600,travel:400,entry:100},
- {stay:1500,food:600,travel:500,entry:150},
- {stay:1500,food:600,travel:300,entry:150},
- {stay:0,food:400,travel:700,entry:0}
+ {stay:0,food:400,travel:600,entry:0},       // Delhi
+ {stay:1200,food:500,travel:300,entry:350}, // Haridwar
+ {stay:1500,food:600,travel:400,entry:0},   // Rishikesh Day 1
+ {stay:1500,food:600,travel:300,entry:1200},// Rishikesh Rafting
+ {stay:1200,food:500,travel:500,entry:60},  // DDN
+ {stay:2200,food:600,travel:500,entry:100}  // Mussoorie
 ];
 
-// ================= ITINERARY =================
 const days=[
 {
-city:"Delhi Arrival",
-title:"Station → Dinner → Volvo Bus",
+city:"Delhi → Haridwar",
+title:"Train Arrival → FlixBus → Ganga Aarti",
 spots:[
- {n:"H Nizamuddin Station",m:"https://maps.google.com/?q=Hazrat+Nizamuddin+Railway+Station"},
- {n:"Kashmere Gate ISBT",m:"https://maps.google.com/?q=Kashmere+Gate+ISBT"}
-],
-schedule:{morning:"—",afternoon:"Train journey",evening:"Freshen + Bus"},
-steps:["Arrive station","Freshen up","Dinner","Transfer to ISBT","Night Volvo"],
-map:"https://www.google.com/maps?q=H+Nizamuddin+to+Kashmere+Gate+ISBT&output=embed",
-images:["images/delhi_bus.jpg"]
-},
-{
-city:"Haridwar",
-title:"Mansa Devi + Ganga Aarti",
-spots:[
- {n:"Mansa Devi Temple",m:"https://maps.google.com/?q=Mansa+Devi+Temple+Haridwar"},
+ {n:"H. Nizamuddin Station",m:"https://maps.google.com/?q=Hazrat+Nizamuddin+Railway+Station"},
  {n:"Har Ki Pauri",m:"https://maps.google.com/?q=Har+Ki+Pauri"}
 ],
-schedule:{morning:"Temple",afternoon:"Rest",evening:"Aarti"},
-steps:["Hotel rest","Ropeway","Lunch","Aarti","Market"],
-map:"https://www.google.com/maps?q=Har+Ki+Pauri+Haridwar&output=embed",
+schedule:{morning:"Train arrival",afternoon:"Bus journey",evening:"Ganga Aarti"},
+steps:["Arrive Delhi","Freshen up","FlixBus to Haridwar","Hotel check-in","Aarti & market"],
+map:"https://www.google.com/maps?q=Delhi+to+Haridwar&output=embed",
 images:["images/haridwar_aarti.jpg"]
 },
 {
+city:"Haridwar → Rishikesh",
+title:"Deep Snaan + Ropeways → Rishikesh",
+spots:[
+ {n:"Mansa Devi",m:"https://maps.google.com/?q=Mansa+Devi+Temple"},
+ {n:"Chandi Devi",m:"https://maps.google.com/?q=Chandi+Devi+Temple"},
+ {n:"Laxman Jhula",m:"https://maps.google.com/?q=Laxman+Jhula"}
+],
+schedule:{morning:"Snaan & temples",afternoon:"Drive",evening:"Jhulas"},
+steps:["Deep snaan","Ropeways","Lunch","Cab to Rishikesh","Evening walk"],
+map:"https://www.google.com/maps?q=Haridwar+to+Rishikesh&output=embed",
+images:["images/haridwar_temple.jpg"]
+},
+{
+city:"Rishikesh",
+title:"Tapovan Walk + Cafés",
+spots:[
+ {n:"Ram Jhula",m:"https://maps.google.com/?q=Ram+Jhula"},
+ {n:"Tapovan",m:"https://maps.google.com/?q=Tapovan+Rishikesh"}
+],
+schedule:{morning:"Rest",afternoon:"Cafés",evening:"River walk"},
+steps:["Late start","Café hopping","Ashram visit","Evening chill"],
+map:"https://www.google.com/maps?q=Tapovan+Rishikesh&output=embed",
+images:["images/rishikesh_shiva.jpg"]
+},
+{
+city:"Rishikesh",
+title:"Rafting + Recovery Day",
+spots:[
+ {n:"Shivpuri Rafting",m:"https://maps.google.com/?q=Shivpuri+Rishikesh"}
+],
+schedule:{morning:"Rafting",afternoon:"Rest",evening:"Light walk"},
+steps:["Early breakfast","Rafting","Hot shower","Lunch","Rest"],
+map:"https://www.google.com/maps?q=Rishikesh+Rafting&output=embed",
+images:["images/rafting.jpg"]
+},
+{
 city:"Rishikesh → Dehradun",
-title:"Shiva Statue + FRI",
+title:"Neergarh + Triveni → DDN",
 spots:[
- {n:"Shiva Statue",m:"https://maps.google.com/?q=Shiva+Statue+Rishikesh"},
- {n:"Forest Research Institute",m:"https://maps.google.com/?q=Forest+Research+Institute+Dehradun"}
+ {n:"Neergarh Waterfall",m:"https://maps.google.com/?q=Neergarh+Waterfall"},
+ {n:"Triveni Ghat",m:"https://maps.google.com/?q=Triveni+Ghat"}
 ],
-schedule:{morning:"Rishikesh",afternoon:"Drive",evening:"FRI"},
-steps:["Temple","Café lunch","Drive to DDN","Hotel","FRI walk"],
-map:"https://www.google.com/maps?q=Haridwar+to+Rishikesh+to+Dehradun&output=embed",
-images:["images/rishikesh_shiva.jpg","images/fri_dehradun.jpg"]
+schedule:{morning:"Waterfall",afternoon:"Triveni",evening:"DDN"},
+steps:["Leave bags at hotel","Waterfall","Checkout","Triveni Ghat","Cab to DDN"],
+map:"https://www.google.com/maps?q=Rishikesh+to+Dehradun&output=embed",
+images:["images/neergarh.jpg"]
 },
 {
-city:"Dehradun → Mussoorie",
-title:"Robber’s Cave + Mall Road",
-spots:[
- {n:"Robber’s Cave",m:"https://maps.google.com/?q=Robbers+Cave+Dehradun"},
- {n:"Mall Road Mussoorie",m:"https://maps.google.com/?q=Mall+Road+Mussoorie"}
-],
-schedule:{morning:"Cave",afternoon:"Drive",evening:"Mall"},
-steps:["Cave visit","Hotel freshen","Drive","Check-in","Evening stroll"],
-map:"https://www.google.com/maps?q=Robbers+Cave+to+Mussoorie&output=embed",
-images:["images/robbers_cave.jpg","images/company_garden.jpg"]
-},
-{
-city:"Mussoorie",
-title:"Kempty + Camel’s Back",
-spots:[
- {n:"Kempty Falls",m:"https://maps.google.com/?q=Kempty+Falls"},
- {n:"Camel’s Back Road",m:"https://maps.google.com/?q=Camel+Back+Road+Mussoorie"}
-],
-schedule:{morning:"Kempty",afternoon:"Rest",evening:"Sunset"},
-steps:["Falls","Lunch","Rest","Sunset walk"],
-map:"https://www.google.com/maps?q=Kempty+Falls+Mussoorie&output=embed",
-images:["images/kempty_falls.jpg","images/camels_back.jpg"]
-},
-{
-city:"Return Journey",
+city:"Mussoorie → Delhi",
 title:"Mussoorie → Dehradun → Night Bus",
 spots:[
- {n:"George Everest",m:"https://maps.google.com/?q=George+Everest+Mussoorie"},
- {n:"Pacific Mall Dehradun",m:"https://maps.google.com/?q=Pacific+Mall+Dehradun"}
+ {n:"Kempty Falls",m:"https://maps.google.com/?q=Kempty+Falls"},
+ {n:"Mall Road",m:"https://maps.google.com/?q=Mall+Road+Mussoorie"}
 ],
-schedule:{morning:"Checkout",afternoon:"Dehradun",evening:"Night bus"},
-steps:["Checkout hotel","George Everest stop","Drive to DDN","Mall & dinner","Night Volvo"],
-map:"https://www.google.com/maps?q=Mussoorie+to+Dehradun+ISBT&output=embed",
-images:["images/return_bus.jpg"]
+schedule:{morning:"Sightseeing",afternoon:"Return",evening:"Bus"},
+steps:["Early Kempty","Return to DDN","Dinner","Night Volvo"],
+map:"https://www.google.com/maps?q=Mussoorie+to+Delhi&output=embed",
+images:["images/kempty_falls.jpg"]
 }
 ];
 
@@ -243,19 +193,6 @@ let active=0,img=0;
 const timeline=document.getElementById("timeline");
 const content=document.getElementById("content");
 
-// ================= MONEY =================
-function calcSettlement(){
- const paid={};
- participants.forEach(p=>paid[p]=0);
- expenses.forEach(e=>paid[e.paidBy]+=e.amount);
- const total=expenses.reduce((a,b)=>a+b.amount,0);
- const share=participants.length?total/participants.length:0;
- const balance={};
- participants.forEach(p=>balance[p]=Math.round(paid[p]-share));
- return {balance,total,share:Math.round(share)};
-}
-
-// ================= RENDER =================
 function buildTimeline(){
  timeline.innerHTML="";
  days.forEach((d,i)=>{
@@ -269,95 +206,36 @@ function buildTimeline(){
 
 function render(){
  const d=days[active];
- const {balance,total,share}=calcSettlement();
  const b=budgets[active];
  const dayEst=b.stay+b.food+b.travel+b.entry;
  const tripEst=budgets.reduce((s,x)=>s+x.stay+x.food+x.travel+x.entry,0);
  const perEst=Math.round(tripEst/participants.length);
- const diff=total-tripEst;
 
  content.innerHTML=`
  <h2>${d.title}</h2>
-
- <div class="imageWrap ${active===0?"night":""}"><img src="${d.images[img]}"></div>
- <div class="gallery">${d.images.map((x,i)=>`<img src="${x}" onclick="img=${i};render()">`).join("")}</div>
+ <div class="imageWrap"><img src="${d.images[img]}"></div>
 
  <details open><summary>📅 Schedule</summary>
- Morning: ${d.schedule.morning}<br>Afternoon: ${d.schedule.afternoon}<br>Evening: ${d.schedule.evening}
+ Morning: ${d.schedule.morning}<br>
+ Afternoon: ${d.schedule.afternoon}<br>
+ Evening: ${d.schedule.evening}
  </details>
 
- <details open><summary>📍 Spots (Clickable)</summary>
- <ul>${d.spots.map(s=>`<li><a href="${s.m}" target="_blank" style="color:#22d3ee">${s.n}</a></li>`).join("")}</ul>
+ <details open><summary>📍 Spots</summary>
+ <ul>${d.spots.map(s=>`<li><a href="${s.m}" target="_blank">${s.n}</a></li>`).join("")}</ul>
  </details>
 
- <details open><summary>🧭 Step-by-Step Route</summary><ul>${d.steps.map(x=>`<li>${x}</li>`).join("")}</ul></details>
+ <details open><summary>🧭 Step-by-Step</summary>
+ <ul>${d.steps.map(x=>`<li>${x}</li>`).join("")}</ul>
+ </details>
 
- <details><summary>🗺 Day Route Map</summary>
- <button onclick="toggleMap()">🗺 View Day Route Map</button>
- <div id="mapBox" style="display:none"><iframe src="${d.map}" loading="lazy"></iframe></div>
+ <details><summary>🗺 Map</summary>
+ <iframe src="${d.map}" loading="lazy"></iframe>
  </details>
 
  <details open><summary>💰 Estimated Budget</summary>
- Day: ₹${dayEst} | Distance: ~${distances[active]} km<br>
- Stay ₹${b.stay} | Food ₹${b.food} | Travel ₹${b.travel} | Entry ₹${b.entry}<hr>
- Trip Est: ₹${tripEst} | Per Person Est: ₹${perEst}
- </details>
-
- <details open><summary>📊 Actual vs Estimated</summary>
- Actual Spend: ₹${total}<br>
- Difference: <b style="color:${diff>0?"#f87171":"#4ade80"}">${diff>0?"+":""}${diff}</b>
- </details>
-
- <hr>
-
- <details open><summary>👥 Participants</summary>
- <input id="newName" placeholder="Add name">
- <button onclick="addPerson()">Add</button>
- <ul>${participants.map((p,i)=>`<li>${p} <button onclick="removePerson(${i})">❌</button></li>`).join("")}</ul>
- </details>
-
- <details open><summary>💳 Add Expense</summary>
-<input id="expTitle" placeholder="Expense name">
-<input id="expAmt" type="number" placeholder="Amount ₹">
-<select id="paidBy">${participants.map(p=>`<option>${p}</option>`).join("")}</select>
-<select id="expDay">
-  ${tripDates.map((d,i)=>`<option value="${i}" ${i===active?"selected":""}>${d}</option>`).join("")}
-</select>
-<button onclick="addExpense()">Add</button>
-</details>
-
-<details open><summary>🧾 Expense Log (Day-wise)</summary>
-
-${tripDates.map((d,di)=>{
-  const list = expenses.filter(e=>e.day===di);
-  return `
-  <b>${d}</b>
-  <ul>
-   ${list.length===0
-     ? "<li>No expenses</li>"
-     : list.map((e,i)=>`
-        <li>
-         ${e.title} — ₹${e.amount} (Paid by ${e.paidBy})
-         <button onclick="deleteExpense(${expenses.indexOf(e)})">❌</button>
-        </li>
-       `).join("")}
-  </ul>`;
-}).join("")}
-
-</details>
-
-
-
- <details open><summary>📊 Settlement</summary>
- Total: ₹${total} | Per Person: ₹${share}
- <ul>
- ${Object.keys(balance).map(p=>{
-   if(balance[p]>0) return `<li>${p} gets ₹${balance[p]}</li>`;
-   if(balance[p]<0) return `<li>${p} pays ₹${Math.abs(balance[p])}</li>`;
-   return `<li>${p} settled</li>`;
- }).join("")}
- </ul>
- <button onclick="shareWA()">📲 Share on WhatsApp</button>
+ Day: ₹${dayEst} | Distance ~${distances[active]} km<br>
+ Trip Est: ₹${tripEst} | Per Person ~₹${perEst}
  </details>
  `;
 
@@ -367,68 +245,8 @@ ${tripDates.map((d,di)=>{
  document.getElementById("vehicle").style.left=`calc(${active*(100/(days.length-1))}% - 12px)`;
 
  buildTimeline();
- saveData();
 }
 
-function toggleMap(){
- const box=document.getElementById("mapBox");
- box.style.display=box.style.display==="none"?"block":"none";
-}
-
-// ================= MONEY ACTIONS =================
-function addPerson(){
- const n=document.getElementById("newName").value.trim();
- if(!n) return;
- participants.push(n);
- render();
-}
-function removePerson(i){
- const name=participants[i];
- expenses=expenses.filter(e=>e.paidBy!==name);
- participants.splice(i,1);
- render();
-}
-function addExpense(){
-  const t = document.getElementById("expTitle").value;
-  const a = parseInt(document.getElementById("expAmt").value);
-  const p = document.getElementById("paidBy").value;
-  const dayInput = document.getElementById("expDay").value;
-
-  if (!t || !a) return alert("Enter expense & amount");
-
-  // Make sure day is a number
-  const day = Number(dayInput);
-
-  expenses.push({ title: t, amount: a, paidBy: p, day: day });
-  expenses = expenses.map(e => ({
-  ...e,
-  day: Number(e.day)
-}));
-
-  render();
-}
-
-function deleteExpense(i){
-  expenses.splice(i,1);
-  render();
-}
-
-function saveData(){
- localStorage.setItem("participants",JSON.stringify(participants));
- localStorage.setItem("expenses",JSON.stringify(expenses));
-}
-function shareWA(){
- const {balance,total,share}=calcSettlement();
- let msg=`Uttarakhand Trip Settlement\nTotal: ₹${total}\nPer Person: ₹${share}\n\nBalances:\n`;
- Object.keys(balance).forEach(p=>{
-  if(balance[p]>0) msg+=`${p} gets ₹${balance[p]}\n`;
-  else if(balance[p]<0) msg+=`${p} pays ₹${Math.abs(balance[p])}\n`;
-  else msg+=`${p} settled\n`;
- });
- window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
-}
-
-// ================= NAV =================
 function select(i){active=i;img=0;render();}
 function next(){active=(active+1)%days.length;render();}
 function prev(){active=(active-1+days.length)%days.length;render();}
