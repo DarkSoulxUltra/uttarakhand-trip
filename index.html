@@ -20,7 +20,6 @@ h1{text-align:center;margin:10px 0}
 
 .node{width:18px;height:18px;background:#164e63;border-radius:50%;cursor:pointer;z-index:2}
 .node.active{background:#22d3ee;box-shadow:0 0 10px #22d3ee}
-
 .vehicle{position:absolute;top:-26px;transition:.4s}
 
 /* LAYOUT */
@@ -94,37 +93,80 @@ const days=[
  city:"Delhi → Haridwar",
  title:"Arrival & Ganga Aarti",
  hotel:{name:"Hotel Ganga Lahari",map:"https://maps.google.com/?q=Hotel+Ganga+Lahari+Haridwar"},
- map:"https://www.google.com/maps?q=Delhi+to+Haridwar&output=embed"
+ map:"https://www.google.com/maps?q=Delhi+to+Haridwar&output=embed",
+ steps:[
+  "Arrive in Delhi early morning",
+  "Freshen up & breakfast",
+  "Board bus to Haridwar",
+  "Hotel check-in",
+  "Evening Ganga Aarti & local market"
+ ]
 },
 {
  city:"Haridwar → Rishikesh",
  title:"Snaan & Ropeways",
  hotel:{name:"Hotel Ishan (Tapovan)",map:"https://maps.google.com/?q=Hotel+Ishan+Rishikesh"},
- map:"https://www.google.com/maps?q=Haridwar+to+Rishikesh&output=embed"
+ map:"https://www.google.com/maps?q=Haridwar+to+Rishikesh&output=embed",
+ steps:[
+  "Early morning Deep Snaan",
+  "Mansa Devi ropeway",
+  "Chandi Devi ropeway",
+  "Lunch & checkout",
+  "Drive to Rishikesh",
+  "Evening walk near hotel"
+ ]
 },
 {
  city:"Rishikesh",
  title:"Tapovan & Cafés",
  hotel:{name:"Hotel Ishan (Tapovan)",map:"https://maps.google.com/?q=Hotel+Ishan+Rishikesh"},
- map:"https://www.google.com/maps?q=Tapovan+Rishikesh&output=embed"
+ map:"https://www.google.com/maps?q=Tapovan+Rishikesh&output=embed",
+ steps:[
+  "Late breakfast",
+  "Explore Tapovan cafés",
+  "Visit nearby ashrams",
+  "Sunset river walk",
+  "Early dinner & rest"
+ ]
 },
 {
  city:"Rishikesh",
  title:"Rafting & Recovery",
  hotel:{name:"Hotel Ishan (Tapovan)",map:"https://maps.google.com/?q=Hotel+Ishan+Rishikesh"},
- map:"https://www.google.com/maps?q=Rishikesh+Rafting&output=embed"
+ map:"https://www.google.com/maps?q=Rishikesh+Rafting&output=embed",
+ steps:[
+  "Early breakfast",
+  "Proceed for river rafting",
+  "Return, freshen up",
+  "Lunch & rest",
+  "Light evening stroll"
+ ]
 },
 {
  city:"Rishikesh → Dehradun",
  title:"Neergarh & Triveni",
  hotel:{name:"Hotel MJ Residency",map:"https://maps.google.com/?q=Hotel+MJ+Residency+Dehradun"},
- map:"https://www.google.com/maps?q=Rishikesh+to+Dehradun&output=embed"
+ map:"https://www.google.com/maps?q=Rishikesh+to+Dehradun&output=embed",
+ steps:[
+  "Pack luggage",
+  "Visit Neergarh Waterfall",
+  "Checkout from Rishikesh",
+  "Triveni Ghat visit",
+  "Drive to Dehradun"
+ ]
 },
 {
  city:"Mussoorie → Delhi",
  title:"Hill Wrap-up",
  hotel:{name:"Honeymoon Inn Mussoorie",map:"https://maps.google.com/?q=Honeymoon+Inn+Mussoorie"},
- map:"https://www.google.com/maps?q=Mussoorie+to+Delhi&output=embed"
+ map:"https://www.google.com/maps?q=Mussoorie+to+Delhi&output=embed",
+ steps:[
+  "Kempty Falls visit",
+  "Mall Road walk",
+  "Lunch in Mussoorie",
+  "Return to Dehradun",
+  "Overnight journey to Delhi"
+ ]
 }
 ];
 
@@ -200,6 +242,11 @@ function render(){
  <details open>
  <summary>🏨 Hotel</summary>
  <a href="${d.hotel.map}" target="_blank">${d.hotel.name}</a>
+ </details>
+
+ <details>
+ <summary>🧭 Step-by-step Plan</summary>
+ <ul>${d.steps.map(s=>`<li>${s}</li>`).join("")}</ul>
  </details>
 
  <details>
