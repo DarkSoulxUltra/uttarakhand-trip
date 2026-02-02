@@ -3,28 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Uttarakhand Group Trip Planner</title>
+<title>Uttarakhand Trip Planner</title>
 
 <style>
 body{margin:0;font-family:system-ui;background:#020617;color:#67e8f9}
 h1{text-align:center;margin:10px 0}
-.container{max-width:1200px;margin:auto;padding:12px;padding-bottom:300px}
+.container{max-width:1200px;margin:auto;padding:12px;padding-bottom:280px}
 .stickyTop{position:sticky;top:0;background:#020617;z-index:5}
 
 /* ROUTE */
-.routeBox{border:1px solid #164e63;border-radius:14px;padding:10px;margin-bottom:8px;position:relative}
+.routeBox{border:1px solid #164e63;border-radius:14px;padding:10px;margin-bottom:8px}
 .progressText{text-align:center;color:#22d3ee;font-weight:600}
-.weatherTop{text-align:center;font-size:13px;margin:4px 0;color:#a5f3fc}
 
-.routeLine{position:relative;display:flex;justify-content:space-between;align-items:center;height:42px}
+.routeLine{position:relative;display:flex;justify-content:space-between;align-items:center;height:40px}
 .routeLine::before{content:'';position:absolute;left:0;right:0;top:50%;height:3px;background:#164e63}
-.node{width:18px;height:18px;background:#164e63;border-radius:50%}
-.node.active{background:#22d3ee;box-shadow:0 0 10px #22d3ee}
-.vehicle{position:absolute;top:-26px;transition:.6s}
 
-/* SVG route */
-svg{position:absolute;left:0;right:0;top:0;width:100%;height:100%;pointer-events:none}
-polyline{fill:none;stroke:#22d3ee;stroke-width:3;stroke-dasharray:200;stroke-dashoffset:200;transition:.8s}
+.node{width:18px;height:18px;background:#164e63;border-radius:50%;cursor:pointer;z-index:2}
+.node.active{background:#22d3ee;box-shadow:0 0 10px #22d3ee}
+
+.vehicle{position:absolute;top:-26px;transition:.4s}
 
 /* LAYOUT */
 .layout{display:flex;flex-wrap:wrap;gap:12px}
@@ -38,7 +35,7 @@ details{border:1px solid #164e63;border-radius:10px;padding:8px;margin:8px 0}
 summary{cursor:pointer;font-weight:600}
 
 button{background:#22d3ee;border:none;border-radius:6px;padding:6px 10px;font-weight:600;cursor:pointer}
-input,select{padding:6px;border-radius:6px;border:none;margin:4px}
+input,select,textarea{padding:6px;border-radius:6px;border:none;margin:4px;width:100%}
 
 iframe{width:100%;height:220px;border-radius:10px;border:1px solid #164e63}
 
@@ -54,27 +51,26 @@ iframe{width:100%;height:220px;border-radius:10px;border:1px solid #164e63}
 <div class="container">
 <h1>Uttarakhand Trip Planner</h1>
 
+<!-- PARTICIPANTS -->
 <details open>
-<summary>🧮 Expense Split Mode</summary>
-<select id="splitMode" onchange="render()">
-<option value="person">Per Person</option>
-<option value="couple">Per Couple</option>
-</select>
+<summary>👥 Participants</summary>
+<input id="newMember" placeholder="Name">
+<button onclick="addMember()">Add</button>
+<ul id="memberList"></ul>
 </details>
 
+<!-- ROUTE -->
 <div class="stickyTop">
 <div class="routeBox">
 <div class="progressText" id="progressText"></div>
-<div class="weatherTop" id="weatherTop"></div>
-
-<svg viewBox="0 0 100 20">
-<polyline id="routeLineSvg" points="0,10 20,10 40,10 60,10 80,10 100,10"/>
-</svg>
-
 <div class="routeLine">
 <div id="vehicle" class="vehicle">🚌</div>
-<div class="node"></div><div class="node"></div><div class="node"></div>
-<div class="node"></div><div class="node"></div><div class="node"></div>
+<div class="node" onclick="select(0)"></div>
+<div class="node" onclick="select(1)"></div>
+<div class="node" onclick="select(2)"></div>
+<div class="node" onclick="select(3)"></div>
+<div class="node" onclick="select(4)"></div>
+<div class="node" onclick="select(5)"></div>
 </div>
 </div>
 </div>
@@ -91,70 +87,86 @@ iframe{width:100%;height:220px;border-radius:10px;border:1px solid #164e63}
 </div>
 
 <script>
-/* ===== WEATHER (AUTO-REFRESH) ===== */
-const cityCoords={
- Haridwar:{lat:29.9457,lon:78.1642},
- Rishikesh:{lat:30.0869,lon:78.2676},
- Dehradun:{lat:30.3165,lon:78.0322},
- Mussoorie:{lat:30.4598,lon:78.0644}
-};
-const dayCity=["Haridwar","Haridwar","Rishikesh","Rishikesh","Dehradun","Mussoorie"];
-const tripStart=new Date("2026-03-15");
-
-async function getWeather(day){
- const city=dayCity[day];
- const {lat,lon}=cityCoords[city];
- const d=new Date(tripStart);d.setDate(tripStart.getDate()+day);
- const ds=d.toISOString().split("T")[0];
-
- try{
-  const url=`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,precipitation_probability_max,windspeed_10m_max&start_date=${ds}&end_date=${ds}&timezone=auto`;
-  const r=await fetch(url,{cache:"no-store"});
-  const j=await r.json();
-  return `🌤️ ${Math.round(j.daily.temperature_2m_max[0])}°C | 🌬️ ${Math.round(j.daily.windspeed_10m_max[0])} km/h | 💧 ${j.daily.precipitation_probability_max[0]}%`;
- }catch{
-  return "Weather unavailable – refresh later";
- }
-}
-
-/* ===== DATA ===== */
+/* ---------- TRIP DATA ---------- */
 const tripDates=["Sun","Mon","Tue","Wed","Thu","Fri"];
 const days=[
-{city:"Delhi → Haridwar",title:"Arrival & Ganga Aarti"},
-{city:"Haridwar → Rishikesh",title:"Snaan & Ropeways"},
-{city:"Rishikesh",title:"Tapovan & Cafés"},
-{city:"Rishikesh",title:"Rafting & Recovery"},
-{city:"Rishikesh → Dehradun",title:"Neergarh & Triveni"},
-{city:"Mussoorie → Delhi",title:"Hill Wrap-up"}
+{
+ city:"Delhi → Haridwar",
+ title:"Arrival & Ganga Aarti",
+ hotel:{name:"Hotel Ganga Lahari",map:"https://maps.google.com/?q=Hotel+Ganga+Lahari+Haridwar"},
+ map:"https://www.google.com/maps?q=Delhi+to+Haridwar&output=embed"
+},
+{
+ city:"Haridwar → Rishikesh",
+ title:"Snaan & Ropeways",
+ hotel:{name:"Hotel Ishan (Tapovan)",map:"https://maps.google.com/?q=Hotel+Ishan+Rishikesh"},
+ map:"https://www.google.com/maps?q=Haridwar+to+Rishikesh&output=embed"
+},
+{
+ city:"Rishikesh",
+ title:"Tapovan & Cafés",
+ hotel:{name:"Hotel Ishan (Tapovan)",map:"https://maps.google.com/?q=Hotel+Ishan+Rishikesh"},
+ map:"https://www.google.com/maps?q=Tapovan+Rishikesh&output=embed"
+},
+{
+ city:"Rishikesh",
+ title:"Rafting & Recovery",
+ hotel:{name:"Hotel Ishan (Tapovan)",map:"https://maps.google.com/?q=Hotel+Ishan+Rishikesh"},
+ map:"https://www.google.com/maps?q=Rishikesh+Rafting&output=embed"
+},
+{
+ city:"Rishikesh → Dehradun",
+ title:"Neergarh & Triveni",
+ hotel:{name:"Hotel MJ Residency",map:"https://maps.google.com/?q=Hotel+MJ+Residency+Dehradun"},
+ map:"https://www.google.com/maps?q=Rishikesh+to+Dehradun&output=embed"
+},
+{
+ city:"Mussoorie → Delhi",
+ title:"Hill Wrap-up",
+ hotel:{name:"Honeymoon Inn Mussoorie",map:"https://maps.google.com/?q=Honeymoon+Inn+Mussoorie"},
+ map:"https://www.google.com/maps?q=Mussoorie+to+Delhi&output=embed"
+}
 ];
 
-let participants=JSON.parse(localStorage.getItem("participants"))||["You","Spouse","Couple-2A","Couple-2B"];
+/* ---------- STATE ---------- */
+let participants=JSON.parse(localStorage.getItem("participants"))||["Sahil","Patil"];
 let expenses=JSON.parse(localStorage.getItem("expenses"))||[];
-const couples={"Couple 1":["You","Spouse"],"Couple 2":["Couple-2A","Couple-2B"]};
-
+let notes=JSON.parse(localStorage.getItem("notes"))||{};
 let active=0;
+
 const timeline=document.getElementById("timeline");
 const content=document.getElementById("content");
 
-function calcSettlement(){
- const mode=document.getElementById("splitMode").value;
- let buckets={},total=0;
-
- if(mode==="person"){
-  participants.forEach(p=>buckets[p]=0);
-  expenses.forEach(e=>{buckets[e.paidBy]+=e.amount;total+=e.amount});
-  return {buckets,total,share:total/participants.length};
- }
-
- Object.keys(couples).forEach(c=>buckets[c]=0);
- expenses.forEach(e=>{
-  const c=Object.keys(couples).find(k=>couples[k].includes(e.paidBy));
-  if(c)buckets[c]+=e.amount;
-  total+=e.amount;
+/* ---------- PARTICIPANTS ---------- */
+function renderMembers(){
+ const ul=document.getElementById("memberList");
+ ul.innerHTML="";
+ participants.forEach((p,i)=>{
+  ul.innerHTML+=`<li>${p} <button onclick="removeMember(${i})">❌</button></li>`;
  });
- return {buckets,total,share:total/2};
+ localStorage.setItem("participants",JSON.stringify(participants));
+}
+function addMember(){
+ const v=newMember.value.trim();
+ if(!v)return;
+ participants.push(v);
+ newMember.value="";
+ render();
+}
+function removeMember(i){
+ participants.splice(i,1);
+ render();
 }
 
+/* ---------- SPLITWISE ---------- */
+function calcSettlement(){
+ let buckets={},total=0;
+ participants.forEach(p=>buckets[p]=0);
+ expenses.forEach(e=>{buckets[e.paidBy]+=e.amount;total+=e.amount});
+ return {buckets,total,share:participants.length?total/participants.length:0};
+}
+
+/* ---------- UI ---------- */
 function buildTimeline(){
  timeline.innerHTML="";
  days.forEach((d,i)=>{
@@ -166,42 +178,73 @@ function buildTimeline(){
  });
 }
 
-async function render(){
+function render(){
  buildTimeline();
- document.getElementById("progressText").innerText=`${tripDates[active]} — ${days[active].city}`;
- document.querySelectorAll(".node").forEach((n,i)=>n.classList.toggle("active",i<=active));
- document.getElementById("vehicle").style.left=`calc(${active*(100/(days.length-1))}% - 12px)`;
- document.getElementById("routeLineSvg").style.strokeDashoffset=200-(active*40);
+ renderMembers();
 
- const w=await getWeather(active);
- document.getElementById("weatherTop").innerText=w;
+ document.getElementById("progressText").innerText=
+ `${tripDates[active]} — ${days[active].city}`;
+
+ document.querySelectorAll(".node")
+  .forEach((n,i)=>n.classList.toggle("active",i<=active));
+
+ document.getElementById("vehicle").style.left=
+ `calc(${active*(100/(days.length-1))}% - 12px)`;
 
  const {buckets,total,share}=calcSettlement();
+ const d=days[active];
 
  content.innerHTML=`
- <h2>${days[active].title}</h2>
- <p><b>Weather:</b> ${w}</p>
+ <h2>${d.title}</h2>
 
- <details open><summary>💳 Add Expense</summary>
+ <details open>
+ <summary>🏨 Hotel</summary>
+ <a href="${d.hotel.map}" target="_blank">${d.hotel.name}</a>
+ </details>
+
+ <details>
+ <summary>🗺 Map</summary>
+ <iframe src="${d.map}" loading="lazy"></iframe>
+ </details>
+
+ <details open>
+ <summary>📝 Day Notes</summary>
+ <textarea rows="4" placeholder="Plans, reminders, timings..."
+ oninput="saveNote(this.value)">${notes[active]||""}</textarea>
+ </details>
+
+ <details open>
+ <summary>💳 Add Expense</summary>
  <input id="et" placeholder="Title">
  <input id="ea" type="number" placeholder="Amount">
  <select id="ep">${participants.map(p=>`<option>${p}</option>`).join("")}</select>
  <button onclick="addExpense()">Add</button>
  </details>
 
- <details open><summary>🧾 Expenses</summary>
- ${expenses.map((e,i)=>`<div>${e.title} ₹${e.amount} (${e.paidBy}) <button onclick="del(${i})">❌</button></div>`).join("")||"No expenses"}
+ <details open>
+ <summary>🧾 Expenses</summary>
+ ${expenses.length?expenses.map((e,i)=>`
+ <div>${e.title} ₹${e.amount} (${e.paidBy})
+ <button onclick="del(${i})">❌</button></div>`).join(""):"No expenses"}
  </details>
 
- <details open><summary>📊 Settlement</summary>
+ <details open>
+ <summary>📊 Settlement</summary>
  Total ₹${total} | Share ₹${Math.round(share)}
  <ul>${Object.keys(buckets).map(k=>{
   const d=buckets[k]-share;
   return `<li>${k} ${d>0?"gets":"pays"} ₹${Math.abs(Math.round(d))}</li>`;
  }).join("")}</ul>
- </details>`;
+ </details>
+ `;
 }
 
+function saveNote(v){
+ notes[active]=v;
+ localStorage.setItem("notes",JSON.stringify(notes));
+}
+
+/* ---------- EXPENSES ---------- */
 function addExpense(){
  const t=et.value,a=parseInt(ea.value),p=ep.value;
  if(!t||!a)return;
@@ -209,7 +252,13 @@ function addExpense(){
  localStorage.setItem("expenses",JSON.stringify(expenses));
  render();
 }
-function del(i){expenses.splice(i,1);localStorage.setItem("expenses",JSON.stringify(expenses));render();}
+function del(i){
+ expenses.splice(i,1);
+ localStorage.setItem("expenses",JSON.stringify(expenses));
+ render();
+}
+
+/* ---------- NAV ---------- */
 function select(i){active=i;render();}
 function next(){active=(active+1)%days.length;render();}
 function prev(){active=(active-1+days.length)%days.length;render();}
