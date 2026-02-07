@@ -121,7 +121,134 @@ const tripRef = doc(db, "trips", tripId);
 /* DATA */
 const tripDates=["Sun","Mon","Tue","Wed","Thu","Fri"];
 
-const days=[ /* SAME FULL days ARRAY YOU USED LAST (hotel, map, steps, highlights) */ ];
+const days = [
+{
+  city: "Delhi → Haridwar",
+  title: "Arrival & Ganga Aarti",
+  steps: [
+    "Arrive Delhi (H. Nizamuddin)",
+    "Bus to Haridwar",
+    "Hotel check-in",
+    "Evening Ganga Aarti at Har Ki Pauri",
+    "Local market & dinner"
+  ],
+  highlights: [
+    "Har Ki Pauri",
+    "Ganga Aarti",
+    "Local chaat market"
+  ],
+  map: "https://www.google.com/maps/embed?pb=!1m28!1m12!1m3!1d55379.7",
+  hotel: {
+    name: "Hotel Ganga Lahari / similar (Har Ki Pauri area)",
+    map: "https://maps.google.com/?q=Hotel+Ganga+Lahari+Haridwar"
+  }
+},
+{
+  city: "Haridwar → Rishikesh",
+  title: "Snaan & Ropeways",
+  steps: [
+    "Early morning Ganga Snaan",
+    "Mansa Devi Ropeway",
+    "Chandi Devi Ropeway",
+    "Lunch",
+    "Cab to Rishikesh",
+    "Evening local market walk"
+  ],
+  highlights: [
+    "Mansa Devi",
+    "Chandi Devi"
+  ],
+  map: "https://www.google.com/maps/embed?pb=!1m28!1m12!1m3!1d34260",
+  hotel: {
+    name: "Tapovan Sarovar / similar (Tapovan)",
+    map: "https://maps.google.com/?q=Tapovan+Rishikesh+Hotel"
+  }
+},
+{
+  city: "Rishikesh",
+  title: "Tapovan & Cafés",
+  steps: [
+    "Ram Jhula",
+    "Laxman Jhula",
+    "Saptarishi Ashram",
+    "Café hopping in Tapovan",
+    "Sunset at riverbank"
+  ],
+  highlights: [
+    "Ram Jhula",
+    "Laxman Jhula",
+    "Saptarishi Ashram"
+  ],
+  map: "https://www.google.com/maps/embed?pb=!1m28!1m12!1m3!1d34261",
+  hotel: {
+    name: "Tapovan Stay (same hotel)",
+    map: "https://maps.google.com/?q=Tapovan+Rishikesh"
+  }
+},
+{
+  city: "Rishikesh",
+  title: "Rafting & Recovery",
+  steps: [
+    "Morning river rafting",
+    "Return to hotel & freshen up",
+    "Triveni Ghat",
+    "Ganga Aarti",
+    "Dinner by riverside café"
+  ],
+  highlights: [
+    "River Rafting",
+    "Triveni Ghat"
+  ],
+  map: "https://www.google.com/maps/embed?pb=!1m28!1m12!1m3!1d34262",
+  hotel: {
+    name: "Tapovan Stay (same hotel)",
+    map: "https://maps.google.com/?q=Tapovan+Rishikesh"
+  }
+},
+{
+  city: "Rishikesh → Dehradun",
+  title: "Ashrams & Waterfall",
+  steps: [
+    "Checkout from Rishikesh",
+    "Neer Garh Waterfall",
+    "Cab to Dehradun",
+    "Drona Ashram",
+    "Deer Park",
+    "Evening market walk"
+  ],
+  highlights: [
+    "Neer Garh Waterfall",
+    "Drona Ashram",
+    "Deer Park"
+  ],
+  map: "https://www.google.com/maps/embed?pb=!1m28!1m12!1m3!1d34263",
+  hotel: {
+    name: "Hotel near Rajpur Road / Ballupur",
+    map: "https://maps.google.com/?q=Rajpur+Road+Dehradun+Hotel"
+  }
+},
+{
+  city: "Mussoorie → Delhi",
+  title: "Hill Wrap-up",
+  steps: [
+    "Early drive to Mussoorie",
+    "Sahastradhara Waterfall",
+    "Mall Road walk",
+    "Return to Dehradun",
+    "Overnight bus / flight to Delhi"
+  ],
+  highlights: [
+    "Sahastradhara",
+    "Mussoorie Mall Road"
+  ],
+  map: "https://www.google.com/maps/embed?pb=!1m28!1m12!1m3!1d34264",
+  hotel: {
+    name: "Day trip – no stay",
+    map: "https://maps.google.com/?q=Mussoorie+Mall+Road"
+  }
+}
+];
+
 
 let participants=["Sahil","Patil"];
 let expenses={};
