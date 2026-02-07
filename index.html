@@ -36,10 +36,16 @@ h1{text-align:center;color:#22d3ee;margin:12px 0}
 /* CARDS */
 .sectionCard{border:1px solid #164e63;border-radius:12px;overflow:hidden}
 .sectionHeader{
-  padding:10px;font-weight:600;cursor:pointer;
+  padding:10px;
+  font-weight:600;
+  cursor:pointer;
   border-bottom:1px solid #164e63;
-  display:flex;justify-content:space-between;align-items:center
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  user-select:none;
 }
+.sectionHeader:active{background:#041428}
 .sectionBody{display:none;padding:10px}
 .sectionCard.expanded .sectionBody{display:block}
 
@@ -88,7 +94,7 @@ import {
   onSnapshot, updateDoc, arrayUnion
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-/* FIREBASE CONFIG (unchanged) */
+/* FIREBASE */
 const firebaseConfig = {
   apiKey: "AIzaSyBqiBMggvuMxAiKfBpJIqnv8OCWj76voAk",
   authDomain: "trip-planner-2026.firebaseapp.com",
@@ -101,7 +107,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* TRIP DATA */
+/* DATA */
 const tripDates=["Sun","Mon","Tue","Wed","Thu","Fri"];
 const days=[
  {city:"Delhi → Haridwar",steps:["Arrive Delhi","Bus to Haridwar","Ganga Aarti"],
@@ -178,23 +184,11 @@ for(let i=0;i<days.length;i++){
   });
 }
 
-/* UI HELPERS */
+/* ACTIONS */
 window.selectDay=i=>{activeDay=i;render()}
 window.expandAll=()=>{cardsExpanded=true;render()}
 window.collapseAll=()=>{cardsExpanded=false;render()}
 window.toggleLog=()=>{showLog=!showLog;render()}
-
-function toggle(el){el.parentElement.classList.toggle("expanded")}
-
-function card(title,body,extra=""){
-  return `
-  <div class="sectionCard ${cardsExpanded?"expanded":""}">
-    <div class="sectionHeader" onclick="toggle(this)">
-      ${title}${extra}
-    </div>
-    <div class="sectionBody">${body}</div>
-  </div>`;
-}
 
 /* RENDER */
 function render(){
@@ -208,31 +202,56 @@ function render(){
 
   vehicle.style.left=`calc(${activeDay*(100/(days.length-1))}% - 10px)`;
 
-  content.innerHTML=`
+  content.innerHTML=buildCards(d);
+  attachCardHandlers();
+}
+
+function buildCards(d){
+  return `
     ${card("🧭 Step-by-step",`<ul>${d.steps.map(s=>`<li>${s}</li>`).join("")}</ul>`)}
     ${card("🗺 Route Map",`<iframe src="${d.route}" width="100%" height="200"></iframe>`)}
     ${card("🏨 Hotel",`<b>${d.hotel}</b>`)}
     ${card("📝 Notes",`<textarea oninput="saveNote(this.value)">${notes[activeDay]||""}</textarea>`)}
-    ${card("💳 Expenses",`
-      <input id="et" placeholder="Title">
-      <input id="ea" type="number" placeholder="Amount">
-      <select id="ep">${participants.map(p=>`<option>${p}</option>`).join("")}</select>
-      <button onclick="addExpense()">Add</button>
-      ${(expenses[activeDay]||[]).map((e,i)=>`
-        <div>${e.title} ₹${e.amount} (${e.paidBy})
-        <button class="smallBtn" onclick="delExpense(${i})">❌</button></div>`).join("")}
-      ${showLog?`<div class="log">${activityLog.map(l=>
-        `<div>[${l.type}] Day ${l.day+1} – ${l.title} ₹${l.amount} by ${l.by}</div>`
-      ).join("")}</div>`:""}
-    `,`<button class="smallBtn" onclick="toggleLog();event.stopPropagation()">🕘</button>`)}
-    ${card("📊 Settlement",`
-      Total ₹${(expenses[activeDay]||[]).reduce((a,b)=>a+b.amount,0)}`)}
+    ${card("💳 Expenses",expensesHTML())}
+    ${card("📊 Settlement",`Total ₹${(expenses[activeDay]||[]).reduce((a,b)=>a+b.amount,0)}`)}
     ${card("🚑 Emergency",`<ul>${d.emergency.map(e=>`<li>${e}</li>`).join("")}</ul>`)}
     ${card("☕ Food & Snacks",`<ul>${d.food.map(f=>`<li>${f}</li>`).join("")}</ul>`)}
   `;
 }
 
-/* ACTIONS */
+function card(title,body){
+  return `
+  <div class="sectionCard ${cardsExpanded?"expanded":""}">
+    <div class="sectionHeader">${title}</div>
+    <div class="sectionBody">${body}</div>
+  </div>`;
+}
+
+function attachCardHandlers(){
+  document.querySelectorAll(".sectionHeader").forEach(h=>{
+    h.onclick=()=>{
+      h.parentElement.classList.toggle("expanded");
+    };
+  });
+}
+
+/* EXPENSES */
+function expensesHTML(){
+  return `
+    <input id="et" placeholder="Title">
+    <input id="ea" type="number" placeholder="Amount">
+    <select id="ep">${participants.map(p=>`<option>${p}</option>`).join("")}</select>
+    <button onclick="addExpense()">Add</button>
+    ${(expenses[activeDay]||[]).map((e,i)=>`
+      <div>${e.title} ₹${e.amount} (${e.paidBy})
+      <button class="smallBtn" onclick="delExpense(${i})">❌</button></div>`).join("")}
+    <button class="smallBtn" onclick="toggleLog()">🕘 Log</button>
+    ${showLog?`<div class="log">${activityLog.map(l=>
+      `<div>[${l.type}] Day ${l.day+1} – ${l.title} ₹${l.amount}</div>`
+    ).join("")}</div>`:""}
+  `;
+}
+
 window.saveNote=async v=>{
   notes[activeDay]=v;
   await setDoc(tripRef,{notes},{merge:true});
@@ -243,22 +262,18 @@ window.addExpense=async ()=>{
   if(!t||!a)return;
   const list=[...(expenses[activeDay]||[]),{title:t,amount:a,paidBy:p}];
   await setDoc(doc(db,"trips",tripId,"expenses","day-"+activeDay),{items:list});
-  await updateDoc(tripRef,{
-    activityLog:arrayUnion({
-      type:"ADD",day:activeDay,title:t,amount:a,by:p,ts:Date.now()
-    })
-  });
+  await updateDoc(tripRef,{activityLog:arrayUnion({
+    type:"ADD",day:activeDay,title:t,amount:a,by:p,ts:Date.now()
+  })});
 };
 
 window.delExpense=async idx=>{
   const item=expenses[activeDay][idx];
   const list=expenses[activeDay].filter((_,i)=>i!==idx);
   await setDoc(doc(db,"trips",tripId,"expenses","day-"+activeDay),{items:list});
-  await updateDoc(tripRef,{
-    activityLog:arrayUnion({
-      type:"DELETE",day:activeDay,title:item.title,amount:item.amount,by:item.paidBy,ts:Date.now()
-    })
-  });
+  await updateDoc(tripRef,{activityLog:arrayUnion({
+    type:"DELETE",day:activeDay,title:item.title,amount:item.amount,by:item.paidBy,ts:Date.now()
+  })});
 };
 
 initTrip();
