@@ -119,25 +119,38 @@ let notes={};
 let active=0;
 
 /* 🔄 REALTIME SYNC */
-onSnapshot(tripRef,(snap)=>{
- if(snap.exists()){
-  const d=snap.data();
-  participants=d.participants||participants;
-  expenses=d.expenses||{};
-  notes=d.notes||{};
+onSnapshot(tripRef, (snap) => {
+  if (!snap.exists()) {
+    // document doesn't exist → create it
+    saveTrip(true);
+    return;
+  }
+
+  const data = snap.data();
+
+  // 🔑 FIRST-TIME SEED (this fixes your issue)
+  if (!data.participants) {
+    saveTrip(true);
+    return;
+  }
+
+  participants = data.participants;
+  expenses = data.expenses || {};
+  notes = data.notes || {};
   render();
- }
 });
 
+
 /* 💾 SAVE */
-function saveTrip(){
- setDoc(tripRef,{
-  participants,
-  expenses,
-  notes,
-  updatedAt:Date.now()
- });
+function saveTrip(isSeed = false) {
+  setDoc(tripRef, {
+    participants: participants.length ? participants : ["Sahil", "Patil"],
+    expenses,
+    notes,
+    updatedAt: Date.now()
+  }, { merge: !isSeed });
 }
+
 
 /* ---------- UI ---------- */
 const timeline=document.getElementById("timeline");
