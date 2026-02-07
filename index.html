@@ -212,6 +212,11 @@ ul{padding-left:18px;}
 
 <script>
 /* ---------------- DATA ---------------- */
+let participants =
+  JSON.parse(localStorage.getItem("participants")) || ["Sahil", "Patil"];
+
+localStorage.setItem("participants", JSON.stringify(participants));
+
 const tripDates=["Sun","Mon","Tue","Wed","Thu","Fri"];
 
 const days=[ /* unchanged, same as your backup */ 
@@ -309,10 +314,24 @@ function render(){
     <input id="et" placeholder="Title">
     <input id="ea" type="number" placeholder="Amount">
     <button onclick="addExpense()">Add</button>
-    ${(expenses[activeDay]||[]).map((e,i)=>`
-      <div>${e.title} ₹${e.amount}
-        <button onclick="removeExpense(${i})">❌</button>
-      </div>`).join("")}`)}
+    ${card("💳 Expenses",`
+  <input id="et" placeholder="Title">
+  <input id="ea" type="number" placeholder="Amount">
+
+  <select id="eby">
+    ${participants.map(p=>`<option>${p}</option>`).join("")}
+  </select>
+
+  <button onclick="addExpense()">Add</button>
+
+  ${(expenses[activeDay]||[]).map((e,i)=>`
+    <div>
+      ${e.title} ₹${e.amount} <small>(${e.by})</small>
+      <button onclick="removeExpense(${i})">❌</button>
+    </div>
+  `).join("")}
+`)}
+
   ${card("📊 Settlement",`
     Total: ₹${(expenses[activeDay]||[]).reduce((a,b)=>a+b.amount,0)}`)}
   ${card("🧾 Expense Logs",`
@@ -332,23 +351,33 @@ function card(title,body){
 
 /* ---------------- EXPENSE ---------------- */
 function addExpense(){
-  const t=document.getElementById("et").value;
-  const a=+document.getElementById("ea").value;
-  if(!t||!a)return;
-  expenses[activeDay]=expenses[activeDay]||[];
-  expenses[activeDay].push({title:t,amount:a});
-  addLog(`Added ₹${a} for ${t} (${tripDates[activeDay]})`);
-  localStorage.setItem("expenses",JSON.stringify(expenses));
+  const t = document.getElementById("et").value;
+  const a = +document.getElementById("ea").value;
+  const by = document.getElementById("eby").value;
+
+  if(!t || !a || !by) return;
+
+  expenses[activeDay] = expenses[activeDay] || [];
+  expenses[activeDay].push({ title:t, amount:a, by });
+
+  addLog(`${by} added ₹${a} for ${t} (${tripDates[activeDay]})`);
+
+  localStorage.setItem("expenses", JSON.stringify(expenses));
   render();
 }
 
+
 function removeExpense(i){
-  const e=expenses[activeDay][i];
+  const e = expenses[activeDay][i];
+
   expenses[activeDay].splice(i,1);
-  addLog(`Removed ₹${e.amount} for ${e.title} (${tripDates[activeDay]})`);
-  localStorage.setItem("expenses",JSON.stringify(expenses));
+
+  addLog(`${e.by} removed ₹${e.amount} for ${e.title} (${tripDates[activeDay]})`);
+
+  localStorage.setItem("expenses", JSON.stringify(expenses));
   render();
 }
+
 
 render();
 </script>
