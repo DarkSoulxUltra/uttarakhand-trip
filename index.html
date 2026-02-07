@@ -2,63 +2,133 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Uttarakhand Trip Planner</title>
 
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
 <style>
-body{margin:0;font-family:system-ui;background:#020617;color:#67e8f9}
-h1{text-align:center;color:#22d3ee;margin:12px 0}
-.container{max-width:1400px;margin:auto;padding:12px}
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: radial-gradient(circle at top, #020617, #000);
+  color: #67e8f9;
+}
+
+h1 {
+  text-align: center;
+  margin: 16px 0;
+  color: #22d3ee;
+}
+
+.container {
+  max-width: 1400px;
+  margin: auto;
+  padding: 12px;
+}
 
 /* ROUTE BAR */
-.routeBox{border:1px solid #164e63;border-radius:14px;padding:14px;margin-bottom:14px;position:relative}
-.routeTitle{text-align:center;font-weight:600;color:#22d3ee;margin-bottom:8px}
-.routeActions{position:absolute;top:10px;right:12px;display:flex;gap:8px}
-.routeActions button{padding:4px 8px;font-size:12px}
-
-.routeLine{position:relative;display:flex;justify-content:space-between;align-items:center;height:36px}
-.routeLine::before{content:"";position:absolute;left:0;right:0;top:50%;height:3px;background:#164e63}
-.node{width:18px;height:18px;background:#164e63;border-radius:50%;cursor:pointer;position:relative}
-.node.active{background:#22d3ee;box-shadow:0 0 8px #22d3ee}
-.node:hover::after{
-  content:attr(data-tip);
-  position:absolute;top:-26px;left:50%;transform:translateX(-50%);
-  background:#020617;border:1px solid #164e63;
-  padding:2px 6px;font-size:11px;border-radius:4px;white-space:nowrap
+.routeBar {
+  border: 1px solid #164e63;
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 16px;
 }
-.vehicle{position:absolute;top:-22px;transition:.4s}
+
+.routeLine {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.routeLine::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 3px;
+  background: #164e63;
+}
+
+.routeDot {
+  width: 18px;
+  height: 18px;
+  background: #164e63;
+  border-radius: 50%;
+  z-index: 2;
+  cursor: pointer;
+}
+
+.routeDot.active {
+  background: #22d3ee;
+  box-shadow: 0 0 10px #22d3ee;
+}
+
+.bus {
+  position: absolute;
+  top: -26px;
+  transition: 0.4s;
+}
 
 /* GRID */
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-@media(max-width:1000px){.grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:600px){.grid{grid-template-columns:1fr}}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+}
 
 /* CARDS */
-.sectionCard{border:1px solid #164e63;border-radius:12px;overflow:hidden}
-.sectionHeader{
-  padding:10px;
-  font-weight:600;
-  cursor:pointer;
-  border-bottom:1px solid #164e63;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  user-select:none;
+.card {
+  border: 1px solid #164e63;
+  border-radius: 14px;
+  overflow: hidden;
 }
-.sectionHeader:active{background:#041428}
-.sectionBody{display:none;padding:10px}
-.sectionCard.expanded .sectionBody{display:block}
 
-input,textarea,select{
-  width:100%;margin:4px 0;padding:6px;border-radius:6px;border:none
+.cardHeader {
+  padding: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  background: rgba(2,6,23,0.8);
 }
-button{
-  background:#22d3ee;border:none;border-radius:6px;
-  padding:6px 10px;cursor:pointer
+
+.cardHeader:hover {
+  background: rgba(34,211,238,0.15);
 }
-ul{padding-left:18px}
-.log{font-size:12px;border-top:1px dashed #164e63;margin-top:6px;padding-top:6px}
-.smallBtn{font-size:12px;padding:2px 6px}
+
+.cardBody {
+  display: none;
+  padding: 10px;
+}
+
+.card.open .cardBody {
+  display: block;
+}
+
+button {
+  background: #22d3ee;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+input, select, textarea {
+  width: 100%;
+  margin: 4px 0;
+  padding: 6px;
+  border-radius: 6px;
+  border: none;
+}
+
+.log {
+  font-size: 13px;
+  color: #a5f3fc;
+}
 </style>
 </head>
 
@@ -66,217 +136,170 @@ ul{padding-left:18px}
 <div class="container">
 <h1>Uttarakhand Trip Planner</h1>
 
-<!-- ROUTE -->
-<div class="routeBox">
-  <div class="routeTitle" id="routeTitle"></div>
-  <div class="routeActions">
-    <button onclick="expandAll()">Expand all</button>
-    <button onclick="collapseAll()">Collapse all</button>
+<div class="routeBar">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <b id="dayTitle"></b>
+    <div>
+      <button onclick="expandAll()">Expand all</button>
+      <button onclick="collapseAll()">Collapse all</button>
+    </div>
   </div>
-  <div class="routeLine">
-    <div id="vehicle" class="vehicle">🚌</div>
-    <div class="node" onclick="selectDay(0)"></div>
-    <div class="node" onclick="selectDay(1)"></div>
-    <div class="node" onclick="selectDay(2)"></div>
-    <div class="node" onclick="selectDay(3)"></div>
-    <div class="node" onclick="selectDay(4)"></div>
-    <div class="node" onclick="selectDay(5)"></div>
+
+  <div class="routeLine" id="routeLine">
+    <div class="bus" id="bus">🚌</div>
   </div>
 </div>
 
-<div class="grid" id="content"></div>
+<div class="grid" id="cards"></div>
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import {
-  getFirestore, doc, setDoc, getDoc,
-  onSnapshot, updateDoc, arrayUnion
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-
-/* FIREBASE */
+<script>
+/* ===================== FIREBASE ===================== */
 const firebaseConfig = {
   apiKey: "AIzaSyBqiBMggvuMxAiKfBpJIqnv8OCWj76voAk",
   authDomain: "trip-planner-2026.firebaseapp.com",
-  projectId: "trip-planner-2026",
-  storageBucket: "trip-planner-2026.appspot.com",
-  messagingSenderId: "118349993233",
-  appId: "1:118349993233:web:7edb1de869796188a428b0"
+  projectId: "trip-planner-2026"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-/* DATA */
-const tripDates=["Sun","Mon","Tue","Wed","Thu","Fri"];
-const days=[
- {city:"Delhi → Haridwar",steps:["Arrive Delhi","Bus to Haridwar","Ganga Aarti"],
-  route:"https://www.google.com/maps?q=Delhi+to+Haridwar&output=embed",
-  hotel:"Hotel Ganga Lahari",
-  emergency:["Ambulance 108","Police 112","District Hospital Haridwar"],
-  food:["Local chai","Chotiwala"]
- },
- {city:"Haridwar → Rishikesh",steps:["Early snan","Mansa Devi","Travel to Rishikesh"],
-  route:"https://www.google.com/maps?q=Haridwar+to+Rishikesh&output=embed",
-  hotel:"Tapovan Resort",
-  emergency:["AIIMS Rishikesh"],
-  food:["German Bakery"]
- },
- {city:"Rishikesh",steps:["Ram Jhula","Laxman Jhula","Cafes"],
-  route:"https://www.google.com/maps?q=Tapovan+Rishikesh&output=embed",
-  hotel:"Tapovan Stay",
-  emergency:["AIIMS Rishikesh"],
-  food:["Beatles Cafe"]
- },
- {city:"Rishikesh",steps:["Rafting","Rest","Ghat walk"],
-  route:"https://www.google.com/maps?q=Rishikesh+rafting&output=embed",
-  hotel:"Tapovan Stay",
-  emergency:["AIIMS Rishikesh"],
-  food:["Local snacks"]
- },
- {city:"Rishikesh → Dehradun",steps:["Neergarh","Drive to DDN"],
-  route:"https://www.google.com/maps?q=Rishikesh+to+Dehradun&output=embed",
-  hotel:"Hotel Pacific Dehradun",
-  emergency:["DDN District Hospital"],
-  food:["Ellora Bakery"]
- },
- {city:"Mussoorie → Delhi",steps:["Mall Road","Return to Delhi"],
-  route:"https://www.google.com/maps?q=Mussoorie+to+Delhi&output=embed",
-  hotel:"—",
-  emergency:["—"],
-  food:["—"]
- }
+/* ===================== STATE ===================== */
+const params = new URLSearchParams(location.search);
+const tripId = params.get("trip") || "default-trip";
+
+const days = [
+  { label:"Sun", title:"Delhi → Haridwar",
+    steps:["Arrive Delhi","Bus to Haridwar","Ganga Aarti"],
+    hotel:"Hotel Ganga Lahari",
+    emergency:["Ambulance 108","Police 112","District Hospital Haridwar"],
+    food:["Local chai","Chotiwala"]
+  },
+  { label:"Mon", title:"Haridwar → Rishikesh",
+    steps:["Morning snaan","Mansa Devi","Travel to Rishikesh"],
+    hotel:"Tapovan Stay",
+    emergency:["AIIMS Rishikesh","Police 112"],
+    food:["German Bakery","Cafe 60s"]
+  }
 ];
 
-/* STATE */
-const tripId=new URLSearchParams(location.search).get("trip")||"default-trip";
-const tripRef=doc(db,"trips",tripId);
+let activeDay = 0;
+let expensesByDay = {};
+let logs = [];
+let expandState = localStorage.getItem("expandAll")==="true";
 
-let activeDay=0;
-let cardsExpanded=false;
-let participants=[];
-let notes={};
-let expenses={};
-let activityLog=[];
-let showLog=false;
-
-/* INIT */
-async function initTrip(){
-  const snap=await getDoc(tripRef);
-  if(!snap.exists()){
-    await setDoc(tripRef,{participants:["Sahil","Patil"],notes:{},activityLog:[]});
-  }
+/* ===================== FIRESTORE ===================== */
+function dayRef(d){
+  return db.collection("trips").doc(tripId)
+           .collection("days").doc(String(d));
 }
 
-onSnapshot(tripRef,s=>{
-  const d=s.data();
-  participants=d.participants||[];
-  notes=d.notes||{};
-  activityLog=d.activityLog||[];
+function logsRef(){
+  return db.collection("trips").doc(tripId).collection("logs");
+}
+
+days.forEach((_,d)=>{
+  dayRef(d).onSnapshot(s=>{
+    expensesByDay[d] = s.data()?.expenses || [];
+    render();
+  });
+});
+
+logsRef().orderBy("ts","desc").onSnapshot(s=>{
+  logs = s.docs.map(d=>d.data());
   render();
 });
 
-for(let i=0;i<days.length;i++){
-  const ref=doc(db,"trips",tripId,"expenses","day-"+i);
-  onSnapshot(ref,s=>{
-    expenses[i]=s.exists()?s.data().items:[];
-    render();
-  });
+/* ===================== UI ===================== */
+function toggleCard(el){
+  el.parentElement.classList.toggle("open");
 }
 
-/* ACTIONS */
-window.selectDay=i=>{activeDay=i;render()}
-window.expandAll=()=>{cardsExpanded=true;render()}
-window.collapseAll=()=>{cardsExpanded=false;render()}
-window.toggleLog=()=>{showLog=!showLog;render()}
+function expandAll(){
+  expandState = true;
+  localStorage.setItem("expandAll","true");
+  document.querySelectorAll(".card").forEach(c=>c.classList.add("open"));
+}
 
-/* RENDER */
+function collapseAll(){
+  expandState = false;
+  localStorage.setItem("expandAll","false");
+  document.querySelectorAll(".card").forEach(c=>c.classList.remove("open"));
+}
+
+/* ===================== EXPENSE ===================== */
+async function addExpense(){
+  const t = document.getElementById("et").value;
+  const a = Number(document.getElementById("ea").value);
+  const p = document.getElementById("ep").value;
+  if(!t || !a) return;
+
+  const list = expensesByDay[activeDay] || [];
+  list.push({title:t,amount:a,paidBy:p});
+
+  await dayRef(activeDay).set({expenses:list},{merge:true});
+  await logsRef().add({msg:`Added ${t} ₹${a}`,ts:Date.now()});
+}
+
+async function delExpense(i){
+  const list = expensesByDay[activeDay];
+  const removed = list.splice(i,1)[0];
+  await dayRef(activeDay).set({expenses:list},{merge:true});
+  await logsRef().add({msg:`Removed ${removed.title}`,ts:Date.now()});
+}
+
+/* ===================== RENDER ===================== */
 function render(){
-  const d=days[activeDay];
-  routeTitle.innerText=`${tripDates[activeDay]} — ${d.city}`;
+  document.getElementById("dayTitle").innerText =
+    `${days[activeDay].label} — ${days[activeDay].title}`;
 
-  document.querySelectorAll(".node").forEach((n,i)=>{
-    n.classList.toggle("active",i===activeDay);
-    n.dataset.tip=`${tripDates[i]} — ${days[i].city}`;
+  const route = document.getElementById("routeLine");
+  route.innerHTML = `<div class="bus" id="bus">🚌</div>`;
+  days.forEach((d,i)=>{
+    const dot = document.createElement("div");
+    dot.className = "routeDot"+(i===activeDay?" active":"");
+    dot.title = d.title;
+    dot.onclick = ()=>{activeDay=i;render();};
+    route.appendChild(dot);
   });
+  document.getElementById("bus").style.left =
+    `calc(${activeDay*(100/(days.length-1))}% - 10px)`;
 
-  vehicle.style.left=`calc(${activeDay*(100/(days.length-1))}% - 10px)`;
+  const d = days[activeDay];
+  const ex = expensesByDay[activeDay] || [];
+  const total = ex.reduce((s,e)=>s+Number(e.amount||0),0);
 
-  content.innerHTML=buildCards(d);
-  attachCardHandlers();
+  const cards = document.getElementById("cards");
+  cards.innerHTML = `
+${card("🧭 Step-by-step", `<ul>${d.steps.map(s=>`<li>${s}</li>`).join("")}</ul>`)}
+${card("🏨 Hotel", d.hotel)}
+${card("🚑 Emergency", `<ul>${d.emergency.map(e=>`<li>${e}</li>`).join("")}</ul>`)}
+${card("☕ Food & Snacks", `<ul>${d.food.map(f=>`<li>${f}</li>`).join("")}</ul>`)}
+${card("💳 Expenses", `
+<input id="et" placeholder="Title">
+<input id="ea" type="number" placeholder="Amount">
+<select id="ep"><option>Sahil</option><option>Patil</option></select>
+<button onclick="addExpense()">Add</button>
+<hr>
+${ex.map((e,i)=>`
+<div>${e.title} ₹${e.amount} (${e.paidBy})
+<button onclick="delExpense(${i})">❌</button></div>`).join("")}
+`)}
+${card("📊 Settlement", `Total ₹${total}`)}
+${card("📝 Logs", logs.map(l=>`<div class="log">${l.msg}</div>`).join("") )}
+`;
+
+  if(expandState) expandAll();
 }
 
-function buildCards(d){
+function card(title, body){
   return `
-    ${card("🧭 Step-by-step",`<ul>${d.steps.map(s=>`<li>${s}</li>`).join("")}</ul>`)}
-    ${card("🗺 Route Map",`<iframe src="${d.route}" width="100%" height="200"></iframe>`)}
-    ${card("🏨 Hotel",`<b>${d.hotel}</b>`)}
-    ${card("📝 Notes",`<textarea oninput="saveNote(this.value)">${notes[activeDay]||""}</textarea>`)}
-    ${card("💳 Expenses",expensesHTML())}
-    ${card("📊 Settlement",`Total ₹${(expenses[activeDay]||[]).reduce((a,b)=>a + Number(b.amount), 0)}`)}
-    ${card("🚑 Emergency",`<ul>${d.emergency.map(e=>`<li>${e}</li>`).join("")}</ul>`)}
-    ${card("☕ Food & Snacks",`<ul>${d.food.map(f=>`<li>${f}</li>`).join("")}</ul>`)}
-  `;
+<div class="card ${expandState?"open":""}">
+  <div class="cardHeader" onclick="toggleCard(this)">${title}</div>
+  <div class="cardBody">${body}</div>
+</div>`;
 }
 
-function card(title,body){
-  return `
-  <div class="sectionCard ${cardsExpanded?"expanded":""}">
-    <div class="sectionHeader">${title}</div>
-    <div class="sectionBody">${body}</div>
-  </div>`;
-}
-
-function attachCardHandlers(){
-  document.querySelectorAll(".sectionHeader").forEach(h=>{
-    h.onclick=()=>{
-      h.parentElement.classList.toggle("expanded");
-    };
-  });
-}
-
-/* EXPENSES */
-function expensesHTML(){
-  return `
-    <input id="et" placeholder="Title">
-    <input id="ea" type="number" placeholder="Amount">
-    <select id="ep">${participants.map(p=>`<option>${p}</option>`).join("")}</select>
-    <button onclick="addExpense()">Add</button>
-    ${(expenses[activeDay]||[]).map((e,i)=>`
-      <div>${e.title} ₹${e.amount} (${e.paidBy})
-      <button class="smallBtn" onclick="delExpense(${i})">❌</button></div>`).join("")}
-    <button class="smallBtn" onclick="toggleLog()">🕘 Log</button>
-    ${showLog?`<div class="log">${activityLog.map(l=>
-      `<div>[${l.type}] Day ${l.day+1} – ${l.title} ₹${l.amount}</div>`
-    ).join("")}</div>`:""}
-  `;
-}
-
-window.saveNote=async v=>{
-  notes[activeDay]=v;
-  await setDoc(tripRef,{notes},{merge:true});
-};
-
-window.addExpense=async ()=>{
-  const t=et.value,a=+ea.value,p=ep.value;
-  if(!t||!a)return;
-  const list=[...(expenses[activeDay]||[]),{ title:t, amount:Number(a), paidBy:p}];
-  await setDoc(doc(db,"trips",tripId,"expenses","day-"+activeDay),{items:list});
-  await updateDoc(tripRef,{activityLog:arrayUnion({
-    type:"ADD",day:activeDay,title:t,amount:a,by:p,ts:Date.now()
-  })});
-};
-
-window.delExpense=async idx=>{
-  const item=expenses[activeDay][idx];
-  const list=expenses[activeDay].filter((_,i)=>i!==idx);
-  await setDoc(doc(db,"trips",tripId,"expenses","day-"+activeDay),{items:list});
-  await updateDoc(tripRef,{activityLog:arrayUnion({
-    type:"DELETE",day:activeDay,title:item.title,amount:item.amount,by:item.paidBy,ts:Date.now()
-  })});
-};
-
-initTrip();
 render();
 </script>
 </body>
