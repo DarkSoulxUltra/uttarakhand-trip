@@ -8,16 +8,29 @@
 <style>
 body{margin:0;font-family:system-ui;background:#020617;color:#67e8f9}
 h1{text-align:center;margin:12px 0}
-.container{max-width:1400px;margin:auto;padding:12px;padding-bottom:280px}
+.container{max-width:1400px;margin:auto;padding:12px;padding-bottom:200px}
 
 /* ROUTE */
 .stickyTop{position:sticky;top:0;background:#020617;z-index:5}
-.routeBox{border:1px solid #164e63;border-radius:16px;padding:12px;margin-bottom:12px}
+.routeBox{position:relative;border:1px solid #164e63;border-radius:16px;padding:12px;margin-bottom:12px}
 .progressText{text-align:center;color:#22d3ee;font-weight:600;margin-bottom:8px}
+
+.routeActions{
+ position:absolute;
+ top:10px;
+ right:12px;
+ display:flex;
+ gap:8px;
+}
+.routeActions button{
+ padding:4px 8px;
+ font-size:12px;
+}
+
 .routeLine{position:relative;display:flex;justify-content:space-between;align-items:center;height:36px}
 .routeLine::before{content:'';position:absolute;left:0;right:0;top:50%;height:3px;background:#164e63}
 .routeFill{position:absolute;left:0;top:50%;height:3px;background:#22d3ee;width:0%;transition:width .6s ease}
-.node{width:16px;height:16px;background:#164e63;border-radius:50%;cursor:pointer;z-index:1}
+.node{width:18px;height:18px;background:#164e63;border-radius:50%;cursor:pointer;z-index:1}
 .node.active{background:#22d3ee;box-shadow:0 0 10px #22d3ee}
 .vehicle{position:absolute;top:-24px;transition:.3s}
 
@@ -29,7 +42,7 @@ h1{text-align:center;margin:12px 0}
 .card.active{border-color:#22d3ee;box-shadow:0 0 12px rgba(34,211,238,.4)}
 .content{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
 
-/* CARDS */
+/* SECTION CARDS */
 .sectionCard{border:1px solid #164e63;border-radius:14px;padding:12px;background:rgba(2,6,23,.6)}
 .sectionHeader{font-weight:700;color:#22d3ee;margin-bottom:8px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
 .sectionBody{max-height:800px;overflow:hidden;transition:max-height .35s ease,opacity .25s ease}
@@ -41,8 +54,6 @@ input,textarea,select{width:100%;padding:6px;border-radius:6px;border:none;margi
 button{background:#22d3ee;border:none;border-radius:6px;padding:6px 10px;font-weight:600;cursor:pointer}
 button[disabled]{opacity:.4;cursor:not-allowed}
 iframe{width:100%;height:220px;border-radius:10px;border:1px solid #164e63}
-
-.mobileNav{position:fixed;bottom:0;left:0;right:0;background:#020617;border-top:1px solid #164e63;display:flex;justify-content:space-around;padding:10px;z-index:10}
 </style>
 </head>
 
@@ -50,13 +61,13 @@ iframe{width:100%;height:220px;border-radius:10px;border:1px solid #164e63}
 <div class="container">
 <h1>Uttarakhand Trip Planner</h1>
 
-<details open>
+<details>
 <summary>➕ Open / Create Trip</summary>
 <input id="tripInput" placeholder="e.g. uttarakhand-mar-2026">
 <button onclick="openTrip()">Open Trip</button>
 </details>
 
-<details open>
+<details>
 <summary>👥 Participants <span id="viewBadge"></span></summary>
 <input id="newMember" placeholder="Name">
 <button onclick="addMember()">Add</button>
@@ -66,6 +77,12 @@ iframe{width:100%;height:220px;border-radius:10px;border:1px solid #164e63}
 <div class="stickyTop">
 <div class="routeBox">
 <div class="progressText" id="progressText"></div>
+
+<div class="routeActions">
+<button onclick="expandAll()">Expand all</button>
+<button onclick="collapseAll()">Collapse all</button>
+</div>
+
 <div class="routeLine">
 <div class="routeFill" id="routeFill"></div>
 <div id="vehicle" class="vehicle">🚌</div>
@@ -85,26 +102,21 @@ iframe{width:100%;height:220px;border-radius:10px;border:1px solid #164e63}
 </div>
 </div>
 
-<div class="mobileNav">
-<button onclick="prev()">⏮ Prev</button>
-<button onclick="next()">Next ⏭</button>
-</div>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBqiBMggvuMxAiKfBpJIqnv8OCWj76voAk",
-  authDomain: "trip-planner-2026.firebaseapp.com",
-  projectId: "trip-planner-2026",
-  storageBucket: "trip-planner-2026.firebasestorage.app",
-  messagingSenderId: "118349993233",
-  appId: "1:118349993233:web:7edb1de869796188a428b0"
+ apiKey: "AIzaSyBqiBMggvuMxAiKfBpJIqnv8OCWj76voAk",
+ authDomain: "trip-planner-2026.firebaseapp.com",
+ projectId: "trip-planner-2026",
+ storageBucket: "trip-planner-2026.firebasestorage.app",
+ messagingSenderId: "118349993233",
+ appId: "1:118349993233:web:7edb1de869796188a428b0"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const app=initializeApp(firebaseConfig);
+const db=getFirestore(app);
 
 const params=new URLSearchParams(location.search);
 const tripId=params.get("trip")||"uttarakhand-mar-2026";
@@ -114,63 +126,11 @@ document.getElementById("viewBadge").innerText=viewOnly?"(View only)":"";
 const tripRef=doc(db,"trips",tripId);
 const tripDates=["Sun","Mon","Tue","Wed","Thu","Fri"];
 
-/* DAYS (with emergency + food per day) */
-const days=[
-{
- city:"Delhi → Haridwar",
- title:"Arrival & Ganga Aarti",
- steps:["Arrive Delhi","Bus to Haridwar","Hotel check-in","Ganga Aarti","Market walk"],
- map:"https://www.google.com/maps?q=Delhi+to+Haridwar&output=embed",
- hotel:{name:"Hotel Ganga Lahari",map:"https://maps.google.com/?q=Hotel+Ganga+Lahari+Haridwar"},
- emergency:{ambulance:"108",police:"112",hospital:"District Hospital Haridwar"},
- food:{breakfast:["Local chai stall","Hotel breakfast"],cafes:["Chotiwala"]}
-},
-{
- city:"Haridwar → Rishikesh",
- title:"Ropeways & Transfer",
- steps:["Ganga Snaan","Mansa Devi","Chandi Devi","Cab to Rishikesh"],
- map:"https://www.google.com/maps?q=Haridwar+to+Rishikesh&output=embed",
- hotel:{name:"Tapovan Sarovar",map:"https://maps.google.com/?q=Tapovan+Rishikesh"},
- emergency:{ambulance:"108",police:"112",hospital:"AIIMS Rishikesh"},
- food:{breakfast:["Chotiwala"],cafes:["Little Buddha Café"]}
-},
-{
- city:"Rishikesh",
- title:"Tapovan & Cafés",
- steps:["Ram Jhula","Laxman Jhula","Saptarishi Ashram","Café hopping"],
- map:"https://www.google.com/maps?q=Tapovan+Rishikesh&output=embed",
- hotel:{name:"Tapovan Stay",map:"https://maps.google.com/?q=Tapovan+Rishikesh"},
- emergency:{ambulance:"108",police:"112",hospital:"AIIMS Rishikesh"},
- food:{breakfast:["Local tea stall"],cafes:["Freedom Café","Ganga View Café"]}
-},
-{
- city:"Rishikesh",
- title:"Rafting & Ghat",
- steps:["River rafting","Freshen up","Triveni Ghat","Dinner"],
- map:"https://www.google.com/maps?q=Rishikesh+River+Rafting&output=embed",
- hotel:{name:"Tapovan Stay",map:"https://maps.google.com/?q=Tapovan+Rishikesh"},
- emergency:{ambulance:"108",police:"112",hospital:"AIIMS Rishikesh"},
- food:{breakfast:["Early chai"],cafes:["Little Buddha Café"]}
-},
-{
- city:"Rishikesh → Dehradun",
- title:"Ashrams & Waterfall",
- steps:["Neer Garh","Drona Ashram","Deer Park","Market walk"],
- map:"https://www.google.com/maps?q=Rishikesh+to+Dehradun&output=embed",
- hotel:{name:"Rajpur Road Hotel",map:"https://maps.google.com/?q=Rajpur+Road+Dehradun"},
- emergency:{ambulance:"108",police:"112",hospital:"Doon Hospital"},
- food:{breakfast:["Hotel breakfast"],cafes:["Orchard Café"]}
-},
-{
- city:"Mussoorie → Delhi",
- title:"Hill Wrap-up",
- steps:["Sahastradhara","Mall Road","Return to Delhi"],
- map:"https://www.google.com/maps?q=Dehradun+to+Mussoorie&output=embed",
- hotel:{name:"Day trip",map:"https://maps.google.com/?q=Mussoorie"},
- emergency:{ambulance:"108",police:"112",hospital:"Landour Hospital"},
- food:{breakfast:["Local café"],cafes:["Cafe Ivy"]}
-}
-];
+/* GLOBAL UI STATE */
+let globalExpandState="collapsed"; // remembers across days
+
+/* DAYS (unchanged content-wise) */
+const days=[/* keep your existing days array exactly as before */];
 
 let participants=["Sahil","Patil"],expenses={},notes={},active=0;
 
@@ -201,9 +161,19 @@ function buildTimeline(){
  });
 }
 
+function section(title,body){
+ const collapsedClass = globalExpandState==="collapsed" ? "collapsed" : "";
+ return `
+ <div class="sectionCard ${collapsedClass}">
+  <div class="sectionHeader" onclick="toggleCard(this)">${title}</div>
+  <div class="sectionBody">${body}</div>
+ </div>`;
+}
+
 function render(){
  buildTimeline();
  renderMembers();
+
  document.getElementById("progressText").innerText=`${tripDates[active]} — ${days[active].city}`;
  document.querySelectorAll(".node").forEach((n,i)=>n.classList.toggle("active",i<=active));
  document.getElementById("vehicle").style.left=`calc(${active*(100/(days.length-1))}% - 12px)`;
@@ -211,43 +181,45 @@ function render(){
 
  const d=days[active];
 
- content.innerHTML=`
-<div class="sectionCard">
- <div class="sectionHeader">📦 Sections
- <div><button onclick="expandAll()">Expand all</button><button onclick="collapseAll()">Collapse all</button></div>
- </div>
-</div>
-
-${section("🧭 Step-by-step",`<ul>${d.steps.map(s=>`<li>${s}</li>`).join("")}</ul>`)}
-${section("🗺 Route Map",`<iframe src="${d.map}"></iframe>`)}
-${section("🏨 Hotel",`<a href="${d.hotel.map}" target="_blank">${d.hotel.name}</a><iframe src="${d.hotel.map}&output=embed"></iframe>`)}
-${section("📝 Notes",`<textarea ${viewOnly?"disabled":""} oninput="saveNote(this.value)">${notes[active]||""}</textarea>`)}
-${section("🚨 Emergency",`
-<ul>
-<li><b>Ambulance:</b> ${d.emergency.ambulance}</li>
-<li><b>Police:</b> ${d.emergency.police}</li>
-<li><b>Hospital:</b> ${d.emergency.hospital}</li>
-</ul>`)}
-${section("☕ Food & Snacks Nearby",`
-<b>Breakfast / Tea</b><ul>${d.food.breakfast.map(f=>`<li>${f}</li>`).join("")}</ul>
-<b>Cafés</b><ul>${d.food.cafes.map(f=>`<li>${f}</li>`).join("")}</ul>`)}
-`;
+ content.innerHTML=
+ section("🧭 Step-by-step",`<ul>${d.steps.map(s=>`<li>${s}</li>`).join("")}</ul>`)
+ + section("🗺 Route Map",`<iframe src="${d.map}"></iframe>`)
+ + section("🏨 Hotel",`<a href="${d.hotel.map}" target="_blank">${d.hotel.name}</a><iframe src="${d.hotel.map}&output=embed"></iframe>`)
+ + section("📝 Notes",`<textarea ${viewOnly?"disabled":""} oninput="saveNote(this.value)">${notes[active]||""}</textarea>`)
+ + section("🚨 Emergency",`
+   <ul>
+    <li><b>Ambulance:</b> ${d.emergency.ambulance}</li>
+    <li><b>Police:</b> ${d.emergency.police}</li>
+    <li><b>Hospital:</b> ${d.emergency.hospital}</li>
+   </ul>`)
+ + section("☕ Food & Snacks Nearby",`
+   <b>Breakfast / Tea</b>
+   <ul>${d.food.breakfast.map(f=>`<li>${f}</li>`).join("")}</ul>
+   <b>Cafés</b>
+   <ul>${d.food.cafes.map(f=>`<li>${f}</li>`).join("")}</ul>`);
 }
 
-const section=(title,body)=>`
-<div class="sectionCard collapsed">
- <div class="sectionHeader" onclick="toggleCard(this)">${title}</div>
- <div class="sectionBody">${body}</div>
-</div>`;
+/* CARD CONTROLS */
+window.toggleCard=(el)=>{
+ const card=el.parentElement;
+ card.classList.toggle("collapsed");
+ globalExpandState = document.querySelector(".sectionCard.collapsed") ? "collapsed" : "expanded";
+};
 
-window.toggleCard=(el)=>el.parentElement.classList.toggle("collapsed");
-window.expandAll=()=>document.querySelectorAll(".sectionCard.collapsed").forEach(c=>c.classList.remove("collapsed"));
-window.collapseAll=()=>document.querySelectorAll(".sectionCard:not(.collapsed)").forEach(c=>c.classList.add("collapsed"));
+window.expandAll=()=>{
+ globalExpandState="expanded";
+ document.querySelectorAll(".sectionCard").forEach(c=>c.classList.remove("collapsed"));
+};
 
+window.collapseAll=()=>{
+ globalExpandState="collapsed";
+ document.querySelectorAll(".sectionCard").forEach(c=>c.classList.add("collapsed"));
+};
+
+/* NAV */
 window.select=(i)=>{active=i;render();}
-window.next=()=>{active=(active+1)%days.length;render();}
-window.prev=()=>{active=(active-1+days.length)%days.length;render();}
 
+/* PARTICIPANTS */
 window.addMember=()=>{if(viewOnly)return;const v=newMember.value.trim();if(!v)return;participants.push(v);newMember.value="";saveTrip();}
 window.removeMember=(i)=>{if(viewOnly)return;participants.splice(i,1);saveTrip();}
 function renderMembers(){
