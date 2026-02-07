@@ -6,45 +6,189 @@
 <title>Uttarakhand Trip Planner</title>
 
 <style>
-body{margin:0;font-family:system-ui;background:#020617;color:#67e8f9}
+body{
+  margin:0;
+  font-family:system-ui;
+  background:#020617;
+  color:#67e8f9
+}
+
 h1{text-align:center;margin:12px 0}
-.container{max-width:1200px;margin:auto;padding:12px;padding-bottom:300px}
-.stickyTop{position:sticky;top:0;background:#020617;z-index:5}
 
-.routeBox{border:1px solid #164e63;border-radius:14px;padding:10px;margin-bottom:10px}
-.progressText{text-align:center;color:#22d3ee;font-weight:600}
+.container{
+  max-width:1400px;
+  margin:auto;
+  padding:12px;
+  padding-bottom:280px
+}
 
-.routeLine{position:relative;display:flex;justify-content:space-between;align-items:center;height:40px}
-.routeLine::before{content:'';position:absolute;left:0;right:0;top:50%;height:3px;background:#164e63}
-.node{width:18px;height:18px;background:#164e63;border-radius:50%;cursor:pointer}
-.node.active{background:#22d3ee;box-shadow:0 0 10px #22d3ee}
-.vehicle{position:absolute;top:-26px;transition:.35s}
+/* ===== ROUTE HEADER ===== */
+.stickyTop{
+  position:sticky;
+  top:0;
+  background:#020617;
+  z-index:5
+}
 
-.layout{display:flex;flex-wrap:wrap;gap:12px}
-.timeline{flex:1;min-width:220px}
-.content{flex:3;min-width:280px}
+.routeBox{
+  border:1px solid #164e63;
+  border-radius:16px;
+  padding:12px;
+  margin-bottom:12px
+}
 
-.card{border:1px solid #164e63;border-radius:12px;padding:10px;margin-bottom:8px;cursor:pointer}
-.card.active{border-color:#22d3ee;box-shadow:0 0 12px rgba(34,211,238,.5)}
+.progressText{
+  text-align:center;
+  color:#22d3ee;
+  font-weight:600;
+  margin-bottom:8px
+}
 
-details{border:1px solid #164e63;border-radius:10px;padding:8px;margin:8px 0}
-summary{cursor:pointer;font-weight:600}
+.routeLine{
+  position:relative;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  height:36px
+}
 
-button{background:#22d3ee;border:none;border-radius:6px;padding:6px 10px;font-weight:600;cursor:pointer}
-button[disabled]{opacity:.4;cursor:not-allowed}
+.routeLine::before{
+  content:'';
+  position:absolute;
+  left:0;
+  right:0;
+  top:50%;
+  height:3px;
+  background:#164e63
+}
 
-input,textarea,select{padding:6px;border-radius:6px;border:none;margin:4px;width:100%}
+.node{
+  width:16px;
+  height:16px;
+  background:#164e63;
+  border-radius:50%;
+  cursor:pointer;
+  z-index:1
+}
 
-iframe{width:100%;height:220px;border-radius:10px;border:1px solid #164e63}
+.node.active{
+  background:#22d3ee;
+  box-shadow:0 0 10px #22d3ee
+}
 
-.badge{font-size:12px;color:#22d3ee}
+.vehicle{
+  position:absolute;
+  top:-24px;
+  transition:.3s
+}
 
+/* ===== MAIN LAYOUT ===== */
+.layout{
+  display:grid;
+  grid-template-columns:260px 1fr;
+  gap:14px
+}
+
+@media(max-width:900px){
+  .layout{
+    grid-template-columns:1fr
+  }
+}
+
+/* ===== LEFT TIMELINE ===== */
+.timeline{
+  border:1px solid #164e63;
+  border-radius:14px;
+  padding:10px
+}
+
+.card{
+  border:1px solid #164e63;
+  border-radius:12px;
+  padding:10px;
+  margin-bottom:8px;
+  cursor:pointer
+}
+
+.card.active{
+  border-color:#22d3ee;
+  box-shadow:0 0 12px rgba(34,211,238,.4)
+}
+
+/* ===== CONTENT GRID ===== */
+.content{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:12px
+}
+
+/* ===== CONTENT CARDS ===== */
+.sectionCard{
+  border:1px solid #164e63;
+  border-radius:14px;
+  padding:12px;
+  background:rgba(2,6,23,.6)
+}
+
+.sectionHeader{
+  font-weight:700;
+  color:#22d3ee;
+  margin-bottom:8px;
+  cursor:pointer;
+  display:flex;
+  justify-content:space-between;
+  align-items:center
+}
+
+.sectionBody{
+  margin-top:8px
+}
+
+/* ===== FORM ELEMENTS ===== */
+input,textarea,select{
+  width:100%;
+  padding:6px;
+  border-radius:6px;
+  border:none;
+  margin:4px 0
+}
+
+button{
+  background:#22d3ee;
+  border:none;
+  border-radius:6px;
+  padding:6px 10px;
+  font-weight:600;
+  cursor:pointer
+}
+
+button[disabled]{
+  opacity:.4;
+  cursor:not-allowed
+}
+
+iframe{
+  width:100%;
+  height:220px;
+  border-radius:10px;
+  border:1px solid #164e63
+}
+
+/* ===== MOBILE NAV ===== */
 .mobileNav{
- position:fixed;bottom:0;left:0;right:0;
- background:#020617;border-top:1px solid #164e63;
- display:flex;justify-content:space-around;padding:10px;z-index:10
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:#020617;
+  border-top:1px solid #164e63;
+  display:flex;
+  justify-content:space-around;
+  padding:10px;
+  z-index:10
 }
 </style>
+
 </head>
 
 <body>
@@ -303,52 +447,58 @@ function render(){
  const d=days[active];
  const dayExp=expenses[active]||[];
 
- content.innerHTML=`
- <h2>${d.title}</h2>
+ content.innerHTML = `
+<div class="sectionCard">
+  <div class="sectionHeader">🧭 Step-by-step</div>
+  <div class="sectionBody">
+    <ul>${d.steps.map(s=>`<li>${s}</li>`).join("")}</ul>
+  </div>
+</div>
 
- <details open>
- <summary>🧭 Step-by-step</summary>
- <ul>${d.steps.map(s=>`<li>${s}</li>`).join("")}</ul>
- </details>
+<div class="sectionCard">
+  <div class="sectionHeader">🗺 Route Map</div>
+  <div class="sectionBody">
+    <iframe src="${d.map}"></iframe>
+  </div>
+</div>
 
- <details open>
- <summary>🏨 Hotel</summary>
- <a href="${d.hotel.map}" target="_blank">${d.hotel.name}</a>
- </details>
+<div class="sectionCard">
+  <div class="sectionHeader">🏨 Hotel</div>
+  <div class="sectionBody">
+    <a href="${d.hotel.map}" target="_blank">${d.hotel.name}</a>
+    <iframe src="${d.hotel.map}&output=embed"></iframe>
+  </div>
+</div>
 
- <details>
- <summary>📍 Highlights</summary>
- <ul>${d.highlights.map(h=>`<li>${h}</li>`).join("")}</ul>
- </details>
+<div class="sectionCard">
+  <div class="sectionHeader">📝 Notes</div>
+  <div class="sectionBody">
+    <textarea ${viewOnly?"disabled":""} oninput="saveNote(this.value)">${notes[active]||""}</textarea>
+  </div>
+</div>
 
- <details>
- <summary>🗺 Route Map</summary>
- <iframe src="${d.map}" loading="lazy"></iframe>
- </details>
+<div class="sectionCard">
+  <div class="sectionHeader">💳 Add Expense</div>
+  <div class="sectionBody">
+    <input id="et" placeholder="Title" ${viewOnly?"disabled":""}>
+    <input id="ea" type="number" placeholder="Amount" ${viewOnly?"disabled":""}>
+    <select id="ep">${participants.map(p=>`<option>${p}</option>`).join("")}</select>
+    <button onclick="addExpense()" ${viewOnly?"disabled":""}>Add</button>
+  </div>
+</div>
 
- <details>
- <summary>🗺 Hotel Location</summary>
- <iframe src="${d.hotel.map}&output=embed" loading="lazy"></iframe>
- </details>
+<div class="sectionCard">
+  <div class="sectionHeader">🧾 Expenses</div>
+  <div class="sectionBody">
+    ${(expenses[active]||[]).map((e,i)=>`
+      <div>
+        ${e.title} ₹${e.amount} (${e.paidBy})
+        ${viewOnly?"":`<button onclick="del(${i})">❌</button>`}
+      </div>`).join("") || "No expenses"}
+  </div>
+</div>
+`;
 
- <details open>
- <summary>📝 Notes</summary>
- <textarea ${viewOnly?"disabled":""} oninput="saveNote(this.value)">${notes[active]||""}</textarea>
- </details>
-
- <details open>
- <summary>💳 Add Expense</summary>
- <input id="et" placeholder="Title" ${viewOnly?"disabled":""}>
- <input id="ea" type="number" placeholder="Amount" ${viewOnly?"disabled":""}>
- <select id="ep">${participants.map(p=>`<option>${p}</option>`).join("")}</select>
- <button onclick="addExpense()" ${viewOnly?"disabled":""}>Add</button>
- </details>
-
- <details open>
- <summary>🧾 Expenses</summary>
- ${dayExp.map((e,i)=>`${e.title} ₹${e.amount} (${e.paidBy}) ${viewOnly?"":"<button onclick='del("+i+")'>❌</button>"}`).join("")||"No expenses"}
- </details>
- `;
 }
 
 /* ACTIONS */
