@@ -139,11 +139,11 @@ const days = [
   {
     city:"Delhi → Haridwar",
     steps:["Arrive Delhi","Bus to Haridwar","Hotel check-in","Ganga Aarti"],
-    routeMap:"https://www.google.com/maps/embed?pb=!1m28!1m12!1m3!1d224345.8396456305!2d77.068899!3d28.527280!",
+    routeMap:"https://www.google.com/maps?q=Delhi+to+Haridwar&output=embed",
     hotel:{
-      name:"Hotel Ganga Lahari",
-      link:"https://maps.google.com",
-      map:"https://www.google.com/maps/embed?pb=!1m18"
+      name:"Hotel Ganga Lahari / similar (Har Ki Pauri area)",
+      link:"https://maps.google.com/?q=Hotel+Ganga+Lahari+Haridwar",
+      map:"https://maps.google.com/?q=Hotel+Ganga+Lahari+Haridwar"
     },
     food:["Local chai","Chotiwala"],
     emergency:["Ambulance:108","Police:112","District Hospital Haridwar"]
@@ -151,19 +151,19 @@ const days = [
   {
     city:"Haridwar → Rishikesh",
     steps:["Morning Aarti","Travel to Rishikesh","Explore ghats"],
-    routeMap:"https://www.google.com/maps/embed?pb=!1m18",
+    routeMap:"https://www.google.com/maps?q=Haridwar+to+Rishikesh&output=embed",
     hotel:{
       name:"Aloha on the Ganges",
-      link:"https://maps.google.com",
-      map:"https://www.google.com/maps/embed?pb=!1m18"
+      link:"https://maps.google.com/?q=Aloha+on+the+Ganges",
+      map:"https://maps.google.com/?q=Aloha+on+the+Ganges"
     },
     food:["German Bakery","Ganga View Cafe"],
     emergency:["Ambulance:108","Police:112","AIIMS Rishikesh"]
   },
-  {city:"Rishikesh",steps:["Rafting","Cafes","Ashrams"],routeMap:"https://www.google.com/maps/embed?pb=!1m18",hotel:{name:"Same Hotel",link:"#",map:"https://www.google.com/maps/embed?pb=!1m18"},food:["Cafe","Tea"],emergency:["108","112"]},
-  {city:"Rishikesh",steps:["Waterfall","Rest"],routeMap:"https://www.google.com/maps/embed?pb=!1m18",hotel:{name:"Same Hotel",link:"#",map:"https://www.google.com/maps/embed?pb=!1m18"},food:["Snacks"],emergency:["108"]},
-  {city:"Rishikesh → Dehradun",steps:["Travel","Explore"],routeMap:"https://www.google.com/maps/embed?pb=!1m18",hotel:{name:"DDN Hotel",link:"#",map:"https://www.google.com/maps/embed?pb=!1m18"},food:["Street food"],emergency:["108"]},
-  {city:"Mussoorie → Delhi",steps:["Sightseeing","Return"],routeMap:"https://www.google.com/maps/embed?pb=!1m18",hotel:{name:"—",link:"#",map:""},food:["Cafe"],emergency:["108"]}
+  {city:"Rishikesh",steps:["Rafting","Cafes","Ashrams"],routeMap:"https://www.google.com/maps?q=Rishikesh+River+Rafting&output=embed",hotel:{name:"Same Hotel (Aloha on the Ganges)",link:"#",map:"https://maps.google.com/?q=Aloha+on+the+Ganges"},food:["Cafe","Tea"],emergency:["108","112"]},
+  {city:"Rishikesh",steps:["Waterfall","Rest"],routeMap:"https://www.google.com/maps?q=Rishikesh+Neer+Waterfall&output=embed",hotel:{name:"Same Hotel (Aloha on the Ganges)",link:"#",map:"https://maps.google.com/?q=Aloha+on+the+Ganges"},food:["Snacks"],emergency:["108"]},
+  {city:"Rishikesh → Dehradun",steps:["Travel","Explore"],routeMap:"https://www.google.com/maps?q=Rishikesh+to+Dehradun&output=embed",hotel:{name:"Hotel near Rajpur Road / Ballupur",link:"#",map:"https://maps.google.com/?q=Rajpur+Road+Dehradun+Hotel"},food:["Street food"],emergency:["108"]},
+  {city:"Mussoorie → Delhi",steps:["Sightseeing","Return"],routeMap:"https://www.google.com/maps?q=Dehradun+to+Mussoorie&output=embed",hotel:{name:"Day Trip - No Stay",link:"#",map:"https://maps.google.com/?q=Mussoorie+Mall+Road"},food:["Cafe"],emergency:["108"]}
 ];
 
 let activeDay = 0;
