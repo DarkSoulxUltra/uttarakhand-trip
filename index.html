@@ -1,292 +1,190 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Uttarakhand Trip Planner</title>
 
 <style>
-body{
-  margin:0;
-  font-family:system-ui;
-  background:#020617;
-  color:#67e8f9;
-}
-h1{text-align:center;margin:12px 0}
+body{margin:0;font-family:system-ui;background:#020617;color:#67e8f9}
+h1{text-align:center;color:#22d3ee}
+.container{max-width:1400px;margin:auto;padding:12px}
 
-.container{
-  max-width:1400px;
-  margin:auto;
-  padding:12px;
-}
+.routeBox{border:1px solid #164e63;border-radius:14px;padding:14px;margin-bottom:14px;position:relative}
+.routeTitle{text-align:center;font-weight:600;color:#22d3ee;margin-bottom:6px}
+.routeActions{position:absolute;top:10px;right:12px;display:flex;gap:8px}
+.routeActions button{padding:4px 8px;font-size:12px}
 
-/* ROUTE BAR */
-.routeBox{
-  position:relative;
-  border:1px solid #164e63;
-  border-radius:16px;
-  padding:14px;
-  margin-bottom:16px;
-}
-.progressText{
-  text-align:center;
-  font-weight:600;
-  color:#22d3ee;
-  margin-bottom:8px;
-}
-.routeActions{
-  position:absolute;
-  top:10px;
-  right:12px;
-  display:flex;
-  gap:8px;
-}
-.routeActions button{
-  font-size:12px;
-  padding:4px 8px;
-}
-
-.routeLine{
-  position:relative;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  height:36px;
-}
-.routeLine::before{
-  content:'';
-  position:absolute;
-  left:0;right:0;
-  top:50%;
-  height:3px;
-  background:#164e63;
-}
-.routeFill{
-  position:absolute;
-  left:0;
-  top:50%;
-  height:3px;
-  background:#22d3ee;
-  width:0%;
-  transition:.4s;
-}
-.node{
-  width:18px;height:18px;
-  background:#164e63;
-  border-radius:50%;
-  cursor:pointer;
-  z-index:2;
-  position:relative;
-}
-.node.active{
-  background:#22d3ee;
-  box-shadow:0 0 10px #22d3ee;
-}
+.routeLine{position:relative;display:flex;justify-content:space-between;align-items:center;height:36px}
+.routeLine::before{content:"";position:absolute;left:0;right:0;top:50%;height:3px;background:#164e63}
+.node{width:18px;height:18px;background:#164e63;border-radius:50%;cursor:pointer;position:relative}
+.node.active{background:#22d3ee;box-shadow:0 0 8px #22d3ee}
 .node:hover::after{
-  content:attr(data-label);
-  position:absolute;
-  bottom:28px;
-  left:50%;
-  transform:translateX(-50%);
-  background:#020617;
-  border:1px solid #164e63;
-  padding:4px 8px;
-  border-radius:6px;
-  white-space:nowrap;
-  font-size:12px;
+  content:attr(data-tip);
+  position:absolute;top:-26px;left:50%;transform:translateX(-50%);
+  background:#020617;border:1px solid #164e63;
+  padding:2px 6px;font-size:11px;border-radius:4px;white-space:nowrap
 }
-.vehicle{
-  position:absolute;
-  top:-24px;
-  transition:.25s;
-}
+.vehicle{position:absolute;top:-22px;transition:.4s}
 
-/* GRID */
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-  gap:14px;
-}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:1000px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.grid{grid-template-columns:1fr}}
 
-/* CARDS */
-.card{
-  border:1px solid #164e63;
-  border-radius:14px;
-  padding:12px;
-  background:rgba(2,6,23,.6);
-}
-.cardHeader{
-  font-weight:700;
-  color:#22d3ee;
-  cursor:pointer;
-  margin-bottom:8px;
-}
-.cardBody{
-  max-height:800px;
-  overflow:hidden;
-  transition:.3s;
-}
-.card.collapsed .cardBody{
-  max-height:0;
-  opacity:0;
-}
+.sectionCard{border:1px solid #164e63;border-radius:12px;overflow:hidden}
+.sectionHeader{padding:10px;font-weight:600;cursor:pointer;border-bottom:1px solid #164e63}
+.sectionBody{display:none;padding:10px}
+.sectionCard.expanded .sectionBody{display:block}
 
-input,textarea,select{
-  width:100%;
-  padding:6px;
-  border-radius:6px;
-  border:none;
-  margin:4px 0;
-}
-button{
-  background:#22d3ee;
-  border:none;
-  border-radius:6px;
-  padding:6px 10px;
-  font-weight:600;
-}
-iframe{
-  width:100%;
-  height:220px;
-  border-radius:10px;
-  border:1px solid #164e63;
-}
+input,textarea,select{width:100%;margin:4px 0;padding:6px;border-radius:6px;border:none}
+button{background:#22d3ee;border:none;border-radius:6px;padding:6px 10px;cursor:pointer}
+ul{padding-left:18px}
 </style>
 </head>
 
 <body>
-<div class="container" id="appRoot">
-
+<div class="container">
 <h1>Uttarakhand Trip Planner</h1>
 
 <div class="routeBox">
-  <div class="progressText" id="progressText"></div>
-
+  <div class="routeTitle" id="routeTitle"></div>
   <div class="routeActions">
     <button onclick="expandAll()">Expand all</button>
     <button onclick="collapseAll()">Collapse all</button>
   </div>
-
   <div class="routeLine">
-    <div class="routeFill" id="routeFill"></div>
     <div id="vehicle" class="vehicle">🚌</div>
-    <div class="node" data-label="Sun · Delhi → Haridwar" onclick="select(0)"></div>
-    <div class="node" data-label="Mon · Haridwar → Rishikesh" onclick="select(1)"></div>
-    <div class="node" data-label="Tue · Rishikesh" onclick="select(2)"></div>
-    <div class="node" data-label="Wed · Rishikesh" onclick="select(3)"></div>
-    <div class="node" data-label="Thu · Rishikesh → Dehradun" onclick="select(4)"></div>
-    <div class="node" data-label="Fri · Mussoorie → Delhi" onclick="select(5)"></div>
+    <div class="node" onclick="selectDay(0)"></div>
+    <div class="node" onclick="selectDay(1)"></div>
+    <div class="node" onclick="selectDay(2)"></div>
+    <div class="node" onclick="selectDay(3)"></div>
+    <div class="node" onclick="selectDay(4)"></div>
+    <div class="node" onclick="selectDay(5)"></div>
   </div>
 </div>
 
 <div class="grid" id="content"></div>
-
 </div>
 
-<script>
-/* GLOBAL STATE */
-let active = 0;
-let globalExpandState = "collapsed";
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import {
+  getFirestore, doc, setDoc, getDoc,
+  collection, onSnapshot
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-/* DAYS — FULLY DEFINED */
-const days = [
-{
- city:"Delhi → Haridwar",
- steps:["Arrive Delhi","Bus to Haridwar","Hotel check-in","Ganga Aarti"],
- map:"https://www.google.com/maps?q=Delhi+to+Haridwar&output=embed",
- hotel:{name:"Hotel Ganga Lahari",map:"https://maps.google.com/?q=Hotel+Ganga+Lahari+Haridwar"},
- emergency:{ambulance:"108",police:"112",hospital:"District Hospital Haridwar"},
- food:{breakfast:["Local chai"],cafes:["Chotiwala"]}
-},
-{
- city:"Haridwar → Rishikesh",
- steps:["Ganga Snaan","Mansa Devi","Cab to Rishikesh"],
- map:"https://www.google.com/maps?q=Haridwar+to+Rishikesh&output=embed",
- hotel:{name:"Tapovan Stay",map:"https://maps.google.com/?q=Tapovan+Rishikesh"},
- emergency:{ambulance:"108",police:"112",hospital:"AIIMS Rishikesh"},
- food:{breakfast:["Chotiwala"],cafes:["Little Buddha Café"]}
-},
-{
- city:"Rishikesh",
- steps:["Ram Jhula","Laxman Jhula","Saptarishi Ashram"],
- map:"https://www.google.com/maps?q=Tapovan+Rishikesh&output=embed",
- hotel:{name:"Tapovan Stay",map:"https://maps.google.com/?q=Tapovan+Rishikesh"},
- emergency:{ambulance:"108",police:"112",hospital:"AIIMS Rishikesh"},
- food:{breakfast:["Local tea"],cafes:["Freedom Café"]}
-},
-{
- city:"Rishikesh",
- steps:["River Rafting","Triveni Ghat"],
- map:"https://www.google.com/maps?q=Rishikesh+Rafting&output=embed",
- hotel:{name:"Tapovan Stay",map:"https://maps.google.com/?q=Tapovan+Rishikesh"},
- emergency:{ambulance:"108",police:"112",hospital:"AIIMS Rishikesh"},
- food:{breakfast:["Early chai"],cafes:["Little Buddha Café"]}
-},
-{
- city:"Rishikesh → Dehradun",
- steps:["Neer Garh","Drona Ashram","Deer Park"],
- map:"https://www.google.com/maps?q=Rishikesh+to+Dehradun&output=embed",
- hotel:{name:"Rajpur Road Hotel",map:"https://maps.google.com/?q=Rajpur+Road+Dehradun"},
- emergency:{ambulance:"108",police:"112",hospital:"Doon Hospital"},
- food:{breakfast:["Hotel breakfast"],cafes:["Orchard Café"]}
-},
-{
- city:"Mussoorie → Delhi",
- steps:["Sahastradhara","Mall Road","Return"],
- map:"https://www.google.com/maps?q=Dehradun+to+Mussoorie&output=embed",
- hotel:{name:"Day Trip",map:"https://maps.google.com/?q=Mussoorie"},
- emergency:{ambulance:"108",police:"112",hospital:"Landour Hospital"},
- food:{breakfast:["Cafe"],cafes:["Cafe Ivy"]}
-}
+/* 🔥 YOUR EXISTING CONFIG */
+const firebaseConfig = {
+  apiKey: "AIzaSyBqiBMggvuMxAiKfBpJIqnv8OCWj76voAk",
+  authDomain: "trip-planner-2026.firebaseapp.com",
+  projectId: "trip-planner-2026",
+  storageBucket: "trip-planner-2026.appspot.com",
+  messagingSenderId: "118349993233",
+  appId: "1:118349993233:web:7edb1de869796188a428b0"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* ---------- DATA ---------- */
+const tripDates=["Sun","Mon","Tue","Wed","Thu","Fri"];
+const days=[
+  {city:"Delhi → Haridwar",steps:["Arrive Delhi","Bus","Ganga Aarti"]},
+  {city:"Haridwar → Rishikesh",steps:["Snan","Travel"]},
+  {city:"Rishikesh",steps:["Jhulas","Cafes"]},
+  {city:"Rishikesh",steps:["Rafting","Rest"]},
+  {city:"Rishikesh → Dehradun",steps:["Neergarh","Drive"]},
+  {city:"Mussoorie → Delhi",steps:["Mall Road","Return"]}
 ];
 
-function card(title,body,auto=false){
- const collapsed = auto ? false : globalExpandState==="collapsed";
- return `
- <div class="card ${collapsed?"collapsed":""}">
-  <div class="cardHeader" onclick="this.parentElement.classList.toggle('collapsed')">${title}</div>
-  <div class="cardBody">${body}</div>
- </div>`;
+/* ---------- STATE ---------- */
+const tripId = new URLSearchParams(location.search).get("trip") || "default-trip";
+const tripRef = doc(db, "trips", tripId);
+
+let activeDay=0;
+let cardsExpanded=false;
+let participants=[];
+let notes={};
+let expenses={};
+
+/* ---------- FIREBASE LOAD ---------- */
+async function initTrip(){
+  const snap = await getDoc(tripRef);
+  if(!snap.exists()){
+    await setDoc(tripRef,{participants:[],notes:{}});
+  }
 }
+
+onSnapshot(tripRef,s=>{
+  const d=s.data();
+  participants=d.participants||[];
+  notes=d.notes||{};
+  render();
+});
+
+for(let i=0;i<6;i++){
+  const dayRef = doc(db,"trips",tripId,"expenses","day-"+i);
+  onSnapshot(dayRef,s=>{
+    expenses[i]=s.exists()?s.data().items:[];
+    render();
+  });
+}
+
+/* ---------- UI ---------- */
+window.selectDay=i=>{activeDay=i;render()}
+window.expandAll=()=>{cardsExpanded=true;render()}
+window.collapseAll=()=>{cardsExpanded=false;render()}
+
+function toggle(el){el.parentElement.classList.toggle("expanded")}
 
 function render(){
- const d = days[active];
- document.getElementById("progressText").innerText = d.city;
+  const d=days[activeDay];
+  document.getElementById("routeTitle").innerText=`${tripDates[activeDay]} — ${d.city}`;
 
- document.querySelectorAll(".node").forEach((n,i)=>n.classList.toggle("active",i<=active));
- document.getElementById("vehicle").style.left = `calc(${active*(100/(days.length-1))}% - 12px)`;
- document.getElementById("routeFill").style.width = (active/(days.length-1))*100+"%";
+  document.querySelectorAll(".node").forEach((n,i)=>{
+    n.classList.toggle("active",i===activeDay);
+    n.dataset.tip=`${tripDates[i]} — ${days[i].city}`;
+  });
 
- content.innerHTML =
- card("🧭 Step-by-step",`<ul>${d.steps.map(s=>`<li>${s}</li>`).join("")}</ul>`,true)
- + card("🗺 Route Map",`<iframe src="${d.map}"></iframe>`)
- + card("🏨 Hotel",`<a href="${d.hotel.map}" target="_blank">${d.hotel.name}</a>
-   <iframe src="${d.hotel.map}&output=embed"></iframe>`)
- + card("🚨 Emergency",`
-   <ul>
-    <li>Ambulance: ${d.emergency.ambulance}</li>
-    <li>Police: ${d.emergency.police}</li>
-    <li>Hospital: ${d.emergency.hospital}</li>
-   </ul>`)
- + card("☕ Food & Snacks",`
-   <b>Breakfast</b><ul>${d.food.breakfast.map(f=>`<li>${f}</li>`).join("")}</ul>
-   <b>Cafés</b><ul>${d.food.cafes.map(f=>`<li>${f}</li>`).join("")}</ul>`);
+  document.getElementById("vehicle").style.left=
+    `calc(${activeDay*(100/(days.length-1))}% - 10px)`;
+
+  document.getElementById("content").innerHTML=`
+    ${card("🧭 Step-by-step",`<ul>${d.steps.map(s=>`<li>${s}</li>`).join("")}</ul>`)}
+    ${card("📝 Notes",`
+      <textarea oninput="saveNote(this.value)">${notes[activeDay]||""}</textarea>`)}
+    ${card("💳 Expenses",`
+      <input id="et" placeholder="Title">
+      <input id="ea" type="number" placeholder="Amount">
+      <select id="ep">${participants.map(p=>`<option>${p}</option>`).join("")}</select>
+      <button onclick="addExpense()">Add</button>
+      ${(expenses[activeDay]||[]).map(e=>`<div>${e.title} ₹${e.amount} (${e.paidBy})</div>`).join("")}`)}
+    ${card("📊 Settlement",`
+      Total ₹${(expenses[activeDay]||[]).reduce((a,b)=>a+b.amount,0)}`)}
+  `;
 }
 
-function select(i){ active=i; render(); }
-function expandAll(){ globalExpandState="expanded"; document.querySelectorAll(".card").forEach(c=>c.classList.remove("collapsed")); }
-function collapseAll(){ globalExpandState="collapsed"; document.querySelectorAll(".card").forEach(c=>c.classList.add("collapsed")); }
+function card(title,body){
+  return `<div class="sectionCard ${cardsExpanded?"expanded":""}">
+    <div class="sectionHeader" onclick="toggle(this)">${title}</div>
+    <div class="sectionBody">${body}</div>
+  </div>`;
+}
 
-/* SWIPE */
-let startX=0;
-appRoot.addEventListener("touchstart",e=>startX=e.touches[0].clientX,{passive:true});
-appRoot.addEventListener("touchend",e=>{
- const dx=e.changedTouches[0].clientX-startX;
- if(Math.abs(dx)<60)return;
- if(dx<0 && active<days.length-1)select(active+1);
- if(dx>0 && active>0)select(active-1);
-},{passive:true});
+window.saveNote = async v=>{
+  notes[activeDay]=v;
+  await setDoc(tripRef,{notes},{merge:true});
+};
 
+window.addExpense = async ()=>{
+  const t=et.value,a=+ea.value,p=ep.value;
+  if(!t||!a)return;
+  const list=[...(expenses[activeDay]||[]),{title:t,amount:a,paidBy:p}];
+  await setDoc(doc(db,"trips",tripId,"expenses","day-"+activeDay),{items:list});
+};
+
+initTrip();
 render();
 </script>
 </body>
