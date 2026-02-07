@@ -13,27 +13,24 @@
   --accent:#22d3ee;
   --muted:#67e8f9;
 }
-
 body{
   margin:0;
   font-family:system-ui;
   background:var(--bg);
   color:var(--muted);
 }
-
 h1{
   text-align:center;
   margin:12px 0;
   color:var(--accent);
 }
-
 .container{
   max-width:1400px;
   margin:auto;
   padding:12px;
 }
 
-/* ---------- ROUTE BAR ---------- */
+/* ROUTE BAR */
 .routeBox{
   position:relative;
   border:1px solid var(--border);
@@ -41,31 +38,17 @@ h1{
   padding:14px 12px 18px;
   margin-bottom:14px;
 }
-
 .routeTitle{
   text-align:center;
   font-weight:600;
   color:var(--accent);
   margin-bottom:8px;
 }
-
 .routeActions{
   position:absolute;
   top:10px;
   right:12px;
-  display:flex;
-  gap:8px;
 }
-
-.routeActions button{
-  padding:4px 8px;
-  font-size:12px;
-  background:var(--accent);
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-}
-
 .routeLine{
   position:relative;
   display:flex;
@@ -73,17 +56,14 @@ h1{
   align-items:center;
   height:40px;
 }
-
 .routeLine::before{
   content:"";
   position:absolute;
-  left:0;
-  right:0;
+  left:0; right:0;
   top:50%;
   height:3px;
   background:var(--border);
 }
-
 .node{
   width:18px;
   height:18px;
@@ -92,12 +72,10 @@ h1{
   cursor:pointer;
   position:relative;
 }
-
 .node.active{
   background:var(--accent);
   box-shadow:0 0 10px var(--accent);
 }
-
 .node:hover::after{
   content:attr(data-tip);
   position:absolute;
@@ -111,52 +89,42 @@ h1{
   border-radius:4px;
   white-space:nowrap;
 }
-
 .vehicle{
   position:absolute;
   top:-24px;
   transition:.4s;
 }
 
-/* ---------- GRID ---------- */
+/* GRID */
 .grid{
   display:grid;
   grid-template-columns:repeat(4,1fr);
   gap:12px;
 }
+@media(max-width:1100px){ .grid{grid-template-columns:repeat(2,1fr);} }
+@media(max-width:600px){ .grid{grid-template-columns:1fr;} }
 
-@media(max-width:1100px){
-  .grid{grid-template-columns:repeat(2,1fr);}
-}
-@media(max-width:600px){
-  .grid{grid-template-columns:1fr;}
-}
-
-/* ---------- CARDS ---------- */
+/* CARDS */
 .sectionCard{
   border:1px solid var(--border);
   border-radius:12px;
-  overflow:hidden;
   background:var(--card);
 }
-
 .sectionHeader{
   padding:10px;
   font-weight:600;
   cursor:pointer;
   border-bottom:1px solid var(--border);
 }
-
 .sectionBody{
   padding:10px;
   display:none;
 }
-
 .sectionCard.expanded .sectionBody{
   display:block;
 }
 
-/* ---------- INPUTS ---------- */
+/* INPUTS */
 input, textarea, select{
   width:100%;
   margin:4px 0;
@@ -164,7 +132,6 @@ input, textarea, select{
   border-radius:6px;
   border:none;
 }
-
 button{
   background:var(--accent);
   border:none;
@@ -172,14 +139,7 @@ button{
   padding:6px 10px;
   cursor:pointer;
 }
-
-/* ---------- LIST ---------- */
-ul{padding-left:18px;}
-.log{
-  font-size:13px;
-  opacity:.9;
-  margin-bottom:4px;
-}
+.log{font-size:13px;margin-bottom:4px;}
 </style>
 </head>
 
@@ -187,17 +147,13 @@ ul{padding-left:18px;}
 <div class="container">
 <h1>Uttarakhand Trip Planner</h1>
 
-<!-- ROUTE -->
 <div class="routeBox">
   <div class="routeTitle" id="routeTitle"></div>
-
   <div class="routeActions">
-    <label class="toggle">
-    <input type="checkbox" id="expandToggle" onchange="toggleExpand(this)">
-    <span>Expand all</span>
-  </label>
+    <label>
+      <input type="checkbox" id="expandToggle"> Expand all
+    </label>
   </div>
-
   <div class="routeLine">
     <div id="vehicle" class="vehicle">🚌</div>
     <div class="node" onclick="selectDay(0)"></div>
@@ -213,239 +169,110 @@ ul{padding-left:18px;}
 </div>
 
 <script>
-/* ---------------- DATA ---------------- */
-let participants =
-  JSON.parse(localStorage.getItem("participants")) || ["Sahil", "Patil"];
-
-localStorage.setItem("participants", JSON.stringify(participants));
-
 const tripDates=["Sun","Mon","Tue","Wed","Thu","Fri"];
 
-const days=[ /* unchanged, same as your backup */ 
-{
- city:"Delhi → Haridwar",
- steps:["Arrive Delhi","Bus to Haridwar","Hotel check-in","Ganga Aarti"],
- route:"https://www.google.com/maps?q=Delhi+to+Haridwar&output=embed",
- hotel:{name:"Hotel Ganga Lahari",map:"https://maps.google.com?q=Hotel+Ganga+Lahari"},
- emergency:["Ambulance: 108","Police: 112","District Hospital Haridwar"],
- food:["Local chai","Chotiwala"]
-},
-{
- city:"Haridwar → Rishikesh",
- steps:["Early snan","Mansa Devi","Travel to Rishikesh"],
- route:"https://www.google.com/maps?q=Haridwar+to+Rishikesh&output=embed",
- hotel:{name:"Hotel Tapovan Resort",map:"https://maps.google.com?q=Tapovan+Rishikesh"},
- emergency:["Ambulance: 108","AIIMS Rishikesh"],
- food:["German Bakery","Little Buddha"]
-},
-{
- city:"Rishikesh",
- steps:["Ram Jhula","Laxman Jhula","Cafes"],
- route:"https://www.google.com/maps?q=Tapovan+Rishikesh&output=embed",
- hotel:{name:"Tapovan Stay",map:"https://maps.google.com?q=Tapovan"},
- emergency:["AIIMS Rishikesh"],
- food:["Cafe De Goa","Beatles Cafe"]
-},
-{
- city:"Rishikesh",
- steps:["Rafting","Rest","Ghat walk"],
- route:"https://www.google.com/maps?q=Rishikesh+rafting&output=embed",
- hotel:{name:"Tapovan Stay",map:"https://maps.google.com?q=Tapovan"},
- emergency:["AIIMS Rishikesh"],
- food:["Local snacks"]
-},
-{
- city:"Rishikesh → Dehradun",
- steps:["Neergarh","Travel to DDN"],
- route:"https://www.google.com/maps?q=Rishikesh+to+Dehradun&output=embed",
- hotel:{name:"Hotel Pacific",map:"https://maps.google.com?q=Hotel+Pacific+Dehradun"},
- emergency:["DDN Hospital"],
- food:["Ellora Bakery"]
-},
-{
- city:"Mussoorie → Delhi",
- steps:["Mall road","Return"],
- route:"https://www.google.com/maps?q=Mussoorie+to+Delhi&output=embed",
- hotel:{name:"—",map:"#"},
- emergency:["—"],
- food:["—"]
-}
+const days=[
+{city:"Delhi → Haridwar",steps:["Arrive Delhi","Bus to Haridwar","Hotel check-in","Ganga Aarti"],route:"https://www.google.com/maps?q=Delhi+to+Haridwar&output=embed",hotel:{name:"Hotel Ganga Lahari",map:"#"},emergency:["Ambulance:108","Police:112"],food:["Local chai"]},
+{city:"Haridwar → Rishikesh",steps:["Morning Aarti","Travel"],route:"https://www.google.com/maps?q=Haridwar+to+Rishikesh&output=embed",hotel:{name:"Aloha on the Ganges",map:"#"},emergency:["AIIMS Rishikesh"],food:["German Bakery"]},
+{city:"Rishikesh",steps:["Ram Jhula","Cafes"],route:"https://www.google.com/maps?q=Rishikesh&output=embed",hotel:{name:"Tapovan Stay",map:"#"},emergency:["AIIMS"],food:["Beatles Cafe"]},
+{city:"Rishikesh",steps:["Rafting"],route:"https://www.google.com/maps?q=Rishikesh+rafting&output=embed",hotel:{name:"Tapovan Stay",map:"#"},emergency:["AIIMS"],food:["Snacks"]},
+{city:"Rishikesh → Dehradun",steps:["Travel"],route:"https://www.google.com/maps?q=Rishikesh+to+Dehradun&output=embed",hotel:{name:"Hotel Pacific",map:"#"},emergency:["DDN Hospital"],food:["Ellora"]},
+{city:"Mussoorie → Delhi",steps:["Return"],route:"https://www.google.com/maps?q=Mussoorie+to+Delhi&output=embed",hotel:{name:"—",map:"#"},emergency:["—"],food:["—"]}
 ];
 
-/* ---------------- STATE ---------------- */
-let cardsExpanded =
-  JSON.parse(localStorage.getItem("cardsExpanded") || "false");
-
 let activeDay=0;
-let cardsExpanded=false;
+let participants=["Sahil","Patil"];
 let expenses=JSON.parse(localStorage.getItem("expenses")||"[]");
 let expenseLogs=JSON.parse(localStorage.getItem("expenseLogs")||"[]");
+let cardsExpanded=JSON.parse(localStorage.getItem("cardsExpanded")||"false");
 
-/* ---------------- UI ---------------- */
-function selectDay(i){activeDay=i;render();}
-function expandAll(){cardsExpanded = true;
-  localStorage.setItem("cardsExpanded","true");
-  render();}
-function collapseAll(){
-  cardsExpanded = false;
-  localStorage.setItem("cardsExpanded","false");
-  render();}
-function toggleExpand(el){
-  cardsExpanded = el.checked;
-  localStorage.setItem("cardsExpanded", JSON.stringify(cardsExpanded));
+document.getElementById("expandToggle").checked=cardsExpanded;
+document.getElementById("expandToggle").onchange=e=>{
+  cardsExpanded=e.target.checked;
+  localStorage.setItem("cardsExpanded",cardsExpanded);
   render();
-}
+};
 
+function selectDay(i){activeDay=i;render();}
 function toggle(el){el.parentElement.classList.toggle("expanded");}
 
-/* ---------------- LOGGING ---------------- */
 function addLog(msg){
-  expenseLogs.unshift({
-    ts:new Date().toLocaleString(),
-    msg
-  });
+  expenseLogs.unshift(`[${new Date().toLocaleString()}] ${msg}`);
   localStorage.setItem("expenseLogs",JSON.stringify(expenseLogs));
 }
 
-/* ---------------- RENDER ---------------- */
+function calculateSettlement(){
+  const paid={};participants.forEach(p=>paid[p]=0);
+  expenses.flat().forEach(e=>paid[e.by]+=e.amount);
+  const total=Object.values(paid).reduce((a,b)=>a+b,0);
+  const share=total/participants.length;
+  return {total,share,paid};
+}
+
+function addExpense(){
+  const t=et.value,a=+ea.value,by=eby.value;
+  if(!t||!a)return;
+  expenses[activeDay]=expenses[activeDay]||[];
+  expenses[activeDay].push({title:t,amount:a,by});
+  localStorage.setItem("expenses",JSON.stringify(expenses));
+  addLog(`${by} added ₹${a} for ${t}`);
+  render();
+}
+
+function removeExpense(i){
+  const e=expenses[activeDay][i];
+  expenses[activeDay].splice(i,1);
+  localStorage.setItem("expenses",JSON.stringify(expenses));
+  addLog(`${e.by} removed ₹${e.amount} for ${e.title}`);
+  render();
+}
+
+function card(title,body){
+  return `<div class="sectionCard ${cardsExpanded?"expanded":""}">
+  <div class="sectionHeader" onclick="toggle(this)">${title}</div>
+  <div class="sectionBody">${body}</div></div>`;
+}
+
 function render(){
-  cardsExpanded = JSON.parse(
-    localStorage.getItem("cardsExpanded") || "false"
-  );
   const d=days[activeDay];
-  document.getElementById("routeTitle").innerText=
-    `${tripDates[activeDay]} — ${d.city}`;
-  const toggle = document.getElementById("expandToggle");
-  if (toggle) toggle.checked = cardsExpanded;
+  routeTitle.innerText=`${tripDates[activeDay]} — ${d.city}`;
 
   document.querySelectorAll(".node").forEach((n,i)=>{
     n.classList.toggle("active",i===activeDay);
     n.dataset.tip=`${tripDates[i]} — ${days[i].city}`;
   });
 
-  document.getElementById("vehicle").style.left=
-    `calc(${activeDay*(100/(days.length-1))}% - 10px)`;
+  vehicle.style.left=`calc(${activeDay*(100/5)}% - 10px)`;
 
-  document.getElementById("content").innerHTML=`
+  const {total,share,paid}=calculateSettlement();
+
+  content.innerHTML=`
   ${card("🧭 Step-by-step",`<ul>${d.steps.map(s=>`<li>${s}</li>`).join("")}</ul>`)}
   ${card("🗺 Route Map",`<iframe src="${d.route}" width="100%" height="200"></iframe>`)}
-  ${card("🏨 Hotel",`<a href="${d.hotel.map}" target="_blank">${d.hotel.name}</a>`)}
-  ${card("📝 Notes",`<textarea placeholder="Notes for the day"></textarea>`)}
+  ${card("🏨 Hotel",d.hotel.name)}
+  ${card("📝 Notes",`<textarea></textarea>`)}
   ${card("💳 Expenses",`
-  <input id="et" placeholder="Title">
-  <input id="ea" type="number" placeholder="Amount">
-
-  <select id="eby">
-    ${participants.map(p=>`<option>${p}</option>`).join("")}
-  </select>
-
-  <button onclick="addExpense()">Add</button>
-
-  ${(expenses[activeDay]||[]).map((e,i)=>`
-    <div>
-      ${e.title} ₹${e.amount} <small>(${e.by})</small>
-      <button onclick="removeExpense(${i})">❌</button>
-    </div>
-  `).join("")}
-`)}
-
-  ${card("📊 Settlement", `
-  <div id="settlementBox">Calculating settlement...</div>
-`)}
-  ${card("🧾 Expense Logs",`
-    ${expenseLogs.map(l=>`<div class="log">[${l.ts}] ${l.msg}</div>`).join("") || "No logs yet"}`)}
+    <input id="et" placeholder="Title">
+    <input id="ea" type="number" placeholder="Amount">
+    <select id="eby">${participants.map(p=>`<option>${p}</option>`).join("")}</select>
+    <button onclick="addExpense()">Add</button>
+    ${(expenses[activeDay]||[]).map((e,i)=>`
+      <div>${e.title} ₹${e.amount} (${e.by})
+      <button onclick="removeExpense(${i})">❌</button></div>`).join("")}
+  `)}
+  ${card("📊 Settlement",`
+    Total: ₹${total}<br>
+    Per person: ₹${Math.round(share)}<hr>
+    ${participants.map(p=>{
+      const d=paid[p]-share;
+      return d>0?`🟢 ${p} gets ₹${Math.round(d)}`:`🔴 ${p} pays ₹${Math.abs(Math.round(d))}`;
+    }).join("<br>")}
+  `)}
+  ${card("🧾 Logs",expenseLogs.map(l=>`<div class="log">${l}</div>`).join("")||"No logs")}
   ${card("🚑 Emergency",`<ul>${d.emergency.map(e=>`<li>${e}</li>`).join("")}</ul>`)}
   ${card("☕ Food & Snacks",`<ul>${d.food.map(f=>`<li>${f}</li>`).join("")}</ul>`)}
   `;
-renderSettlement();
-
-  function renderSettlement() {
-  const box = document.getElementById("settlementBox");
-  if (!box) return;
-
-  const { total, share, settlement } = calculateSettlement();
-
-  let html = `
-    <b>Total:</b> ₹${total}<br>
-    <b>Per Person Share:</b> ₹${Math.round(share)}
-    <hr>
-  `;
-
-  participants.forEach(p => {
-    const diff = settlement[p];
-    if (diff > 0) {
-      html += `<div>🟢 ${p} gets ₹${diff}</div>`;
-    } else if (diff < 0) {
-      html += `<div>🔴 ${p} pays ₹${Math.abs(diff)}</div>`;
-    } else {
-      html += `<div>⚪ ${p} settled</div>`;
-    }
-  });
-
-  box.innerHTML = html;
 }
-
-}
-
-function card(title,body){
-  return `
-  <div class="sectionCard ${cardsExpanded?"expanded":""}">
-    <div class="sectionHeader" onclick="toggle(this)">${title}</div>
-    <div class="sectionBody">${body}</div>
-  </div>`;
-}
-
-/* ---------------- EXPENSE ---------------- */
-
-function calculateSettlement() {
-  const paid = {};
-  participants.forEach(p => paid[p] = 0);
-
-  // FLATTEN all days
-  expenses.forEach(dayExpenses => {
-    (dayExpenses || []).forEach(e => {
-      paid[e.by] += Number(e.amount);
-    });
-  });
-
-  const total = Object.values(paid).reduce((a,b)=>a+b,0);
-  const share = total / participants.length;
-
-  const settlement = {};
-  participants.forEach(p => {
-    settlement[p] = Math.round(paid[p] - share);
-  });
-
-  return { total, share, settlement };
-}
-
-
-  
-function addExpense(){
-  const t = document.getElementById("et").value;
-  const a = +document.getElementById("ea").value;
-  const by = document.getElementById("eby").value;
-
-  if(!t || !a || !by) return;
-
-  expenses[activeDay] = expenses[activeDay] || [];
-  expenses[activeDay].push({ title:t, amount:a, by });
-
-  addLog(`${by} added ₹${a} for ${t} (${tripDates[activeDay]})`);
-
-}
-
-
-function removeExpense(i){
-  const e = expenses[activeDay][i];
-
-  expenses[activeDay].splice(i,1);
-
-  addLog(`${e.by} removed ₹${e.amount} for ${e.title} (${tripDates[activeDay]})`);
-
-  localStorage.setItem("expenses", JSON.stringify(expenses));
-}
-
 
 render();
 </script>
