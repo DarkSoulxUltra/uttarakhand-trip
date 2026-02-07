@@ -32,7 +32,7 @@ details{border:1px solid #164e63;border-radius:10px;padding:8px;margin:8px 0}
 summary{cursor:pointer;font-weight:600}
 
 button{background:#22d3ee;border:none;border-radius:6px;padding:6px 10px;font-weight:600;cursor:pointer}
-input,textarea{padding:6px;border-radius:6px;border:none;margin:4px;width:100%}
+input,textarea,select{padding:6px;border-radius:6px;border:none;margin:4px;width:100%}
 
 iframe{width:100%;height:220px;border-radius:10px;border:1px solid #164e63}
 
@@ -86,7 +86,6 @@ iframe{width:100%;height:220px;border-radius:10px;border:1px solid #164e63}
 <script>
 /* ---------------- TRIP DATA ---------------- */
 const tripDates=["Sun","Mon","Tue","Wed","Thu","Fri"];
-
 const days=[
 {
  city:"Delhi → Haridwar",
@@ -98,13 +97,10 @@ const days=[
   "Freshen up & breakfast",
   "Bus to Haridwar",
   "Hotel check-in",
-  "Evening Ganga Aarti at Har Ki Pauri",
-  "Explore local market"
+  "Ganga Aarti at Har Ki Pauri",
+  "Local market walk"
  ],
- highlights:[
-  "Har Ki Pauri",
-  "Ganga Aarti"
- ]
+ highlights:["Har Ki Pauri","Ganga Aarti"]
 },
 {
  city:"Haridwar → Rishikesh",
@@ -117,14 +113,9 @@ const days=[
   "Chandi Devi Ropeway",
   "Visit Saptarishi Ashram",
   "Lunch & checkout",
-  "Drive to Rishikesh",
-  "Evening relaxation near hotel"
+  "Drive to Rishikesh"
  ],
- highlights:[
-  "Mansa Devi",
-  "Chandi Devi",
-  "Saptarishi Ashram"
- ]
+ highlights:["Mansa Devi","Chandi Devi","Saptarishi Ashram"]
 },
 {
  city:"Rishikesh",
@@ -133,16 +124,12 @@ const days=[
  map:"https://www.google.com/maps?q=Tapovan+Rishikesh&output=embed",
  steps:[
   "Late breakfast",
-  "Visit Ram Jhula & Laxman Jhula",
-  "Explore Tapovan cafés",
-  "Visit nearby ashrams",
+  "Ram Jhula & Laxman Jhula",
+  "Tapovan cafés",
+  "Ashram visit",
   "Sunset river walk"
  ],
- highlights:[
-  "Ram Jhula",
-  "Laxman Jhula",
-  "Tapovan cafés"
- ]
+ highlights:["Ram Jhula","Laxman Jhula","Tapovan"]
 },
 {
  city:"Rishikesh",
@@ -151,14 +138,12 @@ const days=[
  map:"https://www.google.com/maps?q=Rishikesh+Rafting&output=embed",
  steps:[
   "Early breakfast",
-  "Proceed for river rafting",
-  "Return & freshen up",
+  "River rafting",
+  "Freshen up",
   "Lunch & rest",
   "Light evening stroll"
  ],
- highlights:[
-  "Shivpuri rafting stretch"
- ]
+ highlights:["Shivpuri Rafting"]
 },
 {
  city:"Rishikesh → Dehradun",
@@ -167,17 +152,13 @@ const days=[
  map:"https://www.google.com/maps?q=Rishikesh+to+Dehradun&output=embed",
  steps:[
   "Checkout from Rishikesh",
-  "Visit Neergarh Waterfall",
+  "Neergarh Waterfall",
   "Drive to Dehradun",
-  "Visit Rishi Drona Ashram",
-  "Visit Malsi Deer Park",
+  "Rishi Drona Ashram",
+  "Malsi Deer Park",
   "Evening market walk"
  ],
- highlights:[
-  "Neergarh Waterfall",
-  "Rishi Drona Ashram",
-  "Malsi Deer Park"
- ]
+ highlights:["Neergarh Waterfall","Rishi Drona Ashram","Malsi Deer Park"]
 },
 {
  city:"Dehradun / Mussoorie → Delhi",
@@ -185,24 +166,20 @@ const days=[
  hotel:{name:"Honeymoon Inn Mussoorie",map:"https://maps.google.com/?q=Honeymoon+Inn+Mussoorie"},
  map:"https://www.google.com/maps?q=Mussoorie+to+Delhi&output=embed",
  steps:[
-  "Visit Sahastradhara Waterfall",
-  "Drive towards Mussoorie",
-  "Kempty Falls visit",
+  "Sahastradhara Waterfall",
+  "Drive to Mussoorie",
+  "Kempty Falls",
   "Mall Road stroll",
   "Return to Dehradun",
   "Overnight journey to Delhi"
  ],
- highlights:[
-  "Sahastradhara",
-  "Kempty Falls",
-  "Mall Road Mussoorie"
- ]
+ highlights:["Sahastradhara","Kempty Falls","Mall Road"]
 }
 ];
 
 /* ---------------- STATE ---------------- */
 let participants=JSON.parse(localStorage.getItem("participants"))||["Sahil","Patil"];
-let expenses=JSON.parse(localStorage.getItem("expenses"))||[];
+let expenses=JSON.parse(localStorage.getItem("expenses"))||{};
 let notes=JSON.parse(localStorage.getItem("notes"))||{};
 let active=0;
 
@@ -230,11 +207,18 @@ function removeMember(i){
  render();
 }
 
-/* ---------------- SPLITWISE ---------------- */
+/* ---------------- SPLITWISE (DAY-WISE) ---------------- */
 function calcSettlement(){
  let buckets={},total=0;
  participants.forEach(p=>buckets[p]=0);
- expenses.forEach(e=>{buckets[e.paidBy]+=e.amount;total+=e.amount});
+
+ Object.values(expenses).forEach(dayArr=>{
+  dayArr.forEach(e=>{
+   buckets[e.paidBy]+=e.amount;
+   total+=e.amount;
+  });
+ });
+
  return {buckets,total,share:participants.length?total/participants.length:0};
 }
 
@@ -265,6 +249,7 @@ function render(){
 
  const {buckets,total,share}=calcSettlement();
  const d=days[active];
+ const dayExpenses=expenses[active]||[];
 
  content.innerHTML=`
  <h2>${d.title}</h2>
@@ -291,12 +276,11 @@ function render(){
 
  <details open>
  <summary>📝 Day Notes</summary>
- <textarea rows="4" placeholder="Plans, timings, reminders..."
- oninput="saveNote(this.value)">${notes[active]||""}</textarea>
+ <textarea rows="4" oninput="saveNote(this.value)">${notes[active]||""}</textarea>
  </details>
 
  <details open>
- <summary>💳 Add Expense</summary>
+ <summary>💳 Add Expense (Day ${active+1})</summary>
  <input id="et" placeholder="Title">
  <input id="ea" type="number" placeholder="Amount">
  <select id="ep">${participants.map(p=>`<option>${p}</option>`).join("")}</select>
@@ -304,14 +288,16 @@ function render(){
  </details>
 
  <details open>
- <summary>🧾 Expenses</summary>
- ${expenses.length?expenses.map((e,i)=>`
- <div>${e.title} ₹${e.amount} (${e.paidBy})
- <button onclick="del(${i})">❌</button></div>`).join(""):"No expenses"}
+ <summary>🧾 Expenses (Day ${active+1})</summary>
+ ${dayExpenses.length
+  ? dayExpenses.map((e,i)=>`
+    <div>${e.title} ₹${e.amount} (${e.paidBy})
+    <button onclick="del(${i})">❌</button></div>`).join("")
+  : "No expenses for this day"}
  </details>
 
  <details open>
- <summary>📊 Settlement</summary>
+ <summary>📊 Settlement (All Days)</summary>
  Total ₹${total} | Share ₹${Math.round(share)}
  <ul>${Object.keys(buckets).map(k=>{
   const d=buckets[k]-share;
@@ -330,12 +316,15 @@ function saveNote(v){
 function addExpense(){
  const t=et.value,a=parseInt(ea.value),p=ep.value;
  if(!t||!a)return;
- expenses.push({title:t,amount:a,paidBy:p});
+
+ if(!expenses[active]) expenses[active]=[];
+ expenses[active].push({title:t,amount:a,paidBy:p});
+
  localStorage.setItem("expenses",JSON.stringify(expenses));
  render();
 }
 function del(i){
- expenses.splice(i,1);
+ expenses[active].splice(i,1);
  localStorage.setItem("expenses",JSON.stringify(expenses));
  render();
 }
