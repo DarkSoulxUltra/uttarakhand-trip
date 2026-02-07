@@ -11,7 +11,6 @@ h1{text-align:center;margin:10px 0}
 .container{max-width:1200px;margin:auto;padding:12px;padding-bottom:280px}
 .stickyTop{position:sticky;top:0;background:#020617;z-index:5}
 
-/* ROUTE */
 .routeBox{border:1px solid #164e63;border-radius:14px;padding:10px;margin-bottom:8px}
 .progressText{text-align:center;color:#22d3ee;font-weight:600}
 
@@ -22,7 +21,6 @@ h1{text-align:center;margin:10px 0}
 .node.active{background:#22d3ee;box-shadow:0 0 10px #22d3ee}
 .vehicle{position:absolute;top:-26px;transition:.4s}
 
-/* LAYOUT */
 .layout{display:flex;flex-wrap:wrap;gap:12px}
 .timeline{flex:1;min-width:220px}
 .content{flex:3;min-width:280px}
@@ -34,7 +32,7 @@ details{border:1px solid #164e63;border-radius:10px;padding:8px;margin:8px 0}
 summary{cursor:pointer;font-weight:600}
 
 button{background:#22d3ee;border:none;border-radius:6px;padding:6px 10px;font-weight:600;cursor:pointer}
-input,select,textarea{padding:6px;border-radius:6px;border:none;margin:4px;width:100%}
+input,textarea{padding:6px;border-radius:6px;border:none;margin:4px;width:100%}
 
 iframe{width:100%;height:220px;border-radius:10px;border:1px solid #164e63}
 
@@ -86,8 +84,9 @@ iframe{width:100%;height:220px;border-radius:10px;border:1px solid #164e63}
 </div>
 
 <script>
-/* ---------- TRIP DATA ---------- */
+/* ---------------- TRIP DATA ---------------- */
 const tripDates=["Sun","Mon","Tue","Wed","Thu","Fri"];
+
 const days=[
 {
  city:"Delhi → Haridwar",
@@ -97,36 +96,52 @@ const days=[
  steps:[
   "Arrive in Delhi early morning",
   "Freshen up & breakfast",
-  "Board bus to Haridwar",
+  "Bus to Haridwar",
   "Hotel check-in",
-  "Evening Ganga Aarti & local market"
+  "Evening Ganga Aarti at Har Ki Pauri",
+  "Explore local market"
+ ],
+ highlights:[
+  "Har Ki Pauri",
+  "Ganga Aarti"
  ]
 },
 {
  city:"Haridwar → Rishikesh",
- title:"Snaan & Ropeways",
+ title:"Ashrams & Ropeways",
  hotel:{name:"Hotel Ishan (Tapovan)",map:"https://maps.google.com/?q=Hotel+Ishan+Rishikesh"},
  map:"https://www.google.com/maps?q=Haridwar+to+Rishikesh&output=embed",
  steps:[
   "Early morning Deep Snaan",
-  "Mansa Devi ropeway",
-  "Chandi Devi ropeway",
+  "Mansa Devi Ropeway",
+  "Chandi Devi Ropeway",
+  "Visit Saptarishi Ashram",
   "Lunch & checkout",
   "Drive to Rishikesh",
-  "Evening walk near hotel"
+  "Evening relaxation near hotel"
+ ],
+ highlights:[
+  "Mansa Devi",
+  "Chandi Devi",
+  "Saptarishi Ashram"
  ]
 },
 {
  city:"Rishikesh",
- title:"Tapovan & Cafés",
+ title:"Tapovan, Ashrams & Cafés",
  hotel:{name:"Hotel Ishan (Tapovan)",map:"https://maps.google.com/?q=Hotel+Ishan+Rishikesh"},
  map:"https://www.google.com/maps?q=Tapovan+Rishikesh&output=embed",
  steps:[
   "Late breakfast",
+  "Visit Ram Jhula & Laxman Jhula",
   "Explore Tapovan cafés",
   "Visit nearby ashrams",
-  "Sunset river walk",
-  "Early dinner & rest"
+  "Sunset river walk"
+ ],
+ highlights:[
+  "Ram Jhula",
+  "Laxman Jhula",
+  "Tapovan cafés"
  ]
 },
 {
@@ -137,40 +152,55 @@ const days=[
  steps:[
   "Early breakfast",
   "Proceed for river rafting",
-  "Return, freshen up",
+  "Return & freshen up",
   "Lunch & rest",
   "Light evening stroll"
+ ],
+ highlights:[
+  "Shivpuri rafting stretch"
  ]
 },
 {
  city:"Rishikesh → Dehradun",
- title:"Neergarh & Triveni",
- hotel:{name:"Hotel MJ Residency",map:"https://maps.google.com/?q=Hotel+MJ+Residency+Dehradun"},
+ title:"Waterfalls, Ashrams & Wildlife",
+ hotel:{name:"Hotel MJ Residency (Rajpur Rd)",map:"https://maps.google.com/?q=Hotel+MJ+Residency+Dehradun"},
  map:"https://www.google.com/maps?q=Rishikesh+to+Dehradun&output=embed",
  steps:[
-  "Pack luggage",
-  "Visit Neergarh Waterfall",
   "Checkout from Rishikesh",
-  "Triveni Ghat visit",
-  "Drive to Dehradun"
+  "Visit Neergarh Waterfall",
+  "Drive to Dehradun",
+  "Visit Rishi Drona Ashram",
+  "Visit Malsi Deer Park",
+  "Evening market walk"
+ ],
+ highlights:[
+  "Neergarh Waterfall",
+  "Rishi Drona Ashram",
+  "Malsi Deer Park"
  ]
 },
 {
- city:"Mussoorie → Delhi",
- title:"Hill Wrap-up",
+ city:"Dehradun / Mussoorie → Delhi",
+ title:"Sahastradhara & Hill Wrap-up",
  hotel:{name:"Honeymoon Inn Mussoorie",map:"https://maps.google.com/?q=Honeymoon+Inn+Mussoorie"},
  map:"https://www.google.com/maps?q=Mussoorie+to+Delhi&output=embed",
  steps:[
+  "Visit Sahastradhara Waterfall",
+  "Drive towards Mussoorie",
   "Kempty Falls visit",
-  "Mall Road walk",
-  "Lunch in Mussoorie",
+  "Mall Road stroll",
   "Return to Dehradun",
   "Overnight journey to Delhi"
+ ],
+ highlights:[
+  "Sahastradhara",
+  "Kempty Falls",
+  "Mall Road Mussoorie"
  ]
 }
 ];
 
-/* ---------- STATE ---------- */
+/* ---------------- STATE ---------------- */
 let participants=JSON.parse(localStorage.getItem("participants"))||["Sahil","Patil"];
 let expenses=JSON.parse(localStorage.getItem("expenses"))||[];
 let notes=JSON.parse(localStorage.getItem("notes"))||{};
@@ -179,7 +209,7 @@ let active=0;
 const timeline=document.getElementById("timeline");
 const content=document.getElementById("content");
 
-/* ---------- PARTICIPANTS ---------- */
+/* ---------------- PARTICIPANTS ---------------- */
 function renderMembers(){
  const ul=document.getElementById("memberList");
  ul.innerHTML="";
@@ -200,7 +230,7 @@ function removeMember(i){
  render();
 }
 
-/* ---------- SPLITWISE ---------- */
+/* ---------------- SPLITWISE ---------------- */
 function calcSettlement(){
  let buckets={},total=0;
  participants.forEach(p=>buckets[p]=0);
@@ -208,7 +238,7 @@ function calcSettlement(){
  return {buckets,total,share:participants.length?total/participants.length:0};
 }
 
-/* ---------- UI ---------- */
+/* ---------------- UI ---------------- */
 function buildTimeline(){
  timeline.innerHTML="";
  days.forEach((d,i)=>{
@@ -244,9 +274,14 @@ function render(){
  <a href="${d.hotel.map}" target="_blank">${d.hotel.name}</a>
  </details>
 
- <details>
+ <details open>
  <summary>🧭 Step-by-step Plan</summary>
  <ul>${d.steps.map(s=>`<li>${s}</li>`).join("")}</ul>
+ </details>
+
+ <details>
+ <summary>📍 Key Highlights</summary>
+ <ul>${d.highlights.map(h=>`<li>${h}</li>`).join("")}</ul>
  </details>
 
  <details>
@@ -256,7 +291,7 @@ function render(){
 
  <details open>
  <summary>📝 Day Notes</summary>
- <textarea rows="4" placeholder="Plans, reminders, timings..."
+ <textarea rows="4" placeholder="Plans, timings, reminders..."
  oninput="saveNote(this.value)">${notes[active]||""}</textarea>
  </details>
 
@@ -291,7 +326,7 @@ function saveNote(v){
  localStorage.setItem("notes",JSON.stringify(notes));
 }
 
-/* ---------- EXPENSES ---------- */
+/* ---------------- EXPENSES ---------------- */
 function addExpense(){
  const t=et.value,a=parseInt(ea.value),p=ep.value;
  if(!t||!a)return;
@@ -305,7 +340,7 @@ function del(i){
  render();
 }
 
-/* ---------- NAV ---------- */
+/* ---------------- NAV ---------------- */
 function select(i){active=i;render();}
 function next(){active=(active+1)%days.length;render();}
 function prev(){active=(active-1+days.length)%days.length;render();}
