@@ -185,6 +185,10 @@ let participants=["Sahil","Patil"];
 let expenses=JSON.parse(localStorage.getItem("expenses")||"[]");
 let expenseLogs=JSON.parse(localStorage.getItem("expenseLogs")||"[]");
 let cardsExpanded=JSON.parse(localStorage.getItem("cardsExpanded")||"false");
+let openCards = new Set(
+  JSON.parse(localStorage.getItem("openCards") || "[]")
+);
+
 
 document.getElementById("expandToggle").checked=cardsExpanded;
 document.getElementById("expandToggle").onchange=e=>{
@@ -194,7 +198,21 @@ document.getElementById("expandToggle").onchange=e=>{
 };
 
 function selectDay(i){activeDay=i;render();}
-function toggle(el){el.parentElement.classList.toggle("expanded");}
+function toggle(el){
+  const card = el.parentElement;
+  const title = el.innerText;
+
+  card.classList.toggle("expanded");
+
+  if (card.classList.contains("expanded")) {
+    openCards.add(title);
+  } else {
+    openCards.delete(title);
+  }
+
+  localStorage.setItem("openCards", JSON.stringify([...openCards]));
+}
+
 
 function addLog(msg){
   expenseLogs.unshift(`[${new Date().toLocaleString()}] ${msg}`);
@@ -227,11 +245,16 @@ function removeExpense(i){
   render();
 }
 
-function card(title,body){
-  return `<div class="sectionCard ${cardsExpanded?"expanded":""}">
-  <div class="sectionHeader" onclick="toggle(this)">${title}</div>
-  <div class="sectionBody">${body}</div></div>`;
+function card(title, body){
+  const shouldExpand = cardsExpanded || openCards.has(title);
+
+  return `
+  <div class="sectionCard ${shouldExpand ? "expanded" : ""}">
+    <div class="sectionHeader" onclick="toggle(this)">${title}</div>
+    <div class="sectionBody">${body}</div>
+  </div>`;
 }
+
 
 function render(){
   const d=days[activeDay];
