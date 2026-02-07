@@ -3,347 +3,298 @@
 <head>
 <meta charset="UTF-8" />
 <title>Uttarakhand Trip Planner</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <style>
+:root{
+  --bg:#020617;
+  --card:#020b1f;
+  --border:#164e63;
+  --accent:#22d3ee;
+}
+*{box-sizing:border-box}
 body{
   margin:0;
-  font-family:system-ui;
-  background:#020617;
-  color:#67e8f9;
+  font-family:system-ui,Segoe UI,Roboto;
+  background:var(--bg);
+  color:#a5f3fc;
 }
-h1{text-align:center;margin:16px}
+h1{text-align:center;color:var(--accent)}
+.container{max-width:1400px;margin:auto;padding:16px}
 
 /* ROUTE */
-.routeBox{
-  border:1px solid #164e63;
-  border-radius:14px;
-  padding:14px;
-  margin:12px;
-}
-.routeTitle{
-  text-align:center;
-  font-weight:600;
-  margin-bottom:8px;
-}
-.routeTrack{
+.route{
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:16px;
+  margin-bottom:20px;
   position:relative;
-  height:46px;
 }
-.routeLine{
-  position:absolute;
-  top:50%;
-  left:0;
-  right:0;
-  height:2px;
-  background:#164e63;
+.route-title{text-align:center;color:var(--accent);margin-bottom:10px}
+.route-line{
+  display:flex;justify-content:space-between;align-items:center;
+  position:relative;margin-top:10px
 }
-.routeProgress{
-  position:absolute;
-  top:50%;
-  left:0;
-  height:2px;
-  background:#22d3ee;
-  width:0%;
-  transition:width .4s ease;
+.route-line::before{
+  content:"";position:absolute;left:0;right:0;top:50%;
+  height:3px;background:var(--border)
 }
-.routeDots{
-  position:absolute;
-  top:50%;
-  left:0;
-  right:0;
-  display:flex;
-  justify-content:space-between;
+.dot{
+  width:16px;height:16px;border-radius:50%;
+  background:#155e75;z-index:1;cursor:pointer
 }
-.node{
-  width:14px;
-  height:14px;
-  background:#164e63;
-  border-radius:50%;
-  cursor:pointer;
-}
-.node.active{background:#22d3ee}
+.dot.active{background:var(--accent);box-shadow:0 0 10px var(--accent)}
 .bus{
-  position:absolute;
-  top:0;
-  transform:translateX(-50%);
-  transition:left .4s ease;
+  position:absolute;top:-28px;transition:.4s;font-size:18px
 }
 
 /* TOGGLE */
-.toggleWrap{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  justify-content:flex-end;
-  margin-bottom:8px;
+.toggle{
+  position:absolute;right:20px;top:20px;display:flex;align-items:center;gap:10px
 }
 .switch{
-  position:relative;
-  width:50px;
-  height:24px;
+  width:52px;height:28px;border-radius:999px;background:#1e293b;
+  position:relative;cursor:pointer
 }
-.switch input{display:none}
-.slider{
-  position:absolute;
-  inset:0;
-  background:#334155;
-  border-radius:20px;
-  cursor:pointer;
+.switch::after{
+  content:"";width:22px;height:22px;border-radius:50%;
+  background:white;position:absolute;top:3px;left:4px;transition:.3s
 }
-.slider:before{
-  content:"";
-  position:absolute;
-  height:18px;
-  width:18px;
-  left:3px;
-  top:3px;
-  background:#fff;
-  border-radius:50%;
-  transition:.3s;
-}
-input:checked + .slider{
-  background:#22d3ee;
-}
-input:checked + .slider:before{
-  transform:translateX(26px);
-}
+.switch.on{background:#22c55e}
+.switch.on::after{left:26px}
 
-/* GRID + CARDS */
+/* GRID */
 .grid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-  gap:12px;
-  padding:12px;
+  gap:16px;
 }
 .card{
-  border:1px solid #164e63;
-  border-radius:12px;
-  padding:10px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:12px;
 }
-.cardHeader{
-  font-weight:600;
+.card h3{
+  margin:0 0 8px 0;
+  color:var(--accent);
   cursor:pointer;
-  margin-bottom:6px;
 }
-.cardBody{display:none}
-.card.open .cardBody{display:block}
+.card.collapsed .body{display:none}
+iframe{width:100%;height:220px;border:0;border-radius:10px}
 
+/* FORM */
 input,select,textarea,button{
-  width:100%;
-  margin:4px 0;
-  padding:6px;
-  border-radius:6px;
-  border:none;
+  width:100%;margin:6px 0;padding:8px;
+  border-radius:6px;border:none
 }
-button{
-  background:#22d3ee;
-  font-weight:600;
-  cursor:pointer;
-}
-
-iframe{
-  width:100%;
-  border:0;
-  border-radius:8px;
-}
+button{background:var(--accent);cursor:pointer}
+.log{font-size:13px;border-bottom:1px solid #134e4a;padding:4px 0}
 </style>
 </head>
 
 <body>
+<div class="container">
 <h1>Uttarakhand Trip Planner</h1>
 
-<div class="routeBox">
-  <div class="toggleWrap">
+<!-- ROUTE -->
+<div class="route">
+  <div class="route-title" id="routeTitle"></div>
+
+  <div class="toggle">
     <span>Collapse</span>
-    <label class="switch">
-      <input type="checkbox" id="expandToggle">
-      <span class="slider"></span>
-    </label>
+    <div id="expandToggle" class="switch"></div>
     <span>Expand</span>
   </div>
 
-  <div class="routeTitle" id="routeTitle"></div>
-
-  <div class="routeTrack">
-    <div class="routeLine"></div>
-    <div class="routeProgress" id="routeProgress"></div>
+  <div class="route-line" id="routeLine">
     <div class="bus" id="bus">🚌</div>
-    <div class="routeDots" id="routeDots"></div>
   </div>
 </div>
 
-<div class="grid" id="content"></div>
+<!-- CARDS -->
+<div class="grid" id="cards"></div>
+</div>
 
 <script>
-/* ---------------- STATE ---------------- */
-var activeDay = 0;
-var cardsExpanded = false;
-var openCards = new Set();
+/* ================= FIREBASE ================= */
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-var participants = ["Sahil","Patil"];
-var expenses = [];
-var logs = [];
+/* ================= DATA ================= */
+const tripId = new URLSearchParams(location.search).get("trip") || "default";
 
-/* ---------------- DAYS (6) ---------------- */
-var days = [
+const tripDates = ["Sun","Mon","Tue","Wed","Thu","Fri"];
+
+const days = [
   {
-    title:"Sun — Delhi → Haridwar",
+    city:"Delhi → Haridwar",
     steps:["Arrive Delhi","Bus to Haridwar","Hotel check-in","Ganga Aarti"],
-    hotel:{name:"Hotel Ganga Lahari",map:"https://maps.google.com/maps?q=Hotel%20Ganga%20Lahari&output=embed"},
+    routeMap:"https://www.google.com/maps/embed?pb=!1m28!1m12!1m3!1d224345.8396456305!2d77.068899!3d28.527280!",
+    hotel:{
+      name:"Hotel Ganga Lahari",
+      link:"https://maps.google.com",
+      map:"https://www.google.com/maps/embed?pb=!1m18"
+    },
     food:["Local chai","Chotiwala"],
-    emergency:["Ambulance 108","Police 112","District Hospital Haridwar"]
+    emergency:["Ambulance:108","Police:112","District Hospital Haridwar"]
   },
   {
-    title:"Mon — Haridwar → Rishikesh",
+    city:"Haridwar → Rishikesh",
     steps:["Morning Aarti","Travel to Rishikesh","Explore ghats"],
-    hotel:{name:"Aloha on the Ganges",map:"https://maps.google.com/maps?q=Aloha%20on%20the%20Ganges&output=embed"},
+    routeMap:"https://www.google.com/maps/embed?pb=!1m18",
+    hotel:{
+      name:"Aloha on the Ganges",
+      link:"https://maps.google.com",
+      map:"https://www.google.com/maps/embed?pb=!1m18"
+    },
     food:["German Bakery","Ganga View Cafe"],
-    emergency:["Ambulance 108","Police 112","AIIMS Rishikesh"]
+    emergency:["Ambulance:108","Police:112","AIIMS Rishikesh"]
   },
-  {
-    title:"Tue — Rishikesh",
-    steps:["Yoga","Rafting","Cafe hopping"],
-    hotel:{name:"Same Hotel",map:"https://maps.google.com/maps?q=Rishikesh&output=embed"},
-    food:["Little Buddha Cafe"],
-    emergency:["AIIMS Rishikesh"]
-  },
-  {
-    title:"Wed — Rishikesh",
-    steps:["Explore temples","Free day"],
-    hotel:{name:"Same Hotel",map:"https://maps.google.com/maps?q=Rishikesh&output=embed"},
-    food:["Local snacks"],
-    emergency:["AIIMS Rishikesh"]
-  },
-  {
-    title:"Thu — Rishikesh → Dehradun",
-    steps:["Travel to Dehradun","Deer Park","Drona Ashram"],
-    hotel:{name:"Dehradun Hotel",map:"https://maps.google.com/maps?q=Dehradun&output=embed"},
-    food:["Bakery"],
-    emergency:["District Hospital Dehradun"]
-  },
-  {
-    title:"Fri — Mussoorie → Delhi",
-    steps:["Sahastradhara","Return to Delhi"],
-    hotel:{name:"—",map:"https://maps.google.com/maps?q=Mussoorie&output=embed"},
-    food:["Tea"],
-    emergency:["Police 112"]
-  }
+  {city:"Rishikesh",steps:["Rafting","Cafes","Ashrams"],routeMap:"https://www.google.com/maps/embed?pb=!1m18",hotel:{name:"Same Hotel",link:"#",map:"https://www.google.com/maps/embed?pb=!1m18"},food:["Cafe","Tea"],emergency:["108","112"]},
+  {city:"Rishikesh",steps:["Waterfall","Rest"],routeMap:"https://www.google.com/maps/embed?pb=!1m18",hotel:{name:"Same Hotel",link:"#",map:"https://www.google.com/maps/embed?pb=!1m18"},food:["Snacks"],emergency:["108"]},
+  {city:"Rishikesh → Dehradun",steps:["Travel","Explore"],routeMap:"https://www.google.com/maps/embed?pb=!1m18",hotel:{name:"DDN Hotel",link:"#",map:"https://www.google.com/maps/embed?pb=!1m18"},food:["Street food"],emergency:["108"]},
+  {city:"Mussoorie → Delhi",steps:["Sightseeing","Return"],routeMap:"https://www.google.com/maps/embed?pb=!1m18",hotel:{name:"—",link:"#",map:""},food:["Cafe"],emergency:["108"]}
 ];
 
-/* ---------------- SETTLEMENT ---------------- */
+let activeDay = 0;
+let cardsExpanded = false;
+let expenses = [];
+let logs = [];
+const participants = ["Sahil","Patil"];
+
+/* ================= ROUTE ================= */
+const routeLine = document.getElementById("routeLine");
+days.forEach((_,i)=>{
+  const d=document.createElement("div");
+  d.className="dot";
+  d.onclick=()=>{activeDay=i;render()};
+  routeLine.appendChild(d);
+});
+
+/* ================= FIREBASE SYNC ================= */
+db.collection("trips").doc(tripId).collection("expenses")
+.onSnapshot(s=>{
+  expenses=s.docs.map(d=>({...d.data(),id:d.id}));
+  render(false);
+});
+
+db.collection("trips").doc(tripId).collection("logs")
+.orderBy("time")
+.onSnapshot(s=>{
+  logs=s.docs.map(d=>d.data());
+  render(false);
+});
+
+/* ================= SETTLEMENT ================= */
 function calculateSettlement(){
-  var total = 0;
-  var paid = {};
+  let total=0, paid={};
   participants.forEach(p=>paid[p]=0);
-
   expenses.forEach(e=>{
-    total += e.amount;
-    paid[e.paidBy] += e.amount;
+    total+=e.amount;
+    paid[e.paidBy]+=e.amount;
   });
-
-  var share = participants.length ? total/participants.length : 0;
-  var settlement = {};
-  participants.forEach(p=>{
-    settlement[p] = Math.round(paid[p]-share);
-  });
-
-  return {total:total,share:share,settlement:settlement};
+  const share=participants.length?total/participants.length:0;
+  let settlement={};
+  participants.forEach(p=>settlement[p]=Math.round(paid[p]-share));
+  return {total,share,settlement};
 }
 
-/* ---------------- RENDER ---------------- */
-function render(){
-  document.getElementById("expandToggle").checked = cardsExpanded;
-  document.getElementById("routeTitle").innerText = days[activeDay].title;
+/* ================= RENDER ================= */
+function card(title,body){
+  return `
+  <div class="card ${cardsExpanded?"":"collapsed"}">
+    <h3 onclick="toggleCard(this)">${title}</h3>
+    <div class="body">${body}</div>
+  </div>`;
+}
 
-  /* ROUTE DOTS */
-  var dots = document.getElementById("routeDots");
-  dots.innerHTML="";
-  days.forEach(function(_,i){
-    var n=document.createElement("div");
-    n.className="node"+(i===activeDay?" active":"");
-    n.onclick=function(){activeDay=i;render();};
-    dots.appendChild(n);
+function toggleCard(h){
+  h.parentElement.classList.toggle("collapsed");
+}
+
+function render(moveBus=true){
+  const d=days[activeDay];
+  document.getElementById("routeTitle").innerText=
+    `${tripDates[activeDay]} — ${d.city}`;
+
+  document.querySelectorAll(".dot").forEach((dot,i)=>{
+    dot.classList.toggle("active",i===activeDay);
   });
 
-  document.getElementById("routeProgress").style.width =
-    (activeDay/(days.length-1))*100+"%";
-  document.getElementById("bus").style.left =
-    (activeDay/(days.length-1))*100+"%";
-
-  var d = days[activeDay];
-  var s = calculateSettlement();
-
-  function card(id,title,body){
-    var open = cardsExpanded || openCards.has(id);
-    return `
-      <div class="card ${open?"open":""}">
-        <div class="cardHeader" onclick="toggleCard('${id}')">${title}</div>
-        <div class="cardBody">${body}</div>
-      </div>`;
+  if(moveBus){
+    const bus=document.getElementById("bus");
+    bus.style.left=`calc(${activeDay*(100/(days.length-1))}% - 8px)`;
   }
 
-  document.getElementById("content").innerHTML = `
-    ${card("steps","🧭 Step-by-step","<ul>"+d.steps.map(x=>"<li>"+x+"</li>").join("")+"</ul>")}
-    ${card("hotel","🏨 Hotel","<b>"+d.hotel.name+"</b><iframe src='"+d.hotel.map+"' height='180'></iframe>")}
-    ${card("food","☕ Food & Snacks","<ul>"+d.food.map(x=>"<li>"+x+"</li>").join("")+"</ul>")}
-    ${card("emergency","🚑 Emergency","<ul>"+d.emergency.map(x=>"<li>"+x+"</li>").join("")+"</ul>")}
-    ${card("expenses","💳 Expenses",`
-      <input id="et" placeholder="Title">
-      <input id="ea" type="number" placeholder="Amount">
-      <select id="ep">${participants.map(p=>"<option>"+p+"</option>").join("")}</select>
-      <button onclick="addExpense()">Add</button><hr>
-      ${expenses.map((e,i)=>`${e.title} ₹${e.amount} (${e.paidBy})
-        <button onclick="delExpense(${i})">❌</button>`).join("<br>")}
-    `)}
-    ${card("settlement","📊 Settlement",`
-      <b>Total:</b> ₹${s.total}<br>
-      <b>Per Person:</b> ₹${Math.round(s.share)}<hr>
-      ${participants.map(p=>{
-        var v=s.settlement[p];
-        return v>0?`🟢 ${p} gets ₹${v}`:
-               v<0?`🔴 ${p} pays ₹${-v}`:
-               `⚪ ${p} settled`;
-      }).join("<br>")}
-    `)}
-    ${card("logs","📜 Logs",`
-      <button onclick="clearLogs()">Clear Logs</button><hr>
-      ${logs.length?logs.join("<br>"):"No logs"}
-    `)}
-  `;
+  const {total,share,settlement}=calculateSettlement();
+
+  document.getElementById("cards").innerHTML = `
+${card("🧭 Step-by-step", `<ul>${d.steps.map(s=>`<li>${s}</li>`).join("")}</ul>`)}
+${card("🗺 Route Map", `<iframe src="${d.routeMap}"></iframe>`)}
+${card("🏨 Hotel", `<a href="${d.hotel.link}" target="_blank">${d.hotel.name}</a><iframe src="${d.hotel.map}"></iframe>`)}
+${card("📝 Notes", `<textarea placeholder="Notes for the day"></textarea>`)}
+${card("🍽 Food & Snacks", `<ul>${d.food.map(f=>`<li>${f}</li>`).join("")}</ul>`)}
+${card("🚑 Emergency", `<ul>${d.emergency.map(e=>`<li>${e}</li>`).join("")}</ul>`)}
+${card("💳 Expenses", `
+<input id="et" placeholder="Title">
+<input id="ea" type="number" placeholder="Amount">
+<select id="ep">${participants.map(p=>`<option>${p}</option>`).join("")}</select>
+<button onclick="addExpense()">Add</button>
+${expenses.map(e=>`<div>${e.title} ₹${e.amount} (${e.paidBy}) <button onclick="delExpense('${e.id}')">❌</button></div>`).join("")}
+`)}
+${card("📊 Settlement", `
+<b>Total:</b> ₹${total}<br>
+<b>Per Person:</b> ₹${Math.round(share)}<hr>
+${Object.entries(settlement).map(([p,v])=>v>0?`🟢 ${p} gets ₹${v}`:v<0?`🔴 ${p} pays ₹${Math.abs(v)}`:`⚪ ${p} settled`).join("<br>")}
+`)}
+${card("🧾 Logs", logs.map(l=>`<div class="log">${l.text}</div>`).join("") )}
+`;
 }
 
-/* ---------------- ACTIONS ---------------- */
-function toggleCard(id){
-  if(openCards.has(id)) openCards.delete(id);
-  else openCards.add(id);
-  render();
-}
+/* ================= ACTIONS ================= */
 function addExpense(){
-  var t=et.value;
-  var a=parseInt(ea.value);
-  var p=ep.value;
-  if(!t||!a)return;
-  expenses.push({title:t,amount:a,paidBy:p});
-  logs.unshift(p+" added ₹"+a+" for "+t);
-  render();
-}
-function delExpense(i){
-  var e=expenses.splice(i,1)[0];
-  logs.unshift("Removed ₹"+e.amount+" for "+e.title);
-  render();
-}
-function clearLogs(){
-  logs=[];
-  render();
+  const title=et.value;
+  const amount=Number(ea.value);
+  const paidBy=ep.value;
+  if(!title||!amount)return;
+
+  db.collection("trips").doc(tripId).collection("expenses").add({
+    title,amount,paidBy
+  });
+
+  db.collection("trips").doc(tripId).collection("logs").add({
+    text:`${paidBy} added ₹${amount} for ${title}`,
+    time:Date.now()
+  });
 }
 
-document.getElementById("expandToggle").onchange=function(e){
-  cardsExpanded=e.target.checked;
-  render();
+function delExpense(id){
+  const exp=expenses.find(e=>e.id===id);
+  db.collection("trips").doc(tripId).collection("expenses").doc(id).delete();
+  db.collection("trips").doc(tripId).collection("logs").add({
+    text:`${exp.paidBy} removed ₹${exp.amount} for ${exp.title}`,
+    time:Date.now()
+  });
+}
+
+/* ================= TOGGLE ================= */
+document.getElementById("expandToggle").onclick=()=>{
+  cardsExpanded=!cardsExpanded;
+  document.getElementById("expandToggle").classList.toggle("on",cardsExpanded);
+  render(false);
 };
 
-document.addEventListener("DOMContentLoaded",render);
+render();
 </script>
 </body>
 </html>
