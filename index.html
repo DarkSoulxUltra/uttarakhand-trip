@@ -62,6 +62,17 @@ h1{text-align:center;margin:12px 0}
   background:#164e63
 }
 
+.routeFill{
+  position:absolute;
+  left:0;
+  top:50%;
+  height:3px;
+  background:#22d3ee;
+  width:0%;
+  transition:width .6s ease;
+}
+
+
 .node{
   width:16px;
   height:16px;
@@ -129,6 +140,28 @@ h1{text-align:center;margin:12px 0}
   padding:12px;
   background:rgba(2,6,23,.6)
 }
+
+  .sectionBody{
+  max-height:800px;
+  overflow:hidden;
+  transition:max-height .35s ease, opacity .25s ease;
+}
+
+.sectionCard.collapsed .sectionBody{
+  max-height:0;
+  opacity:0;
+  margin-top:0;
+}
+
+.sectionHeader::after{
+  content:"▾";
+  transition:transform .3s;
+}
+
+.sectionCard.collapsed .sectionHeader::after{
+  transform:rotate(-90deg);
+}
+
 
 .sectionHeader{
   font-weight:700;
@@ -215,6 +248,7 @@ iframe{
 <div class="routeBox">
 <div class="progressText" id="progressText"></div>
 <div class="routeLine">
+<div class="routeFill" id="routeFill"></div>
 <div id="vehicle" class="vehicle">🚌</div>
 <div class="node" onclick="select(0)"></div>
 <div class="node" onclick="select(1)"></div>
@@ -443,42 +477,45 @@ function render(){
  document.getElementById("progressText").innerText=`${tripDates[active]} — ${days[active].city}`;
  document.querySelectorAll(".node").forEach((n,i)=>n.classList.toggle("active",i<=active));
  document.getElementById("vehicle").style.left=`calc(${active*(100/(days.length-1))}% - 12px)`;
+ const fillPercent = (active / (days.length - 1)) * 100;
+ document.getElementById("routeFill").style.width = fillPercent + "%";
+
 
  const d=days[active];
  const dayExp=expenses[active]||[];
 
  content.innerHTML = `
-<div class="sectionCard">
-  <div class="sectionHeader">🧭 Step-by-step</div>
+<div class="sectionCard collapsed">
+  <div class="sectionHeader" onclick="toggleCard(this)">🧭 Step-by-step</div>
   <div class="sectionBody">
     <ul>${d.steps.map(s=>`<li>${s}</li>`).join("")}</ul>
   </div>
 </div>
 
-<div class="sectionCard">
-  <div class="sectionHeader">🗺 Route Map</div>
+<div class="sectionCard collapsed">
+  <div class="sectionHeader" onclick="toggleCard(this)">🗺 Route Map</div>
   <div class="sectionBody">
     <iframe src="${d.map}"></iframe>
   </div>
 </div>
 
-<div class="sectionCard">
-  <div class="sectionHeader">🏨 Hotel</div>
+<div class="sectionCard collapsed">
+  <div class="sectionHeader" onclick="toggleCard(this)">🏨 Hotel</div>
   <div class="sectionBody">
     <a href="${d.hotel.map}" target="_blank">${d.hotel.name}</a>
     <iframe src="${d.hotel.map}&output=embed"></iframe>
   </div>
 </div>
 
-<div class="sectionCard">
-  <div class="sectionHeader">📝 Notes</div>
+<div class="sectionCard collapsed">
+  <div class="sectionHeader" onclick="toggleCard(this)">📝 Notes</div>
   <div class="sectionBody">
     <textarea ${viewOnly?"disabled":""} oninput="saveNote(this.value)">${notes[active]||""}</textarea>
   </div>
 </div>
 
-<div class="sectionCard">
-  <div class="sectionHeader">💳 Add Expense</div>
+<div class="sectionCard collapsed">
+  <div class="sectionHeader" onclick="toggleCard(this)">💳 Add Expense</div>
   <div class="sectionBody">
     <input id="et" placeholder="Title" ${viewOnly?"disabled":""}>
     <input id="ea" type="number" placeholder="Amount" ${viewOnly?"disabled":""}>
@@ -487,8 +524,8 @@ function render(){
   </div>
 </div>
 
-<div class="sectionCard">
-  <div class="sectionHeader">🧾 Expenses</div>
+<div class="sectionCard collapsed">
+  <div class="sectionHeader" onclick="toggleCard(this)">🧾 Expenses</div>
   <div class="sectionBody">
     ${(expenses[active]||[]).map((e,i)=>`
       <div>
@@ -557,6 +594,13 @@ window.openTrip=()=>{
  if(!t)return;
  location.href=`?trip=${t}`;
 };
+
+ /* Toggle Card */ 
+window.toggleCard = (el) => {
+  el.parentElement.classList.toggle("collapsed");
+};
+
+  
 </script>
 </body>
 </html>
