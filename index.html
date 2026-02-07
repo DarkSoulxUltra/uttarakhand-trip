@@ -104,14 +104,90 @@ const tripRef = doc(db, "trips", tripId);
 
 /* ---------- DATA ---------- */
 const tripDates=["Sun","Mon","Tue","Wed","Thu","Fri"];
+
 const days=[
- {city:"Delhi → Haridwar",title:"Arrival & Ganga Aarti",steps:["Arrive Delhi","Bus to Haridwar","Ganga Aarti"]},
- {city:"Haridwar → Rishikesh",title:"Ashrams & Ropeways",steps:["Deep Snaan","Mansa Devi","Saptarishi"]},
- {city:"Rishikesh",title:"Tapovan & Cafés",steps:["Ram Jhula","Tapovan cafés"]},
- {city:"Rishikesh",title:"Rafting Day",steps:["Rafting","Rest"]},
- {city:"Rishikesh → Dehradun",title:"Waterfalls & Ashrams",steps:["Neergarh","Drona Ashram","Deer Park"]},
- {city:"Mussoorie → Delhi",title:"Hill Wrap-up",steps:["Sahastradhara","Mall Road"]}
+{
+ city:"Delhi → Haridwar",
+ title:"Arrival & Ganga Aarti",
+ hotel:{name:"Hotel Ganga Lahari",map:"https://maps.google.com/?q=Hotel+Ganga+Lahari+Haridwar"},
+ map:"https://www.google.com/maps?q=Delhi+to+Haridwar&output=embed",
+ steps:[
+  "Arrive in Delhi early morning",
+  "Bus to Haridwar",
+  "Hotel check-in",
+  "Ganga Aarti at Har Ki Pauri",
+  "Local market walk"
+ ],
+ highlights:["Har Ki Pauri","Ganga Aarti"]
+},
+{
+ city:"Haridwar → Rishikesh",
+ title:"Ashrams & Ropeways",
+ hotel:{name:"Hotel Ishan (Tapovan)",map:"https://maps.google.com/?q=Hotel+Ishan+Rishikesh"},
+ map:"https://www.google.com/maps?q=Haridwar+to+Rishikesh&output=embed",
+ steps:[
+  "Early morning Deep Snaan",
+  "Mansa Devi Ropeway",
+  "Chandi Devi Ropeway",
+  "Saptarishi Ashram",
+  "Drive to Rishikesh"
+ ],
+ highlights:["Mansa Devi","Chandi Devi","Saptarishi Ashram"]
+},
+{
+ city:"Rishikesh",
+ title:"Tapovan & Cafés",
+ hotel:{name:"Hotel Ishan (Tapovan)",map:"https://maps.google.com/?q=Hotel+Ishan+Rishikesh"},
+ map:"https://www.google.com/maps?q=Tapovan+Rishikesh&output=embed",
+ steps:[
+  "Ram Jhula",
+  "Laxman Jhula",
+  "Tapovan cafés",
+  "Evening river walk"
+ ],
+ highlights:["Ram Jhula","Laxman Jhula","Tapovan"]
+},
+{
+ city:"Rishikesh",
+ title:"Rafting & Recovery",
+ hotel:{name:"Hotel Ishan (Tapovan)",map:"https://maps.google.com/?q=Hotel+Ishan+Rishikesh"},
+ map:"https://www.google.com/maps?q=Rishikesh+Rafting&output=embed",
+ steps:[
+  "Early breakfast",
+  "River rafting",
+  "Freshen up",
+  "Lunch & rest"
+ ],
+ highlights:["Shivpuri Rafting"]
+},
+{
+ city:"Rishikesh → Dehradun",
+ title:"Waterfalls & Ashrams",
+ hotel:{name:"Hotel MJ Residency (Rajpur Rd)",map:"https://maps.google.com/?q=Hotel+MJ+Residency+Dehradun"},
+ map:"https://www.google.com/maps?q=Rishikesh+to+Dehradun&output=embed",
+ steps:[
+  "Neergarh Waterfall",
+  "Rishi Drona Ashram",
+  "Malsi Deer Park",
+  "Evening market"
+ ],
+ highlights:["Neergarh Waterfall","Rishi Drona Ashram","Malsi Deer Park"]
+},
+{
+ city:"Mussoorie → Delhi",
+ title:"Hill Wrap-up",
+ hotel:{name:"Honeymoon Inn Mussoorie",map:"https://maps.google.com/?q=Honeymoon+Inn+Mussoorie"},
+ map:"https://www.google.com/maps?q=Mussoorie+to+Delhi&output=embed",
+ steps:[
+  "Sahastradhara Waterfall",
+  "Kempty Falls",
+  "Mall Road stroll",
+  "Return to Delhi"
+ ],
+ highlights:["Sahastradhara","Kempty Falls","Mall Road"]
+}
 ];
+
 
 let participants=["Sahil","Patil"];
 let expenses={};
@@ -179,13 +255,25 @@ function render(){
  <h2>${days[active].title}</h2>
 
  <details open>
+ <summary>🏨 Hotel</summary>
+ <a href="${d.hotel.map}" target="_blank">${d.hotel.name}</a>
+ </details>
+ <details open>
  <summary>🧭 Step-by-step</summary>
  <ul>${days[active].steps.map(s=>`<li>${s}</li>`).join("")}</ul>
+ </details>
+ <details>
+ <summary>📍 Key Highlights</summary>
+ <ul>${d.highlights.map(h=>`<li>${h}</li>`).join("")}</ul>
  </details>
 
  <details open>
  <summary>📝 Notes</summary>
  <textarea oninput="saveNote(this.value)">${notes[active]||""}</textarea>
+ </details>
+ <details>
+ <summary>🗺 Map</summary>
+ <iframe src="${d.map}" loading="lazy"></iframe>
  </details>
 
  <details open>
