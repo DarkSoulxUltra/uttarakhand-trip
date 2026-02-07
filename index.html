@@ -263,6 +263,11 @@ function card(title, key, body) {
 
 
 function render(moveBus=true){
+  const cardsContainer = document.getElementById("cards");
+cardsContainer.classList.remove("day-transition", "active-day");
+void cardsContainer.offsetWidth;
+cardsContainer.classList.add("day-transition", "active-day");
+
   const d=days[activeDay];
   document.getElementById("routeTitle").innerText=
     `${tripDates[activeDay]} — ${d.city}`;
