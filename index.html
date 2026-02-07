@@ -328,13 +328,62 @@ function render(){
   `).join("")}
 `)}
 
-  ${card("📊 Settlement",`
-    Total: ₹${(expenses[activeDay]||[]).reduce((a,b)=>a+b.amount,0)}`)}
+  ${card("📊 Settlement", `
+  <div id="settlementBox">Calculating settlement
+    const { total, share, paid, settlement } = calculateSettlement();
+
+let settlementHTML = `
+<b>Total:</b> ₹${total}<br>
+<b>Per Person Share:</b> ₹${Math.round(share)}
+<hr>
+`;
+
+participants.forEach(p => {
+  const diff = settlement[p];
+  if (diff > 0) {
+    settlementHTML += `<div>🟢 ${p} gets ₹${diff}</div>`;
+  } else if (diff < 0) {
+    settlementHTML += `<div>🔴 ${p} pays ₹${Math.abs(diff)}</div>`;
+  } else {
+    settlementHTML += `<div>⚪ ${p} settled</div>`;
+  }
+});
+document.getElementById("settlementBox").innerHTML = settlementHTML;
+</div>
+  `)}
   ${card("🧾 Expense Logs",`
     ${expenseLogs.map(l=>`<div class="log">[${l.ts}] ${l.msg}</div>`).join("") || "No logs yet"}`)}
   ${card("🚑 Emergency",`<ul>${d.emergency.map(e=>`<li>${e}</li>`).join("")}</ul>`)}
   ${card("☕ Food & Snacks",`<ul>${d.food.map(f=>`<li>${f}</li>`).join("")}</ul>`)}
   `;
+renderSettlement();
+
+  function renderSettlement() {
+  const box = document.getElementById("settlementBox");
+  if (!box) return;
+
+  const { total, share, settlement } = calculateSettlement();
+
+  let html = `
+    <b>Total:</b> ₹${total}<br>
+    <b>Per Person Share:</b> ₹${Math.round(share)}
+    <hr>
+  `;
+
+  participants.forEach(p => {
+    const diff = settlement[p];
+    if (diff > 0) {
+      html += `<div>🟢 ${p} gets ₹${diff}</div>`;
+    } else if (diff < 0) {
+      html += `<div>🔴 ${p} pays ₹${Math.abs(diff)}</div>`;
+    } else {
+      html += `<div>⚪ ${p} settled</div>`;
+    }
+  });
+
+  box.innerHTML = html;
+}
+
 }
 
 function card(title,body){
@@ -346,6 +395,27 @@ function card(title,body){
 }
 
 /* ---------------- EXPENSE ---------------- */
+
+function calculateSettlement() {
+  const paid = {};
+  participants.forEach(p => paid[p] = 0);
+
+  expenses.forEach(e => {
+    paid[e.paidBy] += Number(e.amount);
+  });
+
+  const total = Object.values(paid).reduce((a,b)=>a+b,0);
+  const share = total / participants.length;
+
+  const settlement = {};
+  participants.forEach(p => {
+    settlement[p] = Math.round(paid[p] - share);
+  });
+
+  return { total, share, paid, settlement };
+}
+
+  
 function addExpense(){
   const t = document.getElementById("et").value;
   const a = +document.getElementById("ea").value;
