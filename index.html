@@ -213,7 +213,7 @@ function buildCards(d){
     ${card("🏨 Hotel",`<b>${d.hotel}</b>`)}
     ${card("📝 Notes",`<textarea oninput="saveNote(this.value)">${notes[activeDay]||""}</textarea>`)}
     ${card("💳 Expenses",expensesHTML())}
-    ${card("📊 Settlement",`Total ₹${(expenses[activeDay]||[]).reduce((a,b)=>a+b.amount,0)}`)}
+    ${card("📊 Settlement",`Total ₹${(expenses[activeDay]||[]).reduce((a,b)=>a + Number(b.amount), 0)}`)}
     ${card("🚑 Emergency",`<ul>${d.emergency.map(e=>`<li>${e}</li>`).join("")}</ul>`)}
     ${card("☕ Food & Snacks",`<ul>${d.food.map(f=>`<li>${f}</li>`).join("")}</ul>`)}
   `;
@@ -260,7 +260,7 @@ window.saveNote=async v=>{
 window.addExpense=async ()=>{
   const t=et.value,a=+ea.value,p=ep.value;
   if(!t||!a)return;
-  const list=[...(expenses[activeDay]||[]),{title:t,amount:a,paidBy:p}];
+  const list=[...(expenses[activeDay]||[]),{ title:t, amount:Number(a), paidBy:p}];
   await setDoc(doc(db,"trips",tripId,"expenses","day-"+activeDay),{items:list});
   await updateDoc(tripRef,{activityLog:arrayUnion({
     type:"ADD",day:activeDay,title:t,amount:a,by:p,ts:Date.now()
