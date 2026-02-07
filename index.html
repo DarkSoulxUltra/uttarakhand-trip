@@ -168,22 +168,10 @@ const days = [
 
   
 let activeDay = 0;
-let cardsExpanded = false;
 let expenses = [];
 let logs = [];
 const participants = ["Sahil","Patil"];
-function getOpenCards() {
-  return Array.from(document.querySelectorAll(".card:not(.collapsed)"))
-    .map(card => card.dataset.card);
-}
 
-function restoreOpenCards(openCards) {
-  document.querySelectorAll(".card").forEach(card => {
-    if (openCards.includes(card.dataset.card)) {
-      card.classList.remove("collapsed");
-    }
-  });
-}
 
 /* ================= ROUTE ================= */
 const routeLine = document.getElementById("routeLine");
@@ -226,7 +214,7 @@ function calculateSettlement(){
 function card(title, key, body) {
   return `
     <div class="card collapsed" data-card="${key}">
-      <div class="cardHeader" onclick="toggleCard(this)">
+      <div class="cardHeader"">
         ${title}
       </div>
       <div class="cardBody">
@@ -237,34 +225,8 @@ function card(title, key, body) {
 }
 
 
-function toggleCard(headerEl) {
-  const card = headerEl.closest(".card");
-
-  // If Expand-All mode is ON, ignore individual toggles
-  if (cardsExpanded) return;
-
-  card.classList.toggle("collapsed");
-}
-
-function onExpandToggle(val) {
-  cardsExpanded = val;
-  localStorage.setItem("cardsExpanded", JSON.stringify(cardsExpanded));
-
-  document.querySelectorAll(".card").forEach(card => {
-    card.classList.toggle("collapsed", !cardsExpanded);
-  });
-}
-
-  
 
 function render(moveBus=true){
-  const openCards =
-  cardsExpanded
-    ? []
-    : document.activeElement?.closest(".card")
-      ? [document.activeElement.closest(".card").dataset.card]
-      : getOpenCards();
-
   const d=days[activeDay];
   document.getElementById("routeTitle").innerText=
     `${tripDates[activeDay]} — ${d.city}`;
