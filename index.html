@@ -166,11 +166,24 @@ const days = [
   {city:"Mussoorie → Delhi",steps:["Sightseeing","Return"],routeMap:"https://www.google.com/maps?q=Dehradun+to+Mussoorie&output=embed",hotel:{name:"Day Trip - No Stay",link:"#",map:"https://maps.google.com/?q=Mussoorie+Mall+Road"},food:["Cafe"],emergency:["108"]}
 ];
 
+  
 let activeDay = 0;
 let cardsExpanded = false;
 let expenses = [];
 let logs = [];
 const participants = ["Sahil","Patil"];
+function getOpenCards() {
+  return Array.from(document.querySelectorAll(".card:not(.collapsed)"))
+    .map(card => card.dataset.card);
+}
+
+function restoreOpenCards(openCards) {
+  document.querySelectorAll(".card").forEach(card => {
+    if (openCards.includes(card.dataset.card)) {
+      card.classList.remove("collapsed");
+    }
+  });
+}
 
 /* ================= ROUTE ================= */
 const routeLine = document.getElementById("routeLine");
@@ -210,19 +223,26 @@ function calculateSettlement(){
 }
 
 /* ================= RENDER ================= */
-function card(title,body){
+function card(title, key, body) {
   return `
-  <div class="card ${cardsExpanded?"":"collapsed"}">
-    <h3 onclick="toggleCard(this)">${title}</h3>
-    <div class="body">${body}</div>
-  </div>`;
+    <div class="card collapsed" data-card="${key}">
+      <div class="cardHeader" onclick="toggleCard(this)">
+        ${title}
+      </div>
+      <div class="cardBody">
+        ${body}
+      </div>
+    </div>
+  `;
 }
+
 
 function toggleCard(h){
   h.parentElement.classList.toggle("collapsed");
 }
 
 function render(moveBus=true){
+  const openCards = cardsExpanded ? [] : getOpenCards();
   const d=days[activeDay];
   document.getElementById("routeTitle").innerText=
     `${tripDates[activeDay]} — ${d.city}`;
@@ -239,26 +259,31 @@ function render(moveBus=true){
   const {total,share,settlement}=calculateSettlement();
 
   document.getElementById("cards").innerHTML = `
-${card("🧭 Step-by-step", `<ul>${d.steps.map(s=>`<li>${s}</li>`).join("")}</ul>`)}
-${card("🗺 Route Map", `<iframe src="${d.routeMap}"></iframe>`)}
-${card("🏨 Hotel", `<a href="${d.hotel.link}" target="_blank">${d.hotel.name}</a><iframe src="${d.hotel.map}"></iframe>`)}
-${card("📝 Notes", `<textarea placeholder="Notes for the day"></textarea>`)}
-${card("🍽 Food & Snacks", `<ul>${d.food.map(f=>`<li>${f}</li>`).join("")}</ul>`)}
-${card("🚑 Emergency", `<ul>${d.emergency.map(e=>`<li>${e}</li>`).join("")}</ul>`)}
-${card("💳 Expenses", `
+${card("🧭 Step-by-step","step-by-step", `<ul>${d.steps.map(s=>`<li>${s}</li>`).join("")}</ul>`)}
+${card("🗺 Route Map", "routemap",`<iframe src="${d.routeMap}"></iframe>`)}
+${card("🏨 Hotel", "hotel", `<a href="${d.hotel.link}" target="_blank">${d.hotel.name}</a><iframe src="${d.hotel.map}"></iframe>`)}
+${card("📝 Notes", "notes",`<textarea placeholder="Notes for the day"></textarea>`)}
+${card("🍽 Food & Snacks", "food&snacks",`<ul>${d.food.map(f=>`<li>${f}</li>`).join("")}</ul>`)}
+${card("🚑 Emergency", "emergency", `<ul>${d.emergency.map(e=>`<li>${e}</li>`).join("")}</ul>`)}
+${card("💳 Expenses", "expenses",`
 <input id="et" placeholder="Title">
 <input id="ea" type="number" placeholder="Amount">
 <select id="ep">${participants.map(p=>`<option>${p}</option>`).join("")}</select>
 <button onclick="addExpense()">Add</button>
 ${expenses.map(e=>`<div>${e.title} ₹${e.amount} (${e.paidBy}) <button onclick="delExpense('${e.id}')">❌</button></div>`).join("")}
 `)}
-${card("📊 Settlement", `
+${card("📊 Settlement", "settlement",`
 <b>Total:</b> ₹${total}<br>
 <b>Per Person:</b> ₹${Math.round(share)}<hr>
 ${Object.entries(settlement).map(([p,v])=>v>0?`🟢 ${p} gets ₹${v}`:v<0?`🔴 ${p} pays ₹${Math.abs(v)}`:`⚪ ${p} settled`).join("<br>")}
 `)}
 ${card("🧾 Logs", logs.map(l=>`<div class="log">${l.text}</div>`).join("") )}
 `;
+
+  if (!cardsExpanded) {
+  restoreOpenCards(openCards);
+}
+
 }
 
 /* ================= ACTIONS ================= */
