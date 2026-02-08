@@ -410,11 +410,7 @@ function render(){
 </div>
 
   <div class="card"><h3>📝 Notes</h3><textarea id="notesInput" placeholder="Notes for the day">${notes[activeDay]||""}</textarea><button onclick="notes[activeDay]=this.previousSibling.value;saveTrip()">Save Notes</button></div>
-  const notesBox = document.getElementById("notesInput");
-if (notesBox) {
-  notesBox.value = notes[activeDay] || "";
-}
-
+ 
   <div class="card">
   <h3>🚨 Emergency</h3>
   <ul>
@@ -452,6 +448,10 @@ if (notesBox) {
 </div>
   `;
 renderMembers();
+}
+const notesBox = document.getElementById("notesInput");
+if (notesBox) {
+  notesBox.value = notes[activeDay] || "";
 }
 
   // 🔗 Expose functions for inline HTML handlers
