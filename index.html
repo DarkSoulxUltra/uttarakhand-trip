@@ -261,6 +261,14 @@ function delExpense(id){
   }
   saveTrip();
 }
+function saveNotes() {
+  const text = document.getElementById("notesInput").value.trim();
+
+  notes[activeDay] = text;
+
+  addLog(`${currentUser || "Someone"} updated notes for ${tripDates[activeDay]}`);
+  saveTrip();
+}
 
 function addMember() {
   const input = document.getElementById("memberName");
@@ -320,16 +328,20 @@ function attachFirebaseListeners() {
 
       participants = data.participants || [];
       notes = data.notes || {};
-      logs = (d.logs || []).map(l => {
-  if (typeof l === "string") {
-    return {
-      text: l,
-      by: "Unknown",
-      time: Date.now()
-    };
-  }
-  return l;
-});
+
+      // Normalize logs
+      logs = (data.logs || []).map(l => {
+        if (typeof l === "string") {
+          return { text: l, by: "Unknown", time: Date.now() };
+        }
+        return l;
+      });
+
+      // 🔥 FIX: auto-set current user if missing
+      if (!currentUser && participants.length) {
+        currentUser = participants[0];
+      }
+
 
 
       render();
@@ -397,7 +409,12 @@ function render(){
   </ul>
 </div>
 
-  <div class="card"><h3>📝 Notes</h3><textarea>${notes[activeDay]||""}</textarea><button onclick="notes[activeDay]=this.previousSibling.value;saveTrip()">Save Notes</button></div>
+  <div class="card"><h3>📝 Notes</h3><textarea id="notesInput" placeholder="Notes for the day">${notes[activeDay]||""}</textarea><button onclick="notes[activeDay]=this.previousSibling.value;saveTrip()">Save Notes</button></div>
+  const notesBox = document.getElementById("notesInput");
+if (notesBox) {
+  notesBox.value = notes[activeDay] || "";
+}
+
   <div class="card">
   <h3>🚨 Emergency</h3>
   <ul>
