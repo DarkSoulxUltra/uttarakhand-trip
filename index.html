@@ -151,6 +151,7 @@ let expenses = [];
 let logs = [];
 let participants = [];
 let notes = {};
+let currentUser = localStorage.getItem("currentUser") || "Unknown";
 
 /* ================= ROUTE DOTS ================= */
 const routeLine = document.getElementById("routeLine");
@@ -214,6 +215,12 @@ function calculateSettlement(){
 }
 
 /* ================= ACTIONS ================= */
+function setCurrentUser(name) {
+  currentUser = name;
+  localStorage.setItem("currentUser", name);
+}
+
+  
 function addLog(message) {
   db.collection("trips").doc(tripId).update({
     logs: firebase.firestore.FieldValue.arrayUnion(
@@ -238,8 +245,9 @@ function addExpense() {
   };
   expenses.push(expense);
   addLog(
-  `${paidBy} added ₹${amount} for ${title} (${tripDates[activeDay]})`
+  `${currentUser} added ₹${amount} for ${title} (paid by ${paidBy}, ${tripDates[activeDay]})`
 );
+
 
   saveTrip(); // 🔥 single source of truth
 }
@@ -250,8 +258,10 @@ function delExpense(id) {
   if (!exp) return;
   expenses = expenses.filter(e => e.id !== id);
   addLog(
-  `${exp.paidBy} removed ₹${exp.amount} for ${exp.title} (${tripDates[exp.day ?? activeDay]})`
+  `${currentUser} removed ₹${exp.amount} for ${exp.title || "expense"} ` +
+  `(paid by ${exp.paidBy || "unknown"}, ${tripDates[exp.day ?? activeDay]})`
 );
+
 
   saveTrip();
 }
