@@ -86,7 +86,11 @@ iframe{width:100%;height:220px;border-radius:10px;border:none}
 <div class="container">
 
 <h1>Uttarakhand Trip Planner</h1>
-
+<div class="authBar">
+  <span id="userLabel"></span>
+  <button onclick="login()">Sign in with Google</button>
+  <button onclick="logout()">Logout</button>
+</div>
 <div class="route">
   <div class="routeLine" id="routeLine"></div>
   <div style="text-align:center;margin-top:6px" id="routeTitle"></div>
@@ -103,14 +107,37 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebas
 import {
   getFirestore, doc, setDoc, onSnapshot
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBqiBMggvuMxAiKfBpJIqnv8OCWj76voAk",
   authDomain: "trip-planner-2026.firebaseapp.com",
   projectId: "trip-planner-2026"
 };
+  
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
+let currentUser = null;
+onAuthStateChanged(auth, user => {
+  if (user) {
+    currentUser = {
+      uid: user.uid,
+      name: user.displayName,
+      email: user.email
+    };
+  } else {
+    currentUser = null;
+  }
+
+  render();
+});
 
 /* ---------- APP STATE ---------- */
 const tripId = new URLSearchParams(location.search).get("trip") || "uttarakhand-mar-2026";
@@ -230,10 +257,14 @@ onSnapshot(ref,s=>{
 function addLog(text) {
   logs.push({
     text,
-    by: currentUser || "Unknown",
+    by: currentUser?.name || "Unknown",
+    uid: currentUser?.uid || null,
     time: Date.now()
   });
+  saveTrip();
 }
+
+
 
 function setCurrentUser(name){
   currentUser = name;
@@ -255,7 +286,7 @@ function addExpense(){
   };
   expenses.push(exp);
   // ✅ FIX: actor is the payer
-  addLog(`${p} added ₹${a} for ${t} (${tripDates[activeDay]})`);
+  addLog(`${currentUser?.name || "Someone"} added ₹${a} for ${t} (paid by ${p}, ${tripDates[activeDay]})`);
   saveTrip();
 }
 
@@ -266,7 +297,8 @@ function delExpense(id){
   expenses = expenses.filter(e => e.id !== id);
 
   // ✅ FIX: actor = who paid originally
-  addLog(`${exp.paidBy} removed ₹${exp.amount} for ${exp.title} (${tripDates[exp.day]})`);
+  addLog(`${currentUser?.name || "Someone"} removed ₹${exp.amount} for ${exp.title} (paid by ${exp.paidBy}, ${tripDates[exp.day]})`);
+
 
   saveTrip();
 }
@@ -378,6 +410,10 @@ function attachFirebaseListeners() {
  
 /* ---------- UI ---------- */
 function render(){
+  
+document.getElementById("userLabel").innerText =
+  currentUser ? `👤 ${currentUser.name}` : "Not signed in";
+
   const d=days[activeDay];
   document.getElementById("routeTitle").innerText=
     `${tripDates[activeDay]} — ${d.city}`;
@@ -468,6 +504,18 @@ if (notesBox) {
   notesBox.value = notes[activeDay] || "";
 }
 
+function login() {
+  const provider = new GoogleAuthProvider();
+  signInWithPopup(auth, provider)
+    .catch(err => alert(err.message));
+}
+
+function logout() {
+  signOut(auth);
+}
+
+
+  
   // 🔗 Expose functions for inline HTML handlers
 window.addExpense = addExpense;
 window.delExpense = delExpense;
