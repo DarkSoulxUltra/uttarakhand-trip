@@ -227,13 +227,14 @@ onSnapshot(ref,s=>{
 });
 
 /* ---------- LOGIC ---------- */
-function addLog(text){
+function addLog(text) {
   logs.push({
     text,
-    by: currentUser,
+    by: currentUser || "Unknown",
     time: Date.now()
   });
 }
+
 function setCurrentUser(name){
   currentUser = name;
   saveTrip();
@@ -264,37 +265,47 @@ function delExpense(id){
 function addMember() {
   const input = document.getElementById("memberName");
   const name = input.value.trim();
-  if (!currentUser) currentUser = name;
   if (!name) return;
+  // First member becomes current user automatically
+  if (!currentUser) {
+    currentUser = name;
+  }
   if (participants.includes(name)) return;
-
   participants.push(name);
   input.value = "";
-
-  logs.push(`${name} joined the trip`);
-  saveTrip(); // 🔥 THIS IS REQUIRED
+  addLog(`${name} joined the trip`);
+  saveTrip();
 }
+
 
 function removeMember(name) {
   participants = participants.filter(p => p !== name);
 
-  logs.push(`${name} was removed from the trip`);
-  saveTrip(); // 🔥 THIS IS REQUIRED
+  addLog(`${name} was removed from the trip`);
+  saveTrip();
 }
 
+
   
-function calculateSettlement(){
-  let total=0,paid={};
-  participants.forEach(p=>paid[p]=0);
-  expenses.forEach(e=>{
-    total+=e.amount;
-    paid[e.paidBy]+=e.amount;
+function calculateSettlement() {
+  if (!participants.length) return { total: 0, share: 0, result: {} };
+  let total = 0;
+  let paid = {};
+  participants.forEach(p => paid[p] = 0);
+  expenses.forEach(e => {
+    total += e.amount || 0;
+    if (paid[e.paidBy] !== undefined) {
+      paid[e.paidBy] += e.amount;
+    }
   });
-  const share=total/participants.length;
-  let result={};
-  participants.forEach(p=>result[p]=Math.round(paid[p]-share));
-  return {total,share,result};
+  const share = total / participants.length;
+  let result = {};
+  participants.forEach(p => {
+    result[p] = Math.round(paid[p] - share);
+  });
+  return { total, share, result };
 }
+
 
 function attachFirebaseListeners() {
   db.collection("trips").doc(tripId)
@@ -309,7 +320,17 @@ function attachFirebaseListeners() {
 
       participants = data.participants || [];
       notes = data.notes || {};
-      logs = data.logs || [];
+      logs = (d.logs || []).map(l => {
+  if (typeof l === "string") {
+    return {
+      text: l,
+      by: "Unknown",
+      time: Date.now()
+    };
+  }
+  return l;
+});
+
 
       render();
     });
@@ -406,7 +427,7 @@ function render(){
   <div class="card"><h3>🧾 Logs</h3>${logs.length
   ? logs.map(l =>
       `<div class="log">
-        [${new Date(l.time).toLocaleString()}] ${l.text}
+        [${l.time ? new Date(l.time).toLocaleString() : "—"}] ${l.text}
       </div>`
     ).join("")
   : "No logs yet"
