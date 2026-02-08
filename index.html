@@ -264,7 +264,7 @@ function delExpense(id){
 function addMember() {
   const input = document.getElementById("memberName");
   const name = input.value.trim();
-
+  if (!currentUser) currentUser = name;
   if (!name) return;
   if (participants.includes(name)) return;
 
