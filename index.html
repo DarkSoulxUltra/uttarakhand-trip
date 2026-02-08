@@ -162,28 +162,21 @@ days.forEach((_,i)=>{
 });
 
 /* ================= FIREBASE LISTENERS ================= */
-function attachFirebaseListeners(){
-  const tripRef = db.collection("trips").doc(tripId);
+function attachFirebaseListeners() {
+  db.collection("trips").doc(tripId)
+    .onSnapshot(doc => {
+      if (!doc.exists) return;
 
-  tripRef.onSnapshot(doc=>{
-    if(!doc.exists) return;
-    participants = doc.data().participants || [];
-    notes = doc.data().notes || {};
-    render();
-  });
+      const data = doc.data();
+      expenses = data.expenses || [];
+      participants = data.participants || [];
+      notes = data.notes || {};
+      logs = data.logs || [];
 
-  tripRef.collection("expenses").orderBy("createdAt","asc")
-  .onSnapshot(s=>{
-    expenses = s.docs.map(d=>({id:d.id,...d.data()}));
-    render();
-  });
-
-  tripRef.collection("logs").orderBy("time","desc")
-  .onSnapshot(s=>{
-    logs = s.docs.map(d=>d.data());
-    render();
-  });
+      render();
+    });
 }
+
 
 /* ================= SETTLEMENT ================= */
 function calculateSettlement(){
@@ -200,28 +193,46 @@ function calculateSettlement(){
 }
 
 /* ================= ACTIONS ================= */
-function addExpense(){
-  const t=document.getElementById("et").value.trim();
-  const a=parseInt(document.getElementById("ea").value,10);
-  const p=document.getElementById("ep").value;
-  if(!t||!a||!p) return;
-
-  db.collection("trips").doc(tripId).collection("expenses").add({
-    title:t,amount:a,paidBy:p,createdAt:Date.now()
-  });
-  db.collection("trips").doc(tripId).collection("logs").add({
-    text:`${p} added ₹${a} for ${t}`,time:Date.now()
-  });
+function addExpense() {
+  const title = document.getElementById("et").value.trim();
+  const amount = parseInt(document.getElementById("ea").value);
+  const paidBy = document.getElementById("ep").value;
+  if (!title || !amount) return;
+  const expense = {
+    id: Date.now().toString(),
+    title,
+    amount,
+    paidBy,
+    day: activeDay
+  };
+  expenses.push(expense);
+  logs.push(
+    `${paidBy} added ₹${amount} for ${title} (${tripDates[activeDay]})`
+  );
+  saveTrip(); // 🔥 single source of truth
 }
 
-function delExpense(id){
-  const e=expenses.find(x=>x.id===id);
-  if(!e) return;
-  db.collection("trips").doc(tripId).collection("expenses").doc(id).delete();
-  db.collection("trips").doc(tripId).collection("logs").add({
-    text:`${e.paidBy} removed ₹${e.amount} for ${e.title}`,time:Date.now()
-  });
+
+function delExpense(id) {
+  const exp = expenses.find(e => e.id === id);
+  if (!exp) return;
+  expenses = expenses.filter(e => e.id !== id);
+  logs.push(
+    `${exp.paidBy} removed ₹${exp.amount} for ${exp.title} (${tripDates[exp.day]})`
+  );
+  saveTrip();
 }
+
+function saveTrip() {
+  db.collection("trips").doc(tripId).set({
+    expenses,
+    participants,
+    notes,
+    logs,
+    updatedAt: Date.now()
+  }, { merge: true });
+}
+
 
 function addMember(){
   const name=document.getElementById("newMember").value.trim();
