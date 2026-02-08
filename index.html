@@ -242,33 +242,46 @@ function setCurrentUser(name){
 
 
 function addExpense(){
-  const t=document.getElementById("et").value;
-  const a=parseInt(document.getElementById("ea").value);
-  const p=document.getElementById("ep").value;
-  if(!t||!a)return;
-  const exp={id:crypto.randomUUID(),title:t,amount:a,paidBy:p,day:activeDay};
+  const t = document.getElementById("et").value.trim();
+  const a = parseInt(document.getElementById("ea").value);
+  const p = document.getElementById("ep").value; // payer
+  if(!t || !a || !p) return;
+  const exp = {
+    id: crypto.randomUUID(),
+    title: t,
+    amount: a,
+    paidBy: p,
+    day: activeDay
+  };
   expenses.push(exp);
-  addLog(`${currentUser} added ₹${a} for ${t} (${tripDates[activeDay]})`);
+  // ✅ FIX: actor is the payer
+  addLog(`${p} added ₹${a} for ${t} (${tripDates[activeDay]})`);
   saveTrip();
 }
 
 function delExpense(id){
-  let exp = expenses.find(e => e.id === id);
-  if (!exp) exp = expenses.find(e => e.title); // legacy fallback
-  expenses = expenses.filter(e => e !== exp);
-  if(exp){
-    addLog(`${currentUser} removed ₹${exp.amount} for ${exp.title} (${tripDates[exp.day] || ""})`);
-  }
+  const exp = expenses.find(e => e.id === id);
+  if (!exp) return;
+
+  expenses = expenses.filter(e => e.id !== id);
+
+  // ✅ FIX: actor = who paid originally
+  addLog(`${exp.paidBy} removed ₹${exp.amount} for ${exp.title} (${tripDates[exp.day]})`);
+
   saveTrip();
 }
-function saveNotes() {
-  const text = document.getElementById("notesInput").value.trim();
 
+function saveNotes() {
+  const box = document.getElementById("notesInput");
+  if (!box) return;
+
+  const text = box.value.trim();
   notes[activeDay] = text;
 
-  addLog(`${currentUser || "Someone"} updated notes for ${tripDates[activeDay]}`);
+  addLog(`${currentUser || "Someone"} updated notes (${tripDates[activeDay]})`);
   saveTrip();
 }
+
 
 function addMember() {
   const input = document.getElementById("memberName");
@@ -409,7 +422,8 @@ function render(){
   </ul>
 </div>
 
-  <div class="card"><h3>📝 Notes</h3><textarea id="notesInput" placeholder="Notes for the day">${notes[activeDay]||""}</textarea><button onclick="notes[activeDay]=this.previousSibling.value;saveTrip()">Save Notes</button></div>
+  <div class="card"><h3>📝 Notes</h3><textarea id="notesInput" placeholder="Notes for the day">${notes[activeDay]||""}</textarea><button onclick="saveNotes()">Save Notes</button>
+</div>
  
   <div class="card">
   <h3>🚨 Emergency</h3>
