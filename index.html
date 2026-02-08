@@ -32,7 +32,6 @@ h1{text-align:center;color:var(--accent)}
   border-radius:16px;
   padding:16px;
   margin-bottom:20px;
-  position:relative;
 }
 .route-title{text-align:center;color:var(--accent);margin-bottom:10px}
 .route-line{
@@ -52,8 +51,6 @@ h1{text-align:center;color:var(--accent)}
   position:absolute;top:-28px;transition:.4s;font-size:18px
 }
 
-
-
 /* GRID */
 .grid{
   display:grid;
@@ -65,15 +62,17 @@ h1{text-align:center;color:var(--accent)}
   border:1px solid var(--border);
   border-radius:14px;
   padding:12px;
+  animation:cardEnter .25s ease both;
+  transition:transform .2s, box-shadow .2s, border-color .2s;
 }
-.card h3{
-  margin:0 0 8px 0;
-  color:var(--accent);
-  cursor:pointer;
+.card:hover{
+  transform:translateY(-4px);
+  border-color:var(--accent);
+  box-shadow:0 8px 24px rgba(34,211,238,.25);
 }
+.card h3{margin:0 0 8px 0;color:var(--accent)}
 iframe{width:100%;height:220px;border:0;border-radius:10px}
 
-/* FORM */
 input,select,textarea,button{
   width:100%;margin:6px 0;padding:8px;
   border-radius:6px;border:none
@@ -81,59 +80,10 @@ input,select,textarea,button{
 button{background:var(--accent);cursor:pointer}
 .log{font-size:13px;border-bottom:1px solid #134e4a;padding:4px 0}
 
-  .card {
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    border-color 0.2s ease;
-  will-change: transform;
+@keyframes cardEnter{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:none}
 }
-
-/* Hover for desktop */
-.card:hover {
-  transform: translateY(-4px);
-  border-color: #22d3ee;
-  box-shadow: 0 8px 24px rgba(34, 211, 238, 0.25);
-}
-
-/* Focus for mobile / accessibility */
-.card:focus-within {
-  transform: translateY(-4px);
-  border-color: #22d3ee;
-  box-shadow: 0 8px 24px rgba(34, 211, 238, 0.25);
-}
-
-  @keyframes cardEnter {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.card {
-  animation: cardEnter 0.25s ease both;
-}
-
-  .day-transition .card {
-  animation: cardEnter 0.25s ease both;
-}
-
-  .day-divider {
-  height: 1px;
-  margin: 18px 0 24px;
-  background: linear-gradient(
-    to right,
-    transparent,
-    rgba(34, 211, 238, 0.6),
-    transparent
-  );
-}
-
-
 </style>
 </head>
 
@@ -141,34 +91,28 @@ button{background:var(--accent);cursor:pointer}
 <div class="container">
 <h1>Uttarakhand Trip Planner</h1>
 
-<!-- ROUTE -->
 <div class="route">
   <div class="route-title" id="routeTitle"></div>
-
-  
-
   <div class="route-line" id="routeLine">
     <div class="bus" id="bus">🚌</div>
   </div>
 </div>
 
-<!-- CARDS -->
 <div class="grid" id="cards"></div>
 </div>
 
 <script>
 /* ================= FIREBASE ================= */
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT"
+  apiKey: "AIzaSyBqiBMggvuMxAiKfBpJIqnv8OCWj76voAk",
+  authDomain: "trip-planner-2026.firebaseapp.com",
+  projectId: "trip-planner-2026"
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 /* ================= DATA ================= */
 const tripId = new URLSearchParams(location.search).get("trip") || "default";
-
 const tripDates = ["Sun","Mon","Tue","Wed","Thu","Fri"];
 
 const days = [
@@ -177,39 +121,38 @@ const days = [
     steps:["Arrive Delhi","Bus to Haridwar","Hotel check-in","Ganga Aarti"],
     routeMap:"https://www.google.com/maps?q=Delhi+to+Haridwar&output=embed",
     hotel:{
-      name:"Hotel Ganga Lahari / similar (Har Ki Pauri area)",
-      link:"https://maps.google.com/?q=Hotel+Ganga+Lahari+Haridwar",
-      map:"https://www.google.com/maps?q=Hotel+Ganga+Lahari+Haridwar&output=embed"
+      name:"Hotel near Har Ki Pauri",
+      link:"https://maps.google.com/?q=Har+Ki+Pauri+Haridwar",
+      map:"https://www.google.com/maps?q=Har+Ki+Pauri+Haridwar&output=embed"
     },
     food:["Local chai","Chotiwala"],
-    emergency:["Ambulance:108","Police:112","District Hospital Haridwar"]
+    emergency:["Ambulance:108","Police:112"]
   },
   {
     city:"Haridwar → Rishikesh",
-    steps:["Morning Aarti","Travel to Rishikesh","Explore ghats"],
+    steps:["Morning Aarti","Travel","Explore ghats"],
     routeMap:"https://www.google.com/maps?q=Haridwar+to+Rishikesh&output=embed",
     hotel:{
-      name:"Aloha on the Ganges",
-      link:"https://maps.google.com/?q=Aloha+on+the+Ganges",
-      map:"https://www.google.com/maps?q=Aloha+on+the+Ganges&output=embed"
+      name:"Hotel in Tapovan",
+      link:"https://maps.google.com/?q=Tapovan+Rishikesh",
+      map:"https://www.google.com/maps?q=Tapovan+Rishikesh&output=embed"
     },
-    food:["German Bakery","Ganga View Cafe"],
-    emergency:["Ambulance:108","Police:112","AIIMS Rishikesh"]
+    food:["German Bakery","Cafe"],
+    emergency:["Ambulance:108","Police:112"]
   },
-  {city:"Rishikesh",steps:["Rafting","Cafes","Ashrams"],routeMap:"https://www.google.com/maps?q=Rishikesh+River+Rafting&output=embed",hotel:{name:"Same Hotel (Aloha on the Ganges)",link:"#",map:"https://www.google.com/maps?q=Aloha+on+the+Ganges&output=embed"},food:["Cafe","Tea"],emergency:["108","112"]},
-  {city:"Rishikesh",steps:["Waterfall","Rest"],routeMap:"https://www.google.com/maps?q=Rishikesh+Neer+Waterfall&output=embed",hotel:{name:"Same Hotel (Aloha on the Ganges)",link:"#",map:"https://www.google.com/maps?q=Aloha+on+the+Ganges&output=embed"},food:["Snacks"],emergency:["108"]},
-  {city:"Rishikesh → Dehradun",steps:["Travel","Explore"],routeMap:"https://www.google.com/maps?q=Rishikesh+to+Dehradun&output=embed",hotel:{name:"Hotel near Rajpur Road / Ballupur",link:"#",map:"https://www.google.com/maps?q=Rajpur+Road+Dehradun+Hotel&output=embed"},food:["Street food"],emergency:["108"]},
-  {city:"Mussoorie → Delhi",steps:["Sightseeing","Return"],routeMap:"https://www.google.com/maps?q=Dehradun+to+Mussoorie&output=embed",hotel:{name:"Day Trip - No Stay",link:"#",map:"https://www.google.com/maps?q=Mussoorie+Mall+Road&output=embed"},food:["Cafe"],emergency:["108"]}
+  {city:"Rishikesh",steps:["Rafting","Cafes","Ashrams"],routeMap:"https://www.google.com/maps?q=Rishikesh&output=embed",hotel:{name:"Same Hotel",link:"#",map:"https://www.google.com/maps?q=Tapovan+Rishikesh&output=embed"},food:["Snacks"],emergency:["108"]},
+  {city:"Rishikesh",steps:["Waterfall","Rest"],routeMap:"https://www.google.com/maps?q=Neer+Waterfall+Rishikesh&output=embed",hotel:{name:"Same Hotel",link:"#",map:"https://www.google.com/maps?q=Tapovan+Rishikesh&output=embed"},food:["Tea"],emergency:["108"]},
+  {city:"Rishikesh → Dehradun",steps:["Travel","Explore"],routeMap:"https://www.google.com/maps?q=Rishikesh+to+Dehradun&output=embed",hotel:{name:"Hotel in Dehradun",link:"#",map:"https://www.google.com/maps?q=Dehradun&output=embed"},food:["Street food"],emergency:["108"]},
+  {city:"Mussoorie → Delhi",steps:["Sightseeing","Return"],routeMap:"https://www.google.com/maps?q=Mussoorie&output=embed",hotel:{name:"Day Trip",link:"#",map:"https://www.google.com/maps?q=Mussoorie&output=embed"},food:["Cafe"],emergency:["108"]}
 ];
 
-  
 let activeDay = 0;
-let expenses = null;
-let logs = null;
-const participants = ["Sahil","Patil"];
+let expenses = [];
+let logs = [];
+let participants = [];
+let notes = {};
 
-
-/* ================= ROUTE ================= */
+/* ================= ROUTE DOTS ================= */
 const routeLine = document.getElementById("routeLine");
 days.forEach((_,i)=>{
   const d=document.createElement("div");
@@ -218,19 +161,29 @@ days.forEach((_,i)=>{
   routeLine.appendChild(d);
 });
 
-/* ================= FIREBASE SYNC ================= */
-db.collection("trips").doc(tripId).collection("expenses")
-.onSnapshot(s=>{
-  expenses=s.docs.map(d=>({...d.data(),id:d.id}));
-  render(false);
-});
+/* ================= FIREBASE LISTENERS ================= */
+function attachFirebaseListeners(){
+  const tripRef = db.collection("trips").doc(tripId);
 
-db.collection("trips").doc(tripId).collection("logs")
-.orderBy("time")
-.onSnapshot(s=>{
-  logs=s.docs.map(d=>d.data());
-  render(false);
-});
+  tripRef.onSnapshot(doc=>{
+    if(!doc.exists) return;
+    participants = doc.data().participants || [];
+    notes = doc.data().notes || {};
+    render();
+  });
+
+  tripRef.collection("expenses").orderBy("createdAt","asc")
+  .onSnapshot(s=>{
+    expenses = s.docs.map(d=>({id:d.id,...d.data()}));
+    render();
+  });
+
+  tripRef.collection("logs").orderBy("time","desc")
+  .onSnapshot(s=>{
+    logs = s.docs.map(d=>d.data());
+    render();
+  });
+}
 
 /* ================= SETTLEMENT ================= */
 function calculateSettlement(){
@@ -238,149 +191,86 @@ function calculateSettlement(){
   participants.forEach(p=>paid[p]=0);
   expenses.forEach(e=>{
     total+=e.amount;
-    paid[e.paidBy]+=e.amount;
+    paid[e.paidBy]=(paid[e.paidBy]||0)+e.amount;
   });
   const share=participants.length?total/participants.length:0;
-  let settlement={};
+  const settlement={};
   participants.forEach(p=>settlement[p]=Math.round(paid[p]-share));
   return {total,share,settlement};
 }
 
-/* ================= RENDER ================= */
-function card(title, key, body) {
-  return `
-    <div class="card" data-card="${key}">
-      <div class="cardHeader"">
-        ${title}
-      </div>
-      <div class="cardBody">
-        ${body}
-      </div>
-    </div>
-  `;
+/* ================= ACTIONS ================= */
+function addExpense(){
+  const t=document.getElementById("et").value.trim();
+  const a=parseInt(document.getElementById("ea").value,10);
+  const p=document.getElementById("ep").value;
+  if(!t||!a||!p) return;
+
+  db.collection("trips").doc(tripId).collection("expenses").add({
+    title:t,amount:a,paidBy:p,createdAt:Date.now()
+  });
+  db.collection("trips").doc(tripId).collection("logs").add({
+    text:`${p} added ₹${a} for ${t}`,time:Date.now()
+  });
 }
 
+function delExpense(id){
+  const e=expenses.find(x=>x.id===id);
+  if(!e) return;
+  db.collection("trips").doc(tripId).collection("expenses").doc(id).delete();
+  db.collection("trips").doc(tripId).collection("logs").add({
+    text:`${e.paidBy} removed ₹${e.amount} for ${e.title}`,time:Date.now()
+  });
+}
 
+function addMember(){
+  const name=document.getElementById("newMember").value.trim();
+  if(!name) return;
+  db.collection("trips").doc(tripId)
+    .update({participants:firebase.firestore.FieldValue.arrayUnion(name)});
+}
 
-function render(moveBus=true){
-  if (!expenses || !logs) return;
-  const cardsContainer = document.getElementById("cards");
-cardsContainer.classList.remove("day-transition", "active-day");
-void cardsContainer.offsetWidth;
-cardsContainer.classList.add("day-transition", "active-day");
+function removeMember(name){
+  db.collection("trips").doc(tripId)
+    .update({participants:firebase.firestore.FieldValue.arrayRemove(name)});
+}
+
+function saveNotes(){
+  db.collection("trips").doc(tripId)
+    .update({[`notes.${activeDay}`]:document.getElementById("notesBox").value});
+}
+
+/* ================= RENDER ================= */
+function render(){
+  document.getElementById("routeTitle").innerText=
+    `${tripDates[activeDay]} — ${days[activeDay].city}`;
+  document.querySelectorAll(".dot").forEach((d,i)=>d.classList.toggle("active",i===activeDay));
+  document.getElementById("bus").style.left=`calc(${activeDay*(100/(days.length-1))}% - 8px)`;
 
   const d=days[activeDay];
-  document.getElementById("routeTitle").innerText=
-    `${tripDates[activeDay]} — ${d.city}`;
-
-  document.querySelectorAll(".dot").forEach((dot,i)=>{
-    dot.classList.toggle("active",i===activeDay);
-  });
-
-  if(moveBus){
-    const bus=document.getElementById("bus");
-    bus.style.left=`calc(${activeDay*(100/(days.length-1))}% - 8px)`;
-  }
-
   const {total,share,settlement}=calculateSettlement();
 
-  document.getElementById("cards").innerHTML = `
-${card("🧭 Step-by-step","step-by-step", `<ul>${d.steps.map(s=>`<li>${s}</li>`).join("")}</ul>`)}
-${card("🗺 Route Map", "routemap",`<iframe src="${d.routeMap}"></iframe>`)}
-${card("🏨 Hotel", "hotel", `<a href="${d.hotel.link}" target="_blank">${d.hotel.name}</a><iframe src="${d.hotel.map}"></iframe>`)}
-${card("📝 Notes", "notes",`<textarea placeholder="Notes for the day"></textarea>`)}
-${card("🍽 Food & Snacks", "food&snacks",`<ul>${d.food.map(f=>`<li>${f}</li>`).join("")}</ul>`)}
-${card("🚑 Emergency", "emergency", `<ul>${d.emergency.map(e=>`<li>${e}</li>`).join("")}</ul>`)}
-${card("💳 Expenses", "expenses",`
-<input id="et" placeholder="Title">
-<input id="ea" type="number" placeholder="Amount">
+  document.getElementById("cards").innerHTML=`
+<div class="card"><h3>🧭 Step-by-step</h3><ul>${d.steps.map(s=>`<li>${s}</li>`).join("")}</ul></div>
+<div class="card"><h3>🗺 Route Map</h3><iframe src="${d.routeMap}"></iframe></div>
+<div class="card"><h3>🏨 Hotel</h3><a href="${d.hotel.link}" target="_blank">${d.hotel.name}</a><iframe src="${d.hotel.map}"></iframe></div>
+<div class="card"><h3>📝 Notes</h3><textarea id="notesBox">${notes[activeDay]||""}</textarea><button onclick="saveNotes()">Save Notes</button></div>
+<div class="card"><h3>👥 Members</h3><input id="newMember" placeholder="Name"><button onclick="addMember()">Add</button>${participants.map(p=>`<div>${p} <button onclick="removeMember('${p}')">❌</button></div>`).join("")}</div>
+<div class="card"><h3>💳 Expenses</h3>
+<input id="et" placeholder="Title"><input id="ea" type="number" placeholder="Amount">
 <select id="ep">${participants.map(p=>`<option>${p}</option>`).join("")}</select>
 <button onclick="addExpense()">Add</button>
 ${expenses.map(e=>`<div>${e.title} ₹${e.amount} (${e.paidBy}) <button onclick="delExpense('${e.id}')">❌</button></div>`).join("")}
-`)}
-${card("📊 Settlement", "settlement",`
-<b>Total:</b> ₹${total}<br>
-<b>Per Person:</b> ₹${Math.round(share)}<hr>
+</div>
+<div class="card"><h3>📊 Settlement</h3>
+<b>Total:</b> ₹${total}<br><b>Per Person:</b> ₹${Math.round(share)}<hr>
 ${Object.entries(settlement).map(([p,v])=>v>0?`🟢 ${p} gets ₹${v}`:v<0?`🔴 ${p} pays ₹${Math.abs(v)}`:`⚪ ${p} settled`).join("<br>")}
-`)}
-${card("🧾 Logs", logs.map(l=>`<div class="log">${l.text}</div>`).join("") )}
+</div>
+<div class="card"><h3>🧾 Logs</h3>${logs.map(l=>`<div class="log">${l.text}</div>`).join("")}</div>
 `;
-
-  if (!cardsExpanded) {
-  restoreOpenCards(openCards);
 }
 
-}
-
-/* ================= ACTIONS ================= */
-function addExpense() {
-  const titleEl = document.getElementById("et");
-  const amountEl = document.getElementById("ea");
-  const paidByEl = document.getElementById("ep");
-
-  const title = titleEl.value.trim();
-  const amount = parseInt(amountEl.value, 10);
-  const paidBy = paidByEl.value;
-
-  if (!title || isNaN(amount) || amount <= 0) return;
-
-  db.collection("trips")
-    .doc(tripId)
-    .collection("expenses")
-    .add({
-      title,
-      amount,
-      paidBy,
-      createdAt: Date.now()
-    });
-
-  db.collection("trips")
-    .doc(tripId)
-    .collection("logs")
-    .add({
-      type: "ADD",
-      title,
-      amount,
-      paidBy,
-      time: Date.now()
-    });
-
-  // UX polish only
-  titleEl.value = "";
-  amountEl.value = "";
-}
-
-
-function delExpense(expenseId) {
-  const exp = expenses.find(e => e.id === expenseId);
-  if (!exp) return;
-
-  db.collection("trips")
-    .doc(tripId)
-    .collection("expenses")
-    .doc(expenseId)
-    .delete();
-
-  db.collection("trips")
-    .doc(tripId)
-    .collection("logs")
-    .add({
-      type: "REMOVE",
-      title: exp.title,
-      amount: exp.amount,
-      paidBy: exp.paidBy,
-      time: Date.now()
-    });
-}
-
-/* ================= TOGGLE ================= */
-document.getElementById("expandToggle").onclick=()=>{
-  cardsExpanded=!cardsExpanded;
-  document.getElementById("expandToggle").classList.toggle("on",cardsExpanded);
-  render(false);
-};
-
-render();
+attachFirebaseListeners();
 </script>
 </body>
 </html>
