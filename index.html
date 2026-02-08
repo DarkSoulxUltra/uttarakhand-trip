@@ -162,24 +162,40 @@ days.forEach((_,i)=>{
 });
 
 /* ================= FIREBASE LISTENERS ================= */
+
+function normalizeExpenses(raw) {
+  if (!raw) return [];
+  // Already correct array
+  if (Array.isArray(raw)) {
+    return raw.map(e => ({
+      id: e.id || crypto.randomUUID(),
+      ...e
+    }));
+  }
+  // Firestore map → array
+  return Object.values(raw)
+    .flatMap(day =>
+      Object.values(day || {}).map(e => ({
+        id: e.id || crypto.randomUUID(),
+        ...e
+      }))
+    );
+}
+
+
 function attachFirebaseListeners() {
   db.collection("trips").doc(tripId)
     .onSnapshot(doc => {
       if (!doc.exists) return;
-
-      const data = doc.data();
-      expenses = // 🔥 Normalize expenses (array-safe)
-        expenses = Array.isArray(data.expenses)
-        ? data.expenses
-        : Object.values(data.expenses || {}).flat();
-
+      const data = doc.data() || {};
       participants = data.participants || [];
       notes = data.notes || {};
       logs = data.logs || [];
-
+      expenses = normalizeExpenses(data.expenses);
       render();
     });
 }
+
 
 
 /* ================= SETTLEMENT ================= */
@@ -198,6 +214,16 @@ function calculateSettlement(){
 }
 
 /* ================= ACTIONS ================= */
+function addLog(message) {
+  db.collection("trips").doc(tripId).update({
+    logs: firebase.firestore.FieldValue.arrayUnion(
+      `[${new Date().toLocaleString()}] ${message}`
+    ),
+    updatedAt: Date.now()
+  });
+}
+
+  
 function addExpense() {
   const title = document.getElementById("et").value.trim();
   const amount = parseInt(document.getElementById("ea").value);
@@ -211,9 +237,10 @@ function addExpense() {
     day: activeDay
   };
   expenses.push(expense);
-  logs.push(
-    `${paidBy} added ₹${amount} for ${title} (${tripDates[activeDay]})`
-  );
+  addLog(
+  `${paidBy} added ₹${amount} for ${title} (${tripDates[activeDay]})`
+);
+
   saveTrip(); // 🔥 single source of truth
 }
 
@@ -222,9 +249,10 @@ function delExpense(id) {
   const exp = expenses.find(e => e.id === id);
   if (!exp) return;
   expenses = expenses.filter(e => e.id !== id);
-  logs.push(
-    `${exp.paidBy} removed ₹${exp.amount} for ${exp.title} (${tripDates[exp.day]})`
-  );
+  addLog(
+  `${exp.paidBy} removed ₹${exp.amount} for ${exp.title} (${tripDates[exp.day ?? activeDay]})`
+);
+
   saveTrip();
 }
 
@@ -282,7 +310,15 @@ ${expenses.map(e=>`<div>${e.title} ₹${e.amount} (${e.paidBy}) <button onclick=
 <b>Total:</b> ₹${total}<br><b>Per Person:</b> ₹${Math.round(share)}<hr>
 ${Object.entries(settlement).map(([p,v])=>v>0?`🟢 ${p} gets ₹${v}`:v<0?`🔴 ${p} pays ₹${Math.abs(v)}`:`⚪ ${p} settled`).join("<br>")}
 </div>
-<div class="card"><h3>🧾 Logs</h3>${logs.map(l=>`<div class="log">${l.text}</div>`).join("")}</div>
+<div class="card"><h3>🧾 Logs</h3>${(logs || []).map(l => `
+  <div class="logLine">
+    [${new Date(l.at).toLocaleString()}]
+    ${l.by}
+    ${l.type === "add" ? "added" : "removed"}
+    ₹${l.amount} for ${l.title}
+  </div>
+`).join("") || "No logs yet"}
+</div>
 `;
 }
 
