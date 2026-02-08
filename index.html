@@ -115,7 +115,7 @@ const db = getFirestore(app);
 /* ---------- APP STATE ---------- */
 const tripId = new URLSearchParams(location.search).get("trip") || "uttarakhand-mar-2026";
 const tripDates=["Sun","Mon","Tue","Wed","Thu","Fri"];
-let currentUser = null;
+
 let activeDay=0;
 let expenses=[];
 let participants=["Sahil","Patil"];
