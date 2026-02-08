@@ -115,6 +115,7 @@ import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
+
 const firebaseConfig = {
   apiKey: "AIzaSyBqiBMggvuMxAiKfBpJIqnv8OCWj76voAk",
   authDomain: "trip-planner-2026.firebaseapp.com",
@@ -146,7 +147,6 @@ const tripDates=["Sun","Mon","Tue","Wed","Thu","Fri"];
 let activeDay=0;
 let expenses=[];
 let participants=["Sahil","Patil"];
-let currentUser = null
 let notes={};
 let logs=[];
 
@@ -522,6 +522,8 @@ window.delExpense = delExpense;
 window.addMember = addMember;
 window.removeMember = removeMember;
 window.saveNotes = saveNotes;
+window.login = login;
+window.logout = logout;
 
 
 render();
