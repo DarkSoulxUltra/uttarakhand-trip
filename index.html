@@ -214,7 +214,10 @@ function saveTrip(){
 onSnapshot(ref,s=>{
   if(!s.exists())return;
   const d=s.data();
-  expenses=Array.isArray(d.expenses)?d.expenses:[];
+  expenses = Array.isArray(d.expenses)
+  ? d.expenses
+  : Object.values(d.expenses || {}).flat();
+
   participants=d.participants||[];
   notes=d.notes||{};
   logs=d.logs||[];
@@ -223,8 +226,13 @@ onSnapshot(ref,s=>{
 
 /* ---------- LOGIC ---------- */
 function addLog(text){
-  logs.push(`[${new Date().toLocaleString()}] ${text}`);
+  logs.push({
+    text,
+    by: currentUser,
+    time: Date.now()
+  });
 }
+
 
 function addExpense(){
   const t=document.getElementById("et").value;
@@ -238,11 +246,15 @@ function addExpense(){
 }
 
 function delExpense(id){
-  const exp=expenses.find(e=>e.id===id);
-  expenses=expenses.filter(e=>e.id!==id);
-  if(exp)addLog(`${currentUser} removed ₹${exp.amount} for ${exp.title} (${tripDates[exp.day]})`);
+  let exp = expenses.find(e => e.id === id);
+  if (!exp) exp = expenses.find(e => e.title); // legacy fallback
+  expenses = expenses.filter(e => e !== exp);
+  if(exp){
+    addLog(`${currentUser} removed ₹${exp.amount} for ${exp.title} (${tripDates[exp.day] || ""})`);
+  }
   saveTrip();
 }
+
 
 function calculateSettlement(){
   let total=0,paid={};
@@ -323,7 +335,15 @@ function render(){
     Total ₹${total}<br>Per Person ₹${Math.round(share)}
     ${Object.entries(result).map(([p,v])=>`<div>${v>0?"🟢":"🔴"} ${p} ${v>0?"gets":"pays"} ₹${Math.abs(v)}</div>`).join("")}
   </div>
-  <div class="card"><h3>🧾 Logs</h3>${logs.length?logs.map(l=>`<div class="log">${l}</div>`).join(""):"No logs yet"}</div>
+  <div class="card"><h3>🧾 Logs</h3>${logs.length
+  ? logs.map(l =>
+      `<div class="log">
+        [${new Date(l.time).toLocaleString()}] ${l.text}
+      </div>`
+    ).join("")
+  : "No logs yet"
+}
+</div>
   `;
 }
 
