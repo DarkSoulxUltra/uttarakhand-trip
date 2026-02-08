@@ -168,7 +168,11 @@ function attachFirebaseListeners() {
       if (!doc.exists) return;
 
       const data = doc.data();
-      expenses = data.expenses || [];
+      expenses = // 🔥 Normalize expenses (array-safe)
+        expenses = Array.isArray(data.expenses)
+        ? data.expenses
+        : Object.values(data.expenses || {}).flat();
+
       participants = data.participants || [];
       notes = data.notes || {};
       logs = data.logs || [];
@@ -180,6 +184,7 @@ function attachFirebaseListeners() {
 
 /* ================= SETTLEMENT ================= */
 function calculateSettlement(){
+  if (!Array.isArray(expenses)) expenses = [];
   let total=0, paid={};
   participants.forEach(p=>paid[p]=0);
   expenses.forEach(e=>{
