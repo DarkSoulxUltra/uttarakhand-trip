@@ -98,6 +98,7 @@ iframe{width:100%;height:220px;border-radius:10px;border:none}
 
 <!-- FIREBASE -->
 <script type="module">
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import {
   getFirestore, doc, setDoc, onSnapshot
@@ -114,6 +115,7 @@ const db = getFirestore(app);
 /* ---------- APP STATE ---------- */
 const tripId = new URLSearchParams(location.search).get("trip") || "uttarakhand-mar-2026";
 const tripDates=["Sun","Mon","Tue","Wed","Thu","Fri"];
+let currentUser = null;
 let activeDay=0;
 let expenses=[];
 let participants=["Sahil","Patil"];
@@ -231,6 +233,10 @@ function addLog(text){
     by: currentUser,
     time: Date.now()
   });
+}
+function setCurrentUser(name){
+  currentUser = name;
+  saveTrip();
 }
 
 
