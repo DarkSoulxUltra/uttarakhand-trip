@@ -121,8 +121,8 @@ let expenses=[];
 let participants=["Sahil","Patil"];
 let notes={};
 let logs=[];
-let currentUser=localStorage.getItem("currentUser")||prompt("Your name?")||"Guest";
-localStorage.setItem("currentUser",currentUser);
+let currentUser = null;
+
 
 /* ---------- TRIP DATA ---------- */
 const days=[
@@ -261,7 +261,28 @@ function delExpense(id){
   saveTrip();
 }
 
+function addMember() {
+  const input = document.getElementById("memberName");
+  const name = input.value.trim();
 
+  if (!name) return;
+  if (participants.includes(name)) return;
+
+  participants.push(name);
+  input.value = "";
+
+  logs.push(`${name} joined the trip`);
+  saveTrip(); // 🔥 THIS IS REQUIRED
+}
+
+function removeMember(name) {
+  participants = participants.filter(p => p !== name);
+
+  logs.push(`${name} was removed from the trip`);
+  saveTrip(); // 🔥 THIS IS REQUIRED
+}
+
+  
 function calculateSettlement(){
   let total=0,paid={};
   participants.forEach(p=>paid[p]=0);
@@ -275,6 +296,40 @@ function calculateSettlement(){
   return {total,share,result};
 }
 
+function attachFirebaseListeners() {
+  db.collection("trips").doc(tripId)
+    .onSnapshot(doc => {
+      if (!doc.exists) return;
+
+      const data = doc.data();
+
+      expenses = Array.isArray(data.expenses)
+        ? data.expenses
+        : Object.values(data.expenses || {}).flat();
+
+      participants = data.participants || [];
+      notes = data.notes || {};
+      logs = data.logs || [];
+
+      render();
+    });
+}
+
+
+ function renderMembers() {
+  const box = document.getElementById("memberList");
+  if (!box) return;
+
+  box.innerHTML = participants.length
+    ? participants.map(m => `
+        <div class="pill">
+          ${m}
+          <button onclick="removeMember('${m}')">❌</button>
+        </div>
+      `).join("")
+    : "<i>No members yet</i>";
+}
+ 
 /* ---------- UI ---------- */
 function render(){
   const d=days[activeDay];
@@ -329,7 +384,14 @@ function render(){
   </ul>
 </div>
 
-  <div class="card"><h3>👥 Members</h3>${participants.join("<br>")}</div>
+  <div class="card">
+  <h3>👥 Members</h3>
+  <input id="memberName" placeholder="Name">
+  <button onclick="addMember()">Add</button>
+
+  <div id="memberList"></div>
+</div>
+
   <div class="card"><h3>💳 Expenses</h3>
     <input id="et" placeholder="Title">
     <input id="ea" type="number" placeholder="Amount">
@@ -351,6 +413,7 @@ function render(){
 }
 </div>
   `;
+renderMembers();
 }
 
   // 🔗 Expose functions for inline HTML handlers
