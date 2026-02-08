@@ -353,6 +353,14 @@ function render(){
   `;
 }
 
+  // 🔗 Expose functions for inline HTML handlers
+window.addExpense = addExpense;
+window.delExpense = delExpense;
+window.addMember = addMember;
+window.removeMember = removeMember;
+window.saveNotes = saveNotes;
+
+
 render();
 </script>
 </body>
