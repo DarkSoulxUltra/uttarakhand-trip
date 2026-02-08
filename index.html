@@ -315,7 +315,7 @@ function saveNotes() {
   const text = box.value.trim();
   notes[activeDay] = text;
 
-  addLog(`${currentUser || "Someone"} updated notes (${tripDates[activeDay]})`);
+  addLog(`${currentUser?.name || "Someone"} updated notes (${tripDates[activeDay]})`);
   saveTrip();
 }
 
