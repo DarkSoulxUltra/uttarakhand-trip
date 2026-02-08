@@ -5,10 +5,6 @@
 <title>Uttarakhand Trip Planner</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
 <style>
 :root{
   --bg:#020617;
@@ -19,104 +15,116 @@
 *{box-sizing:border-box}
 body{
   margin:0;
-  font-family:system-ui,Segoe UI,Roboto;
-  background:var(--bg);
-  color:#a5f3fc;
+  font-family:system-ui,-apple-system,BlinkMacSystemFont;
+  background:linear-gradient(180deg,#020617,#020617);
+  color:#e5faff;
 }
 h1{text-align:center;color:var(--accent)}
-.container{max-width:1400px;margin:auto;padding:16px}
-
-/* ROUTE */
+.container{max-width:1300px;margin:auto;padding:16px}
 .route{
   border:1px solid var(--border);
   border-radius:16px;
-  padding:16px;
-  margin-bottom:20px;
+  padding:14px;
+  margin-bottom:16px;
 }
-.route-title{text-align:center;color:var(--accent);margin-bottom:10px}
-.route-line{
-  display:flex;justify-content:space-between;align-items:center;
-  position:relative;margin-top:10px
+.routeLine{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  position:relative;
 }
-.route-line::before{
-  content:"";position:absolute;left:0;right:0;top:50%;
-  height:3px;background:var(--border)
+.routeLine::before{
+  content:"";
+  position:absolute;
+  left:0;right:0;top:50%;
+  height:3px;
+  background:var(--border);
 }
-.dot{
-  width:16px;height:16px;border-radius:50%;
-  background:#155e75;z-index:1;cursor:pointer
+.node{
+  width:14px;height:14px;border-radius:50%;
+  background:#155e75;z-index:2;
 }
-.dot.active{background:var(--accent);box-shadow:0 0 10px var(--accent)}
-.bus{
-  position:absolute;top:-28px;transition:.4s;font-size:18px
-}
+.node.active{background:var(--accent)}
+.bus{font-size:18px;margin-right:6px}
 
-/* GRID */
 .grid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-  gap:16px;
+  gap:14px;
 }
+
 .card{
   background:var(--card);
   border:1px solid var(--border);
   border-radius:14px;
   padding:12px;
-  animation:cardEnter .25s ease both;
-  transition:transform .2s, box-shadow .2s, border-color .2s;
+  transition:.25s;
 }
-.card:hover{
-  transform:translateY(-4px);
-  border-color:var(--accent);
-  box-shadow:0 8px 24px rgba(34,211,238,.25);
-}
-.card h3{margin:0 0 8px 0;color:var(--accent)}
-iframe{width:100%;height:220px;border:0;border-radius:10px}
+.card:hover{box-shadow:0 0 14px rgba(34,211,238,.25)}
+.card h3{margin:0 0 8px;color:var(--accent)}
 
 input,select,textarea,button{
-  width:100%;margin:6px 0;padding:8px;
-  border-radius:6px;border:none
+  width:100%;
+  padding:8px;
+  margin:4px 0;
+  border-radius:8px;
+  border:none;
 }
-button{background:var(--accent);cursor:pointer}
-.log{font-size:13px;border-bottom:1px solid #134e4a;padding:4px 0}
-
-@keyframes cardEnter{
-  from{opacity:0;transform:translateY(8px)}
-  to{opacity:1;transform:none}
+button{
+  background:var(--accent);
+  color:#022c22;
+  font-weight:600;
+  cursor:pointer;
 }
+.log{font-size:13px;border-bottom:1px dashed var(--border);padding:4px 0}
+iframe{width:100%;height:220px;border-radius:10px;border:none}
+.remove{background:#ff4d4d;color:white}
 </style>
 </head>
 
 <body>
 <div class="container">
+
 <h1>Uttarakhand Trip Planner</h1>
 
 <div class="route">
-  <div class="route-title" id="routeTitle"></div>
-  <div class="route-line" id="routeLine">
-    <div class="bus" id="bus">🚌</div>
-  </div>
+  <div class="routeLine" id="routeLine"></div>
+  <div style="text-align:center;margin-top:6px" id="routeTitle"></div>
 </div>
 
-<div class="grid" id="cards"></div>
+<div class="grid" id="content"></div>
+
 </div>
 
-<script>
-/* ================= FIREBASE ================= */
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import {
+  getFirestore, doc, setDoc, onSnapshot
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
 const firebaseConfig = {
   apiKey: "AIzaSyBqiBMggvuMxAiKfBpJIqnv8OCWj76voAk",
   authDomain: "trip-planner-2026.firebaseapp.com",
   projectId: "trip-planner-2026"
 };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-/* ================= DATA ================= */
-const tripId = new URLSearchParams(location.search).get("trip") || "default";
-const tripDates = ["Sun","Mon","Tue","Wed","Thu","Fri"];
+/* ---------- APP STATE ---------- */
+const tripId = new URLSearchParams(location.search).get("trip") || "uttarakhand-mar-2026";
+const tripDates=["Sun","Mon","Tue","Wed","Thu","Fri"];
+let activeDay=0;
+let expenses=[];
+let participants=["Sahil","Patil"];
+let notes={};
+let logs=[];
+let currentUser=localStorage.getItem("currentUser")||prompt("Your name?")||"Guest";
+localStorage.setItem("currentUser",currentUser);
 
-const days = [
-  {
+/* ---------- TRIP DATA ---------- */
+const days=[
+{
     city:"Delhi → Haridwar",
     steps:["Arrive Delhi","Bus to Haridwar","Hotel check-in","Ganga Aarti"],
     routeMap:"https://www.google.com/maps?q=Delhi+to+Haridwar&output=embed",
@@ -140,199 +148,186 @@ const days = [
     food:["German Bakery","Cafe"],
     emergency:["Ambulance:108","Police:112"]
   },
-  {city:"Rishikesh",steps:["Rafting","Cafes","Ashrams"],routeMap:"https://www.google.com/maps?q=Rishikesh&output=embed",hotel:{name:"Same Hotel",link:"#",map:"https://www.google.com/maps?q=Tapovan+Rishikesh&output=embed"},food:["Snacks"],emergency:["108"]},
-  {city:"Rishikesh",steps:["Waterfall","Rest"],routeMap:"https://www.google.com/maps?q=Neer+Waterfall+Rishikesh&output=embed",hotel:{name:"Same Hotel",link:"#",map:"https://www.google.com/maps?q=Tapovan+Rishikesh&output=embed"},food:["Tea"],emergency:["108"]},
-  {city:"Rishikesh → Dehradun",steps:["Travel","Explore"],routeMap:"https://www.google.com/maps?q=Rishikesh+to+Dehradun&output=embed",hotel:{name:"Hotel in Dehradun",link:"#",map:"https://www.google.com/maps?q=Dehradun&output=embed"},food:["Street food"],emergency:["108"]},
-  {city:"Mussoorie → Delhi",steps:["Sightseeing","Return"],routeMap:"https://www.google.com/maps?q=Mussoorie&output=embed",hotel:{name:"Day Trip",link:"#",map:"https://www.google.com/maps?q=Mussoorie&output=embed"},food:["Cafe"],emergency:["108"]}
+  {
+    city:"Rishikesh",
+    steps:["Rafting","Cafes","Ashrams"],
+    routeMap:"https://www.google.com/maps?q=Rishikesh&output=embed",
+    hotel:{
+      name:"Same Hotel",
+      link:"#",
+      map:"https://www.google.com/maps?q=Tapovan+Rishikesh&output=embed"
+    },
+    food:["Snacks"],
+    emergency:["108"]
+  },
+  {
+    city:"Rishikesh",
+    steps:["Waterfall","Rest"],
+    routeMap:"https://www.google.com/maps?q=Neer+Waterfall+Rishikesh&output=embed",
+    hotel:{
+      name:"Same Hotel",
+      link:"#",
+      map:"https://www.google.com/maps?q=Tapovan+Rishikesh&output=embed"
+    },
+    food:["Tea"],
+    emergency:["108"]
+  },
+  {
+    city:"Rishikesh → Dehradun",
+    steps:["Travel","Explore"],
+    routeMap:"https://www.google.com/maps?q=Rishikesh+to+Dehradun&output=embed",
+    hotel:{
+      name:"Hotel in Dehradun",
+      link:"#",
+      map:"https://www.google.com/maps?q=Dehradun&output=embed"
+    },
+    food:["Street food"],
+    emergency:["108"]
+  },
+  {
+    city:"Mussoorie → Delhi",
+    steps:["Sightseeing","Return"],
+    routeMap:"https://www.google.com/maps?q=Mussoorie&output=embed",
+    hotel:{
+      name:"Day Trip",
+      link:"#",
+      map:"https://www.google.com/maps?q=Mussoorie&output=embed"
+    },
+    food:["Cafe"],
+    emergency:["108"]
+  }
 ];
 
-let activeDay = 0;
-let expenses = [];
-let logs = [];
-let participants = [];
-let notes = {};
-let currentUser = localStorage.getItem("currentUser") || "Unknown";
+/* ---------- FIREBASE ---------- */
+const ref=doc(db,"trips",tripId);
 
-/* ================= ROUTE DOTS ================= */
-const routeLine = document.getElementById("routeLine");
-days.forEach((_,i)=>{
-  const d=document.createElement("div");
-  d.className="dot";
-  d.onclick=()=>{activeDay=i;render()};
-  routeLine.appendChild(d);
-});
-
-/* ================= FIREBASE LISTENERS ================= */
-
-function normalizeExpenses(raw) {
-  if (!raw) return [];
-  // Already correct array
-  if (Array.isArray(raw)) {
-    return raw.map(e => ({
-      id: e.id || crypto.randomUUID(),
-      ...e
-    }));
-  }
-  // Firestore map → array
-  return Object.values(raw)
-    .flatMap(day =>
-      Object.values(day || {}).map(e => ({
-        id: e.id || crypto.randomUUID(),
-        ...e
-      }))
-    );
-}
-
-
-function attachFirebaseListeners() {
-  db.collection("trips").doc(tripId)
-    .onSnapshot(doc => {
-      if (!doc.exists) return;
-      const data = doc.data() || {};
-      participants = data.participants || [];
-      notes = data.notes || {};
-      logs = data.logs || [];
-      expenses = normalizeExpenses(data.expenses);
-      render();
-    });
-}
-
-
-
-/* ================= SETTLEMENT ================= */
-function calculateSettlement(){
-  if (!Array.isArray(expenses)) expenses = [];
-  let total=0, paid={};
-  participants.forEach(p=>paid[p]=0);
-  expenses.forEach(e=>{
-    total+=e.amount;
-    paid[e.paidBy]=(paid[e.paidBy]||0)+e.amount;
-  });
-  const share=participants.length?total/participants.length:0;
-  const settlement={};
-  participants.forEach(p=>settlement[p]=Math.round(paid[p]-share));
-  return {total,share,settlement};
-}
-
-/* ================= ACTIONS ================= */
-function setCurrentUser(name) {
-  currentUser = name;
-  localStorage.setItem("currentUser", name);
-}
-
-  
-function addLog(message) {
-  db.collection("trips").doc(tripId).update({
-    logs: firebase.firestore.FieldValue.arrayUnion(
-      `[${new Date().toLocaleString()}] ${message}`
-    ),
-    updatedAt: Date.now()
-  });
-}
-
-  
-function addExpense() {
-  const title = document.getElementById("et").value.trim();
-  const amount = parseInt(document.getElementById("ea").value);
-  const paidBy = document.getElementById("ep").value;
-  if (!title || !amount) return;
-  const expense = {
-    id: Date.now().toString(),
-    title,
-    amount,
-    paidBy,
-    day: activeDay
-  };
-  expenses.push(expense);
-  addLog(
-  `${currentUser} added ₹${amount} for ${title} (paid by ${paidBy}, ${tripDates[activeDay]})`
-);
-
-
-  saveTrip(); // 🔥 single source of truth
-}
-
-
-function delExpense(id) {
-  const exp = expenses.find(e => e.id === id);
-  if (!exp) return;
-  expenses = expenses.filter(e => e.id !== id);
-  addLog(
-  `${currentUser} removed ₹${exp.amount} for ${exp.title || "expense"} ` +
-  `(paid by ${exp.paidBy || "unknown"}, ${tripDates[exp.day ?? activeDay]})`
-);
-
-
-  saveTrip();
-}
-
-function saveTrip() {
-  db.collection("trips").doc(tripId).set({
+function saveTrip(){
+  setDoc(ref,{
     expenses,
     participants,
     notes,
     logs,
-    updatedAt: Date.now()
-  }, { merge: true });
+    updatedAt:Date.now()
+  });
 }
 
+onSnapshot(ref,s=>{
+  if(!s.exists())return;
+  const d=s.data();
+  expenses=Array.isArray(d.expenses)?d.expenses:[];
+  participants=d.participants||[];
+  notes=d.notes||{};
+  logs=d.logs||[];
+  render();
+});
 
-function addMember(){
-  const name=document.getElementById("newMember").value.trim();
-  if(!name) return;
-  db.collection("trips").doc(tripId)
-    .update({participants:firebase.firestore.FieldValue.arrayUnion(name)});
+/* ---------- LOGIC ---------- */
+function addLog(text){
+  logs.push(`[${new Date().toLocaleString()}] ${text}`);
 }
 
-function removeMember(name){
-  db.collection("trips").doc(tripId)
-    .update({participants:firebase.firestore.FieldValue.arrayRemove(name)});
+function addExpense(){
+  const t=document.getElementById("et").value;
+  const a=parseInt(document.getElementById("ea").value);
+  const p=document.getElementById("ep").value;
+  if(!t||!a)return;
+  const exp={id:crypto.randomUUID(),title:t,amount:a,paidBy:p,day:activeDay};
+  expenses.push(exp);
+  addLog(`${currentUser} added ₹${a} for ${t} (${tripDates[activeDay]})`);
+  saveTrip();
 }
 
-function saveNotes(){
-  db.collection("trips").doc(tripId)
-    .update({[`notes.${activeDay}`]:document.getElementById("notesBox").value});
+function delExpense(id){
+  const exp=expenses.find(e=>e.id===id);
+  expenses=expenses.filter(e=>e.id!==id);
+  if(exp)addLog(`${currentUser} removed ₹${exp.amount} for ${exp.title} (${tripDates[exp.day]})`);
+  saveTrip();
 }
 
-/* ================= RENDER ================= */
+function calculateSettlement(){
+  let total=0,paid={};
+  participants.forEach(p=>paid[p]=0);
+  expenses.forEach(e=>{
+    total+=e.amount;
+    paid[e.paidBy]+=e.amount;
+  });
+  const share=total/participants.length;
+  let result={};
+  participants.forEach(p=>result[p]=Math.round(paid[p]-share));
+  return {total,share,result};
+}
+
+/* ---------- UI ---------- */
 function render(){
-  document.getElementById("routeTitle").innerText=
-    `${tripDates[activeDay]} — ${days[activeDay].city}`;
-  document.querySelectorAll(".dot").forEach((d,i)=>d.classList.toggle("active",i===activeDay));
-  document.getElementById("bus").style.left=`calc(${activeDay*(100/(days.length-1))}% - 8px)`;
-
   const d=days[activeDay];
-  const {total,share,settlement}=calculateSettlement();
+  document.getElementById("routeTitle").innerText=
+    `${tripDates[activeDay]} — ${d.city}`;
 
-  document.getElementById("cards").innerHTML=`
-<div class="card"><h3>🧭 Step-by-step</h3><ul>${d.steps.map(s=>`<li>${s}</li>`).join("")}</ul></div>
-<div class="card"><h3>🗺 Route Map</h3><iframe src="${d.routeMap}"></iframe></div>
-<div class="card"><h3>🏨 Hotel</h3><a href="${d.hotel.link}" target="_blank">${d.hotel.name}</a><iframe src="${d.hotel.map}"></iframe></div>
-<div class="card"><h3>📝 Notes</h3><textarea id="notesBox">${notes[activeDay]||""}</textarea><button onclick="saveNotes()">Save Notes</button></div>
-<div class="card"><h3>👥 Members</h3><input id="newMember" placeholder="Name"><button onclick="addMember()">Add</button>${participants.map(p=>`<div>${p} <button onclick="removeMember('${p}')">❌</button></div>`).join("")}</div>
-<div class="card"><h3>💳 Expenses</h3>
-<input id="et" placeholder="Title"><input id="ea" type="number" placeholder="Amount">
-<select id="ep">${participants.map(p=>`<option>${p}</option>`).join("")}</select>
-<button onclick="addExpense()">Add</button>
-${expenses.map(e=>`<div>${e.title} ₹${e.amount} (${e.paidBy}) <button onclick="delExpense('${e.id}')">❌</button></div>`).join("")}
+  const rl=document.getElementById("routeLine");
+  rl.innerHTML="";
+  days.forEach((_,i)=>{
+    const n=document.createElement("div");
+    n.className="node"+(i===activeDay?" active":"");
+    n.onclick=()=>{activeDay=i;render()};
+    rl.appendChild(n);
+  });
+
+  const {total,share,result}=calculateSettlement();
+
+  document.getElementById("content").innerHTML=`
+  <div class="card"><h3>🧭 Step-by-step</h3><ul>${d.steps.map(s=>`<li>${s}</li>`).join("")}</ul></div>
+  <div class="card">
+  <h3>🗺 Route Map</h3>
+  ${
+    d.routeMap
+      ? `<iframe src="${d.routeMap}" loading="lazy"></iframe>`
+      : "No route map available"
+  }
 </div>
-<div class="card"><h3>📊 Settlement</h3>
-<b>Total:</b> ₹${total}<br><b>Per Person:</b> ₹${Math.round(share)}<hr>
-${Object.entries(settlement).map(([p,v])=>v>0?`🟢 ${p} gets ₹${v}`:v<0?`🔴 ${p} pays ₹${Math.abs(v)}`:`⚪ ${p} settled`).join("<br>")}
+  <div class="card">
+  <h3>🏨 Hotel</h3>
+  ${
+    d.hotel
+      ? `
+        <b>${d.hotel.name}</b><br>
+        <a href="${d.hotel.link}" target="_blank">Open in Maps</a>
+        <iframe src="${d.hotel.map}" loading="lazy"></iframe>
+      `
+      : "No hotel for this day"
+  }
 </div>
-<div class="card"><h3>🧾 Logs</h3>${(logs || []).map(l => `
-  <div class="logLine">
-    [${new Date(l.at).toLocaleString()}]
-    ${l.by}
-    ${l.type === "add" ? "added" : "removed"}
-    ₹${l.amount} for ${l.title}
+  <div class="card">
+  <h3>🍽 Food & Snacks</h3>
+  <ul>
+    ${(d.food || []).map(f => `<li>${f}</li>`).join("")}
+  </ul>
+</div>
+
+  <div class="card"><h3>📝 Notes</h3><textarea>${notes[activeDay]||""}</textarea><button onclick="notes[activeDay]=this.previousSibling.value;saveTrip()">Save Notes</button></div>
+  <div class="card">
+  <h3>🚨 Emergency</h3>
+  <ul>
+    ${(d.emergency || []).map(e => `<li>${e}</li>`).join("")}
+  </ul>
+</div>
+
+  <div class="card"><h3>👥 Members</h3>${participants.join("<br>")}</div>
+  <div class="card"><h3>💳 Expenses</h3>
+    <input id="et" placeholder="Title">
+    <input id="ea" type="number" placeholder="Amount">
+    <select id="ep">${participants.map(p=>`<option>${p}</option>`).join("")}</select>
+    <button onclick="addExpense()">Add</button>
+    ${expenses.map(e=>`<div>${e.title} ₹${e.amount} (${e.paidBy}) <button class="remove" onclick="delExpense('${e.id}')">X</button></div>`).join("")}
   </div>
-`).join("") || "No logs yet"}
-</div>
-`;
+  <div class="card"><h3>📊 Settlement</h3>
+    Total ₹${total}<br>Per Person ₹${Math.round(share)}
+    ${Object.entries(result).map(([p,v])=>`<div>${v>0?"🟢":"🔴"} ${p} ${v>0?"gets":"pays"} ₹${Math.abs(v)}</div>`).join("")}
+  </div>
+  <div class="card"><h3>🧾 Logs</h3>${logs.length?logs.map(l=>`<div class="log">${l}</div>`).join(""):"No logs yet"}</div>
+  `;
 }
 
-attachFirebaseListeners();
+render();
 </script>
 </body>
 </html>
