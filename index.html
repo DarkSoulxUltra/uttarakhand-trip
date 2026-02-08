@@ -204,8 +204,8 @@ const days = [
 
   
 let activeDay = 0;
-let expenses = [];
-let logs = [];
+let expenses = null;
+let logs = null;
 const participants = ["Sahil","Patil"];
 
 
@@ -263,6 +263,7 @@ function card(title, key, body) {
 
 
 function render(moveBus=true){
+  if (!expenses || !logs) return;
   const cardsContainer = document.getElementById("cards");
 cardsContainer.classList.remove("day-transition", "active-day");
 void cardsContainer.offsetWidth;
@@ -312,29 +313,64 @@ ${card("🧾 Logs", logs.map(l=>`<div class="log">${l.text}</div>`).join("") )}
 }
 
 /* ================= ACTIONS ================= */
-function addExpense(){
-  const title=et.value;
-  const amount=Number(ea.value);
-  const paidBy=ep.value;
-  if(!title||!amount)return;
+function addExpense() {
+  const titleEl = document.getElementById("et");
+  const amountEl = document.getElementById("ea");
+  const paidByEl = document.getElementById("ep");
 
-  db.collection("trips").doc(tripId).collection("expenses").add({
-    title,amount,paidBy
-  });
+  const title = titleEl.value.trim();
+  const amount = parseInt(amountEl.value, 10);
+  const paidBy = paidByEl.value;
 
-  db.collection("trips").doc(tripId).collection("logs").add({
-    text:`${paidBy} added ₹${amount} for ${title}`,
-    time:Date.now()
-  });
+  if (!title || isNaN(amount) || amount <= 0) return;
+
+  db.collection("trips")
+    .doc(tripId)
+    .collection("expenses")
+    .add({
+      title,
+      amount,
+      paidBy,
+      createdAt: Date.now()
+    });
+
+  db.collection("trips")
+    .doc(tripId)
+    .collection("logs")
+    .add({
+      type: "ADD",
+      title,
+      amount,
+      paidBy,
+      time: Date.now()
+    });
+
+  // UX polish only
+  titleEl.value = "";
+  amountEl.value = "";
 }
 
-function delExpense(id){
-  const exp=expenses.find(e=>e.id===id);
-  db.collection("trips").doc(tripId).collection("expenses").doc(id).delete();
-  db.collection("trips").doc(tripId).collection("logs").add({
-    text:`${exp.paidBy} removed ₹${exp.amount} for ${exp.title}`,
-    time:Date.now()
-  });
+
+function delExpense(expenseId) {
+  const exp = expenses.find(e => e.id === expenseId);
+  if (!exp) return;
+
+  db.collection("trips")
+    .doc(tripId)
+    .collection("expenses")
+    .doc(expenseId)
+    .delete();
+
+  db.collection("trips")
+    .doc(tripId)
+    .collection("logs")
+    .add({
+      type: "REMOVE",
+      title: exp.title,
+      amount: exp.amount,
+      paidBy: exp.paidBy,
+      time: Date.now()
+    });
 }
 
 /* ================= TOGGLE ================= */
