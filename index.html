@@ -1265,6 +1265,25 @@ body{
     <div class="nav-title">Uttarakhand <span>Trip</span></div>
   </div>
   
+  <div class="trip-controls" style="display:flex; flex-direction:column; align-items:center; gap:4px;">
+
+  <div style="display:flex; gap:8px;">
+    <button onclick="createNewTrip()" class="btn btn-primary">
+      Create Trip
+    </button>
+
+    <button onclick="joinTrip()" class="btn btn-secondary">
+      Join Trip
+    </button>
+  </div>
+
+  <div style="font-size:12px; color:#666;">
+    Trip Code: <strong id="tripDisplay">---</strong>
+  </div>
+
+</div>
+
+
   <div class="nav-links">
   <a href="#journey" class="nav-link">Journey</a>
 
@@ -1291,6 +1310,8 @@ body{
     </button>
   </div>
 </nav>
+
+
 
 <!-- Hero Section -->
 <section class="hero">
@@ -1393,9 +1414,23 @@ onAuthStateChanged(auth, user => {
 });
 
 /* ---------- APP STATE ---------- */
-const tripId = new URLSearchParams(location.search).get("trip") || "uttarakhand-mar-2026";
+const params = new URLSearchParams(window.location.search);
+let tripId = params.get("trip");
+
+if (!tripId) {
+  tripId = generateTripId();
+  window.location.search = "?trip=" + tripId;
+}
+setTimeout(() => {
+  const el = document.getElementById("tripDisplay");
+  if (el) el.innerText = tripId;
+}, 0);
+
+const ref = doc(db, "trips", tripId);
+
 const tripDates = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri"];
 const tripDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+
 
 let activeDay = 0;
 let expenses = [];
@@ -1492,7 +1527,6 @@ const days = [
 ];
 
 /* ---------- FIREBASE ---------- */
-const ref = doc(db, "trips", tripId);
 
 function saveTrip() {
   setDoc(ref, {
@@ -1689,6 +1723,30 @@ function setActiveDay(dayIndex){
 
 
 window.setActiveDay = setActiveDay;
+
+function generateTripId(length = 12) {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
+function createNewTrip() {
+  const newTripId = generateTripId();
+  window.location.search = "?trip=" + newTripId;
+}
+
+function joinTrip() {
+  const code = prompt("Enter Trip Code:");
+  if (!code) return;
+  window.location.search = "?trip=" + code.trim();
+}
+
+window.createNewTrip = createNewTrip;
+window.joinTrip = joinTrip;
+
 
 function render() {
   renderDayTabs();
@@ -1895,6 +1953,9 @@ function logout() {
   signOut(auth)
     .then(() => showToast("Logged out successfully", 'success'));
 }
+
+
+
 
 // Expose functions for inline handlers
 window.addExpense = addExpense;
