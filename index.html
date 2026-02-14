@@ -67,6 +67,15 @@ body{
   box-shadow: var(--shadow-soft);
 }
 
+.navbar {
+  flex-wrap: wrap;
+}
+
+.navbar .nav-links {
+  flex-wrap: wrap;
+}
+
+
 .nav-brand {
   display: flex;
   align-items: center;
@@ -129,6 +138,38 @@ body{
 .nav-link:hover::after {
   width: 100%;
 }
+
+.trip-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.trip-buttons {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.trip-code {
+  font-size: 12px;
+  color: #666;
+}
+
+@media (max-width: 768px) {
+  .trip-buttons {
+    flex-direction: row;
+    gap: 4px;
+  }
+
+  .btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+}
+
 
 /* Auth Section in Navbar */
 .nav-auth {
@@ -1265,23 +1306,27 @@ body{
     <div class="nav-title">Uttarakhand <span>Trip</span></div>
   </div>
   
-  <div class="trip-controls" style="display:flex; flex-direction:column; align-items:center; gap:4px;">
-
-  <div style="display:flex; gap:8px;">
+  <div class="trip-controls">
+  <div class="trip-buttons">
     <button onclick="createNewTrip()" class="btn btn-primary">
-      Create Trip
+      Create
     </button>
 
     <button onclick="joinTrip()" class="btn btn-secondary">
-      Join Trip
+      Join
+    </button>
+
+    <button onclick="leaveTrip()" class="btn btn-outline">
+      Leave
     </button>
   </div>
 
-  <div style="font-size:12px; color:#666;">
-    Trip Code: <strong id="tripDisplay">---</strong>
+  <div class="trip-code">
+    Trip: <strong id="tripDisplay">---</strong>
   </div>
 
 </div>
+
 
 
   <div class="nav-links">
@@ -1637,23 +1682,29 @@ function removeMember(name) {
 }
 
 function calculateSettlement() {
-  if (!participants.length) return { total: 0, share: 0, result: {} };
-  let total = 0;
-  let paid = {};
-  participants.forEach(p => paid[p] = 0);
-  expenses.forEach(e => {
-    total += e.amount || 0;
-    if (paid[e.paidBy] !== undefined) {
-      paid[e.paidBy] += e.amount;
-    }
+
+  const total = expenses.reduce((sum, e) => sum + e.amount, 0);
+  const share = participants.length ? total / participants.length : 0;
+
+  const balances = {};
+
+  participants.forEach(p => balances[p] = 0);
+
+  expenses.forEach(exp => {
+    balances[exp.paidBy] += exp.amount;
   });
-  const share = total / participants.length;
-  let result = {};
-  participants.forEach(p => {
-    result[p] = Math.round(paid[p] - share);
+
+  const result = participants.map(p => {
+    return {
+      name: p,
+      balance: balances[p] - share
+    };
   });
+
   return { total, share, result };
 }
+
+
 
 function showToast(message, type = 'success') {
   const existing = document.querySelector('.toast');
@@ -1743,10 +1794,16 @@ function joinTrip() {
   if (!code) return;
   window.location.search = "?trip=" + code.trim();
 }
+function leaveTrip() {
+  const confirmLeave = confirm("Leave this trip?");
+  if (!confirmLeave) return;
+
+  window.location.href = window.location.pathname;
+}
 
 window.createNewTrip = createNewTrip;
 window.joinTrip = joinTrip;
-
+window.leaveTrip = leaveTrip;
 
 function render() {
   renderDayTabs();
@@ -1762,7 +1819,7 @@ function render() {
   const safeExpenses = Array.isArray(expenses) ? expenses : [];
   const safeLogs = Array.isArray(logs) ? logs : [];
 
-  const dayExpenses = safeExpenses.filter(e => e.day === activeDay);
+  const dayExpenses = safeExpenses.filter(e => Number(e.day) === Number(activeDay));
 
   const { total, share, result } = calculateSettlement();
 
@@ -1912,14 +1969,31 @@ function render() {
   </div>
 
   <!-- Settlement -->
-  <div class="card">
-    <div class="card-header">
-      <div class="card-icon">📊</div>
-      <div class="card-title">Settlement</div>
-    </div>
-    <div>Total: ₹${total}</div>
-    <div>Per Person: ₹${Math.round(share)}</div>
+<div class="card">
+  <div class="card-header">
+    <div class="card-icon">📊</div>
+    <div class="card-title">Settlement</div>
   </div>
+
+  <div>Total: ₹${total}</div>
+  <div>Per Person: ₹${Math.round(share)}</div>
+
+  <hr style="margin:10px 0;">
+
+  ${result.map(p => `
+    <div>
+      ${
+        p.balance > 0
+          ? `${p.name} should receive ₹${Math.round(p.balance)}`
+          : p.balance < 0
+            ? `${p.name} owes ₹${Math.round(Math.abs(p.balance))}`
+            : `${p.name} is settled`
+      }
+    </div>
+  `).join("")}
+
+</div>
+
 
   <!-- Logs -->
   <div class="card">
