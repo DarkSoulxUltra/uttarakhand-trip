@@ -1357,6 +1357,79 @@ body{
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* ===== PROFILE DROPDOWN NAV ===== */
+
+.profile-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, var(--sunset-orange), var(--sunset-gold));
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.profile-menu {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(6px);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+}
+
+.profile-card {
+  background: white;
+  width: 92%;
+  max-width: 420px;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: var(--shadow-strong);
+}
+
+.profile-avatar {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--forest-medium), var(--mountain-blue));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  color: white;
+  margin: 0 auto 12px;
+}
+
+.profile-links {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.profile-links button,
+.profile-links a {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.1);
+  background: var(--cream);
+  text-align: center;
+  text-decoration: none;
+  color: var(--forest-dark);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.profile-links button:hover,
+.profile-links a:hover {
+  background: var(--sunset-gold);
+  color: white;
+}
+
+  
 </style>
 </head>
 
@@ -1364,69 +1437,33 @@ body{
 
 <!-- Navigation Bar -->
 <nav class="navbar">
-  <div class="navbar-top">
   <div class="nav-brand">
     <div class="nav-logo">🏔️</div>
     <div class="nav-title">Uttarakhand <span>Trip</span></div>
-    <div class="nav-auth" id="navAuth">
-    <button class="btn btn-primary" onclick="login()">
-      <span>🔐</span> Sign in
-    </button>
-      <button class="btn btn-secondary btn-small" onclick="logout()">
-        <span>🚪</span> Logout
-      </button>
   </div>
-  </div>
-  </div>
-  
-  
+
   <div class="trip-controls">
-  <div class="trip-buttons">
-    <button onclick="createNewTrip()" class="btn btn-primary">
-      Create
-    </button>
-
-    <button onclick="joinTrip()" class="btn btn-secondary">
-      Join
-    </button>
-
-    <button onclick="leaveTrip()" class="btn btn-outline">
-      Leave
-    </button>
+    <div class="trip-buttons">
+      <button onclick="createNewTrip()" class="btn btn-primary">Create</button>
+      <button onclick="joinTrip()" class="btn btn-secondary">Join</button>
+      <button onclick="leaveTrip()" class="btn btn-secondary">Leave</button>
+    </div>
+    <div class="trip-code">
+      Trip: <strong id="tripDisplay">---</strong>
+    </div>
   </div>
 
-  <div class="trip-code">
-    Trip: <strong id="tripDisplay">---</strong>
-  </div>
-
-</div>
-
-
-
-  <div class="nav-links">
-  <a href="#journey" class="nav-link">Journey</a>
-
-  <a href="Uttarakhand_Group_Trip_Itinerary.pdf"
-     class="nav-link"
-     target="_blank">
-     📄 Itinerary
-  </a>
-
-  <a href="planning_and_budget.pdf"
-   class="nav-link"
-   target="_blank">
-   📊 Planning & Budget
-</a>
-
-
-  <a href="#aboutSection" class="nav-link">About</a>
-</div>
-
-  
-  
+  <button id="profileBtn" class="profile-btn" onclick="toggleProfileMenu()">👤</button>
 </nav>
 
 
+ <div id="profileMenu" class="profile-menu">
+  <div class="profile-card">
+    <div id="profileHeader"></div>
+    <div id="profileLinks" class="profile-links"></div>
+  </div>
+</div>
+ 
 
 <!-- Hero Section -->
 <section class="hero">
@@ -1796,32 +1833,61 @@ function showToast(message, type = 'success') {
 
 /* ---------- UI RENDERING ---------- */
 function renderAuth() {
-  const navAuth = document.getElementById("navAuth");
+  const header = document.getElementById("profileHeader");
+  const links = document.getElementById("profileLinks");
+  const btn = document.getElementById("profileBtn");
+
+  if (!btn) return;
 
   if (currentUser) {
-    navAuth.innerHTML = `
-      <div class="user-profile">
-        <div class="user-avatar">
-          ${currentUser.name ? currentUser.name[0].toUpperCase() : '👤'}
-        </div>
-        <div class="user-info">
-          <span class="user-name">${currentUser.name}</span>
-          <span class="user-email">${currentUser.email}</span>
-        </div>
-      </div>
+    btn.innerText = currentUser.name?.[0]?.toUpperCase() || "👤";
 
-      <button class="btn btn-secondary btn-small" onclick="logout()">
-        🚪 Logout
-      </button>
+    header.innerHTML = `
+      <div class="profile-avatar">
+        ${currentUser.name?.[0]?.toUpperCase() || "👤"}
+      </div>
+      <div style="text-align:center;font-weight:600;">
+        ${currentUser.name}
+        <div style="font-size:12px;color:#666;">${currentUser.email}</div>
+      </div>
+    `;
+
+    links.innerHTML = `
+      <a href="#journey">Journey</a>
+      <a href="Uttarakhand_Group_Trip_Itinerary.pdf" target="_blank">Itinerary</a>
+      <a href="planning_and_budget.pdf" target="_blank">Planning & Budget</a>
+      <a href="#aboutSection">About</a>
+      <button onclick="logout()">Logout</button>
     `;
   } else {
-    navAuth.innerHTML = `
-      <button class="btn btn-primary" onclick="login()">
-        🔐 Sign in with Google
-      </button>
+    btn.innerText = "👤";
+
+    header.innerHTML = `
+      <div class="profile-avatar">👤</div>
+      <div style="text-align:center;font-weight:600;">Guest</div>
+    `;
+
+    links.innerHTML = `
+      <button onclick="login()">Sign in with Google</button>
+      <a href="#journey">Journey</a>
+      <a href="Uttarakhand_Group_Trip_Itinerary.pdf" target="_blank">Itinerary</a>
+      <a href="planning_and_budget.pdf" target="_blank">Planning & Budget</a>
+      <a href="#aboutSection">About</a>
     `;
   }
 }
+
+function toggleProfileMenu() {
+  const menu = document.getElementById("profileMenu");
+  menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+}
+
+document.getElementById("profileMenu").addEventListener("click", e => {
+  if (e.target.id === "profileMenu") {
+    document.getElementById("profileMenu").style.display = "none";
+  }
+});
+  
 
 
 function renderDayTabs() {
