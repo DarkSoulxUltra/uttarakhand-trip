@@ -167,10 +167,43 @@ body{
   font-weight: 600;
   color: #2e3d2f;
 }
+
+
   
 /* ===== MOBILE NAVBAR FIX ===== */
 @media (max-width: 768px) {
-  ..navbar {
+
+  .navbar {
+    flex-direction: column;
+    align-items: stretch;
+    height: auto;
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .nav-brand {
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+  }
+
+  .trip-controls {
+    width:100%;
+    background:white;
+    padding:14px;
+    border-radius:18px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  }
+
+  .trip-buttons {
+    display:flex;
+    gap:10px;
+  }
+
+  .trip-buttons .btn {
+    flex:1;
+  }
+  .navbar {
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
@@ -1259,7 +1292,6 @@ body{
   }
   
   .hero {
-    margin-top: 120px;
     padding: 1.5rem;
   }
   
@@ -1394,17 +1426,19 @@ body{
 .profile-menu {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.45);
+  background: rgba(0,0,0,0.35);
   backdrop-filter: blur(6px);
   display: none;
   justify-content: center;
-  align-items: center;
-  z-index: 5000;
+  align-items: flex-start;
+  padding-top: 80px;
+  z-index: 2000;
 }
 
 .profile-menu.active {
   display: flex;
 }
+
 
 
 .profile-card {
@@ -1491,7 +1525,8 @@ body{
     <div id="profileLinks" class="profile-links"></div>
   </div>
 </div>
- 
+
+  
 
 <!-- Hero Section -->
 <section class="hero">
@@ -2220,25 +2255,33 @@ window.setActiveDay = setActiveDay;
 /* ===== PROFILE DROPDOWN CONTROL ===== */
 
 window.addEventListener("DOMContentLoaded", () => {
+const profileBtn = document.getElementById("profileBtn");
+const profileMenu = document.getElementById("profileMenu");
 
-  const profileBtn = document.getElementById("profileBtn");
-  const profileMenu = document.getElementById("profileMenu");
+function openProfileMenu() {
+  profileMenu.classList.add("active");
+  document.body.style.overflow = "hidden";
+}
 
-  if (!profileBtn || !profileMenu) return;
+function closeProfileMenu() {
+  profileMenu.classList.remove("active");
+  document.body.style.overflow = "";
+}
 
-  profileBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    profileMenu.classList.add("active");
-  });
-
-  profileMenu.addEventListener("click", (e) => {
-    if (e.target === profileMenu) {
-      profileMenu.classList.remove("active");
-    }
-  });
-
+profileBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  if (profileMenu.classList.contains("active")) {
+    closeProfileMenu();
+  } else {
+    openProfileMenu();
+  }
 });
-;
+
+profileMenu.addEventListener("click", (e) => {
+  if (e.target === profileMenu) {
+    closeProfileMenu();
+  }
+});
 
 
 // Initial render
