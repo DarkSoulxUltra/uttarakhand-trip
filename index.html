@@ -158,54 +158,59 @@ body{
   font-weight: 600;
   color: #2e3d2f;
 }
-
-/* ---------- Mobile Fix ---------- */
+  
+/* ===== MOBILE NAVBAR FIX ===== */
 
 @media (max-width: 768px) {
 
   .navbar {
+    display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
     padding: 12px 16px;
+    gap: 10px;
+  }
+
+  .navbar-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 
   .trip-controls {
-    background: #ffffff;
     width: 100%;
+    background: #ffffff;
     padding: 10px;
     border-radius: 14px;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.1);
-    margin-top: 12px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
   }
 
   .trip-buttons {
-    width: 100%;
+    display: flex;
     justify-content: space-between;
+    gap: 6px;
   }
 
   .trip-buttons .btn {
     flex: 1;
+    font-size: 12px;
     padding: 8px 0;
-    font-size: 13px;
   }
 
   .trip-code {
     text-align: center;
     font-size: 12px;
+    margin-top: 6px;
     color: #444;
   }
 
-
-
-  .trip-buttons {
-    flex-direction: row;
-    gap: 4px;
+  .nav-links {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    width: 100%;
   }
 
-  .btn {
-    padding: 6px 10px;
-    font-size: 12px;
-  }
 }
 
 
@@ -1339,10 +1344,21 @@ body{
 
 <!-- Navigation Bar -->
 <nav class="navbar">
+  <div class="navbar-top">
   <div class="nav-brand">
     <div class="nav-logo">🏔️</div>
     <div class="nav-title">Uttarakhand <span>Trip</span></div>
+    <div class="nav-auth" id="navAuth">
+    <button class="btn btn-primary" onclick="login()">
+      <span>🔐</span> Sign in
+    </button>
+      <button class="btn btn-secondary btn-small" onclick="logout()">
+        <span>🚪</span> Logout
+      </button>
   </div>
+  </div>
+  </div>
+  
   
   <div class="trip-controls">
   <div class="trip-buttons">
@@ -1387,11 +1403,7 @@ body{
 </div>
 
   
-  <div class="nav-auth" id="navAuth">
-    <button class="btn btn-primary" onclick="login()">
-      <span>🔐</span> Sign in
-    </button>
-  </div>
+  
 </nav>
 
 
@@ -1774,9 +1786,7 @@ function renderAuth() {
           <span class="user-email">${currentUser.email}</span>
         </div>
       </div>
-      <button class="btn btn-secondary btn-small" onclick="logout()">
-        <span>🚪</span> Logout
-      </button>
+      
     `;
   } else {
     navAuth.innerHTML = `
