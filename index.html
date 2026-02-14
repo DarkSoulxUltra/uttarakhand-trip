@@ -52,25 +52,34 @@ body{
 /* ========== NAVIGATION BAR ========== */
 .navbar {
   position: relative;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 70px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(139, 115, 85, 0.15);
-  z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 2rem;
-  box-shadow: var(--shadow-soft);
+  padding: 14px 20px;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  z-index: 2000;
 }
 
-.navbar {
-  flex-wrap: wrap;
+ .nav-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
+.nav-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+} 
+  
 .navbar .nav-links {
   flex-wrap: wrap;
 }
@@ -161,71 +170,38 @@ body{
   
 /* ===== MOBILE NAVBAR FIX ===== */
 @media (max-width: 768px) {
-  .navbar {
+  ..navbar {
     flex-direction: column;
     align-items: stretch;
-    padding: 12px 16px;
     gap: 12px;
-    height: auto;
   }
-  .nav-brand {
-    justify-content: space-between;
-    width: 100%;
-  }
-  .nav-auth {
-    width: 100%;
+
+  .nav-left {
     justify-content: space-between;
   }
-  .trip-controls {
+
+  .nav-center {
     width: 100%;
-    background: white;
-    padding: 12px;
-    border-radius: 14px;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
   }
+
   .trip-buttons {
-    width: 100%;
     display: flex;
-    gap: 6px;
+    width: 100%;
+    gap: 8px;
   }
   .trip-buttons .btn {
     flex: 1;
-    font-size: 12px;
   }
-  .trip-code {
-    margin-top: 6px;
-    text-align: center;
+  .nav-right {
+    position: absolute;
+    top: 14px;
+    right: 20px;
   }
-  .nav-links {
-    display: none;
+
+  .hero {
+    margin-top: 0; /* remove that huge white gap */
   }
-  .nav-auth {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 8px;
-  width: 100%;
 }
-
-.user-profile {
-  width: 100%;
-}
-  .nav-auth .btn {
-  width: 100%;
-}
-
-
-.nav-auth .btn {
-  align-self: flex-end;
-  width: auto;
-  padding: 6px 12px;
-  font-size: 12px;
-}
-
-
-}
-
-
 
 /* Auth Section in Navbar */
 .nav-auth {
@@ -1358,6 +1334,49 @@ body{
   to { transform: rotate(360deg); }
 }
 
+/* ===== Profile Circle ===== */
+.profile-circle {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
+  background: linear-gradient(135deg, var(--sunset-orange), var(--sunset-gold));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== Dropdown Overlay ===== */
+.profile-menu {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(4px);
+  display: none;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 90px;
+  z-index: 3000;
+}
+
+.profile-menu.active {
+  display: flex;
+}
+
+.profile-card {
+  width: 92%;
+  max-width: 360px;
+  background: white;
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+  
 /* ===== PROFILE DROPDOWN NAV ===== */
 
 .profile-btn {
@@ -1369,18 +1388,24 @@ body{
   color: white;
   font-weight: 700;
   cursor: pointer;
+  z-index: 2100;
 }
 
 .profile-menu {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0,0,0,0.45);
   backdrop-filter: blur(6px);
   display: none;
   justify-content: center;
   align-items: center;
-  z-index: 3000;
+  z-index: 5000;
 }
+
+.profile-menu.active {
+  display: flex;
+}
+
 
 .profile-card {
   background: white;
@@ -1437,12 +1462,12 @@ body{
 
 <!-- Navigation Bar -->
 <nav class="navbar">
-  <div class="nav-brand">
+  <div class="nav-left">
     <div class="nav-logo">🏔️</div>
     <div class="nav-title">Uttarakhand <span>Trip</span></div>
   </div>
 
-  <div class="trip-controls">
+  <div class="nav-center">
     <div class="trip-buttons">
       <button onclick="createNewTrip()" class="btn btn-primary">Create</button>
       <button onclick="joinTrip()" class="btn btn-secondary">Join</button>
@@ -1453,8 +1478,11 @@ body{
     </div>
   </div>
 
-  <button id="profileBtn" class="profile-btn" onclick="toggleProfileMenu()">👤</button>
+  <div class="nav-right">
+    <button id="profileBtn" class="profile-btn">👤</button>
+  </div>
 </nav>
+
 
 
  <div id="profileMenu" class="profile-menu">
@@ -1833,22 +1861,23 @@ function showToast(message, type = 'success') {
 
 /* ---------- UI RENDERING ---------- */
 function renderAuth() {
+
+  const btn = document.getElementById("profileBtn");
   const header = document.getElementById("profileHeader");
   const links = document.getElementById("profileLinks");
-  const btn = document.getElementById("profileBtn");
 
-  if (!btn) return;
+  if (!btn || !header || !links) return;
 
   if (currentUser) {
-    btn.innerText = currentUser.name?.[0]?.toUpperCase() || "👤";
+
+    btn.innerText = currentUser.name
+      ? currentUser.name[0].toUpperCase()
+      : "👤";
 
     header.innerHTML = `
-      <div class="profile-avatar">
-        ${currentUser.name?.[0]?.toUpperCase() || "👤"}
-      </div>
-      <div style="text-align:center;font-weight:600;">
-        ${currentUser.name}
-        <div style="font-size:12px;color:#666;">${currentUser.email}</div>
+      <div style="text-align:center;margin-bottom:16px;">
+        <div style="font-weight:600;">${currentUser.name}</div>
+        <div style="font-size:13px;color:gray;">${currentUser.email}</div>
       </div>
     `;
 
@@ -1857,24 +1886,30 @@ function renderAuth() {
       <a href="Uttarakhand_Group_Trip_Itinerary.pdf" target="_blank">Itinerary</a>
       <a href="planning_and_budget.pdf" target="_blank">Planning & Budget</a>
       <a href="#aboutSection">About</a>
-      <button onclick="logout()">Logout</button>
+      <button onclick="logout()" class="btn btn-secondary" style="margin-top:10px;width:100%;">Logout</button>
     `;
+
   } else {
+
     btn.innerText = "👤";
 
     header.innerHTML = `
-      <div class="profile-avatar">👤</div>
-      <div style="text-align:center;font-weight:600;">Guest</div>
+      <div style="text-align:center;margin-bottom:16px;">
+        <div style="font-weight:600;">Guest User</div>
+      </div>
     `;
 
     links.innerHTML = `
-      <button onclick="login()">Sign in with Google</button>
+      <button onclick="login()" class="btn btn-primary" style="width:100%;margin-bottom:12px;">
+        Sign in with Google
+      </button>
       <a href="#journey">Journey</a>
       <a href="Uttarakhand_Group_Trip_Itinerary.pdf" target="_blank">Itinerary</a>
       <a href="planning_and_budget.pdf" target="_blank">Planning & Budget</a>
       <a href="#aboutSection">About</a>
     `;
   }
+
 }
 
 function toggleProfileMenu() {
@@ -2181,6 +2216,29 @@ window.saveNotes = saveNotes;
 window.login = login;
 window.logout = logout;
 window.setActiveDay = setActiveDay;
+
+/* ===== PROFILE DROPDOWN CONTROL ===== */
+
+window.addEventListener("DOMContentLoaded", () => {
+
+  const profileBtn = document.getElementById("profileBtn");
+  const profileMenu = document.getElementById("profileMenu");
+
+  if (!profileBtn || !profileMenu) return;
+
+  profileBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    profileMenu.classList.add("active");
+  });
+
+  profileMenu.addEventListener("click", (e) => {
+    if (e.target === profileMenu) {
+      profileMenu.classList.remove("active");
+    }
+  });
+
+});
+;
 
 
 // Initial render
