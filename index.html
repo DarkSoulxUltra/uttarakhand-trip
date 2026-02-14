@@ -941,6 +941,10 @@ body{
   justify-content: center;
   transition: all 0.3s ease;
 }
+.expense-delete {
+  font-size: 14px;
+}
+
 
 .expense-delete:hover {
   background: rgba(220, 53, 69, 0.25);
@@ -1824,14 +1828,23 @@ function render() {
     </div>
     <div class="expense-list">
       ${dayExpenses.map(e=>`
-        <div class="expense-item">
-          <div class="expense-info">
-            <div class="expense-title">${e.title}</div>
-            <div class="expense-meta">Paid by ${e.paidBy}</div>
-          </div>
-          <div class="expense-amount">₹${e.amount}</div>
-        </div>
-      `).join("")}
+  <div class="expense-item">
+    <div class="expense-info">
+      <div class="expense-title">${e.title}</div>
+      <div class="expense-meta">Paid by ${e.paidBy}</div>
+    </div>
+
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div class="expense-amount">₹${e.amount}</div>
+      <button 
+        class="expense-delete"
+        onclick="delExpense('${e.id}')">
+        ✕
+      </button>
+    </div>
+  </div>
+`).join("")}
+
     </div>
   </div>
 
