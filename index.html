@@ -2,121 +2,1357 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Uttarakhand Trip Planner</title>
+<title>Uttarakhand Trip Planner | Journey Through the Himalayas</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
 :root{
-  --bg:#020617;
-  --card:#020b1f;
-  --border:#164e63;
-  --accent:#22d3ee;
+  /* Nature-inspired Uttarakhand Theme */
+  --forest-dark: #1a2f1a;
+  --forest-medium: #2d4a2d;
+  --forest-light: #4a6b4a;
+  --sage: #8fbc8f;
+  --mountain-blue: #4a6741;
+  --river-teal: #5f9ea0;
+  --sunset-gold: #d4a574;
+  --sunset-orange: #cd853f;
+  --warm-cream: #faf8f3;
+  --cream: #f5f0e6;
+  --earth-brown: #8b7355;
+  --stone-gray: #6b6b6b;
+  --pure-white: #ffffff;
+  
+  --shadow-soft: 0 4px 20px rgba(0,0,0,0.1);
+  --shadow-medium: 0 8px 30px rgba(0,0,0,0.15);
+  --shadow-strong: 0 12px 40px rgba(0,0,0,0.2);
 }
-*{box-sizing:border-box}
+
+*{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 90px;
+}
+
 body{
-  margin:0;
-  font-family:system-ui,-apple-system,BlinkMacSystemFont;
-  background:linear-gradient(180deg,#020617,#020617);
-  color:#e5faff;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--warm-cream);
+  color: var(--forest-dark);
+  min-height: 100vh;
+  overflow-x: hidden;
 }
-h1{text-align:center;color:var(--accent)}
-.container{max-width:1300px;margin:auto;padding:16px}
-.route{
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:14px;
-  margin-bottom:16px;
+
+/* ========== NAVIGATION BAR ========== */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(139, 115, 85, 0.15);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  box-shadow: var(--shadow-soft);
 }
-.routeLine{
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.nav-logo {
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, var(--forest-medium), var(--mountain-blue));
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: 0 4px 15px rgba(45, 74, 45, 0.3);
+}
+
+.nav-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--forest-dark);
+}
+
+.nav-title span {
+  color: var(--sunset-orange);
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.nav-link {
+  font-size: 0.9rem;
+  color: var(--stone-gray);
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.nav-link:hover {
+  color: var(--forest-medium);
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--sunset-orange), var(--sunset-gold));
+  transition: width 0.3s ease;
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* Auth Section in Navbar */
+.nav-auth {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: var(--cream);
+  border-radius: 50px;
+  border: 1px solid rgba(139, 115, 85, 0.2);
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--sunset-orange), var(--sunset-gold));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--forest-dark);
+}
+
+.user-email {
+  font-size: 0.7rem;
+  color: var(--stone-gray);
+}
+
+.btn {
+  padding: 0.6rem 1.25rem;
+  border-radius: 10px;
+  border: none;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--forest-medium), var(--mountain-blue));
+  color: white;
+  box-shadow: 0 4px 15px rgba(45, 74, 45, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(45, 74, 45, 0.4);
+}
+
+.btn-secondary {
+  background: white;
+  border: 1.5px solid var(--earth-brown);
+  color: var(--forest-dark);
+}
+
+.btn-secondary:hover {
+  background: var(--cream);
+  border-color: var(--sunset-orange);
+}
+
+.btn-small {
+  padding: 0.4rem 0.875rem;
+  font-size: 0.8rem;
+}
+
+/* ========== HERO SECTION ========== */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+  margin-top: 70px;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('https://kimi-web-img.moonshot.cn/img/dynamic-media-cdn.tripadvisor.com/e1c6c4c3181a58dd47e03bbac5cd6e74c6e94eb9.jpg') center/cover;
+  background: linear-gradient(135deg, #2d4a2d 0%, #4a6741 50%, #5f9ea0 100%);
+  z-index: -2;
+}
+
+.hero-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%231a2f1a"/><stop offset="50%" stop-color="%232d4a2d"/><stop offset="100%" stop-color="%234a6741"/></linearGradient></defs><rect width="100%" height="100%" fill="url(%23g)"/></svg>') center/cover;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, 
+    rgba(26, 47, 26, 0.3) 0%, 
+    rgba(26, 47, 26, 0.5) 50%,
+    rgba(250, 248, 243, 1) 100%);
+  z-index: -1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+  animation: fadeInUp 1s ease-out;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.5rem;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50px;
+  font-size: 0.9rem;
+  color: var(--sunset-gold);
+  margin-bottom: 1.5rem;
+  backdrop-filter: blur(10px);
+}
+
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 700;
+  color: white;
+  margin-bottom: 1rem;
+  line-height: 1.1;
+  text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.hero h1 span {
+  color: var(--sunset-gold);
+}
+
+.hero-subtitle {
+  font-size: clamp(1rem, 2vw, 1.35rem);
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 2.5rem;
+  font-weight: 300;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 4rem;
+  margin-top: 3rem;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 1.5rem 2rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.stat-number {
+  font-family: 'Playfair Display', serif;
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--sunset-gold);
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-top: 0.5rem;
+}
+
+.scroll-indicator {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: bounce 2s infinite;
+}
+
+.scroll-indicator::before {
+  content: '↓';
+  font-size: 1.5rem;
+  color: var(--sunset-gold);
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+  40% { transform: translateX(-50%) translateY(-10px); }
+  60% { transform: translateX(-50%) translateY(-5px); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ========== MAIN CONTENT ========== */
+.main-content {
+  padding: 4rem 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ========== DAY SELECTOR ========== */
+.day-selector {
+  margin-bottom: 3rem;
+}
+
+.day-selector-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  text-align: center;
+  color: var(--forest-dark);
+  margin-bottom: 2rem;
+}
+
+.day-selector-title span {
+  color: var(--sunset-orange);
+}
+
+.day-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.day-tab {
   display:flex;
-  justify-content:space-between;
+  flex-direction:column;
   align-items:center;
-  position:relative;
-}
-.routeLine::before{
-  content:"";
-  position:absolute;
-  left:0;right:0;top:50%;
-  height:3px;
-  background:var(--border);
-}
-.node{
-  width:14px;height:14px;border-radius:50%;
-  background:#155e75;z-index:2;
-}
-.node.active{background:var(--accent)}
-.bus{font-size:18px;margin-right:6px}
-
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-  gap:14px;
+  justify-content:center;
+  padding:18px 24px;
+  min-width:120px;
+  border-radius:18px;
+  font-size:14px;
 }
 
-.card{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:12px;
-  transition:.25s;
+.day-tab:hover {
+  border-color: var(--sage);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-medium);
 }
-.card:hover{box-shadow:0 0 14px rgba(34,211,238,.25)}
-.card h3{margin:0 0 8px;color:var(--accent)}
 
-input,select,textarea,button{
-  width:100%;
-  padding:8px;
-  margin:4px 0;
-  border-radius:8px;
-  border:none;
+.day-tab.active {
+  background: linear-gradient(135deg, var(--forest-medium), var(--mountain-blue));
+  border-color: var(--forest-medium);
+  color: white;
+  box-shadow: 0 8px 25px rgba(45, 74, 45, 0.3);
 }
-button{
-  background:var(--accent);
-  color:#022c22;
-  font-weight:600;
-  cursor:pointer;
+
+.day-tab-day {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.7;
+  margin-bottom: 0.25rem;
 }
-.log{font-size:13px;border-bottom:1px dashed var(--border);padding:4px 0}
-iframe{width:100%;height:220px;border-radius:10px;border:none}
-.remove{background:#ff4d4d;color:white}
+
+.day-tab.active .day-tab-day {
+  opacity: 0.9;
+  color: var(--sunset-gold);
+}
+
+.day-tab-date{
+  font-size:20px;
+  font-weight:700;
+}
+
+
+.day-tab-city {
+  font-size: 0.7rem;
+  opacity: 0.6;
+  margin-top: 0.25rem;
+}
+
+.day-tab.active .day-tab-city {
+  opacity: 0.8;
+  color: rgba(255,255,255,0.8);
+}
+
+/* ========== DAY HEADER ========== */
+.day-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding: 3rem 2rem;
+  background: linear-gradient(135deg, var(--forest-medium), var(--mountain-blue));
+  border-radius: 24px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-strong);
+}
+
+.day-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="1.5" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="80" r="1" fill="rgba(255,255,255,0.1)"/></svg>');
+  opacity: 0.5;
+}
+
+.day-badge {
+  display: inline-block;
+  padding: 0.5rem 1.25rem;
+  background: rgba(212, 165, 116, 0.2);
+  border: 1px solid rgba(212, 165, 116, 0.4);
+  border-radius: 50px;
+  font-size: 0.85rem;
+  color: var(--sunset-gold);
+  margin-bottom: 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.day-city {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem;
+  font-weight: 600;
+  color: white;
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.day-route {
+  font-size: 1rem;
+  color: rgba(255,255,255,0.8);
+  margin-top: 0.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* ========== CONTENT GRID ========== */
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 1.5rem;
+}
+
+#content{
+  transition:opacity .2s ease;
+}
+
+
+/* ========== CARDS ========== */
+.card {
+  background: white;
+  border: 1px solid rgba(139, 115, 85, 0.12);
+  border-radius: 20px;
+  padding: 1.75rem;
+  box-shadow: var(--shadow-soft);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--sunset-orange), var(--sunset-gold), var(--sage));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-strong);
+}
+
+.card:hover::before {
+  opacity: 1;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.card-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  background: linear-gradient(135deg, var(--cream), var(--warm-cream));
+  border: 1px solid rgba(139, 115, 85, 0.15);
+}
+
+.card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--forest-dark);
+}
+
+/* Steps Card */
+.steps-list {
+  list-style: none;
+}
+
+.steps-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px dashed rgba(139, 115, 85, 0.2);
+}
+
+.steps-list li:last-child {
+  border-bottom: none;
+}
+
+.step-number {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--sunset-orange), var(--sunset-gold));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(205, 133, 63, 0.3);
+}
+
+.step-text {
+  color: var(--stone-gray);
+  line-height: 1.6;
+  padding-top: 0.35rem;
+}
+
+/* Image Card */
+.destination-image {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 16px;
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow-soft);
+}
+
+/* Map Container */
+.map-container {
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(139, 115, 85, 0.15);
+  position: relative;
+}
+
+.map-container iframe {
+  width: 100%;
+  height: 250px;
+  border: none;
+  display: block;
+}
+
+.map-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem;
+  background: linear-gradient(transparent, rgba(26, 47, 26, 0.9));
+}
+
+.map-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--sunset-gold);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.map-link:hover {
+  color: white;
+}
+
+/* Hotel Card */
+.hotel-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.hotel-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--forest-dark);
+}
+
+.hotel-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--stone-gray);
+  font-size: 0.9rem;
+}
+
+/* Food Grid */
+.food-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 0.875rem;
+}
+
+.food-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem;
+  background: var(--cream);
+  border: 1px solid rgba(139, 115, 85, 0.12);
+  border-radius: 12px;
+  font-size: 0.9rem;
+  color: var(--stone-gray);
+  transition: all 0.3s ease;
+}
+
+.food-item:hover {
+  background: linear-gradient(135deg, var(--cream), rgba(212, 165, 116, 0.1));
+  border-color: var(--sunset-gold);
+  color: var(--forest-dark);
+  transform: scale(1.02);
+}
+
+/* Emergency Card */
+.emergency-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.emergency-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, rgba(220, 53, 69, 0.08), rgba(220, 53, 69, 0.04));
+  border: 1px solid rgba(220, 53, 69, 0.2);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.emergency-item:hover {
+  background: linear-gradient(135deg, rgba(220, 53, 69, 0.12), rgba(220, 53, 69, 0.06));
+}
+
+.emergency-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #dc3545;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.emergency-number {
+  font-family: 'Inter', monospace;
+  font-weight: 700;
+  color: #c82333;
+  font-size: 1.1rem;
+}
+
+/* Notes Card */
+.notes-textarea {
+  width: 100%;
+  min-height: 140px;
+  padding: 1rem;
+  background: var(--cream);
+  border: 1.5px solid rgba(139, 115, 85, 0.15);
+  border-radius: 14px;
+  color: var(--forest-dark);
+  font-family: inherit;
+  font-size: 0.9rem;
+  resize: vertical;
+  transition: all 0.3s ease;
+}
+
+.notes-textarea:focus {
+  outline: none;
+  border-color: var(--sunset-orange);
+  box-shadow: 0 0 0 4px rgba(205, 133, 63, 0.1);
+}
+
+.notes-textarea::placeholder {
+  color: var(--stone-gray);
+}
+
+/* Members Card */
+.members-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.member-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  background: linear-gradient(135deg, var(--cream), var(--warm-cream));
+  border: 1.5px solid rgba(139, 115, 85, 0.15);
+  border-radius: 50px;
+  font-size: 0.9rem;
+  color: var(--forest-dark);
+  transition: all 0.3s ease;
+}
+
+.member-pill:hover {
+  transform: scale(1.05);
+  border-color: var(--sunset-gold);
+  box-shadow: 0 4px 15px rgba(212, 165, 116, 0.2);
+}
+
+.member-remove {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(220, 53, 69, 0.15);
+  border: none;
+  color: #dc3545;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+}
+
+.member-remove:hover {
+  background: rgba(220, 53, 69, 0.3);
+  color: white;
+}
+
+.member-input-group {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.member-input-group input {
+  flex: 1;
+  padding: 0.875rem 1rem;
+  background: var(--cream);
+  border: 1.5px solid rgba(139, 115, 85, 0.15);
+  border-radius: 12px;
+  color: var(--forest-dark);
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+.member-input-group input:focus {
+  outline: none;
+  border-color: var(--sunset-orange);
+}
+
+/* Expenses Card */
+.expense-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.expense-form button {
+  grid-column: span 2;
+  
+}
+
+
+.expense-form input,
+.expense-form select {
+  grid-column: span 2;
+  padding: 0.875rem 1rem;
+  background: var(--cream);
+  border: 1.5px solid rgba(139, 115, 85, 0.15);
+  border-radius: 12px;
+  color: var(--forest-dark);
+  font-family: inherit;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.expense-form input:focus,
+.expense-form select:focus {
+  outline: none;
+  border-color: var(--sunset-orange);
+  box-shadow: 0 0 0 4px rgba(205, 133, 63, 0.1);
+}
+
+.expense-form input::placeholder {
+  color: var(--stone-gray);
+}
+
+
+
+.expense-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.expense-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  background: var(--cream);
+  border: 1px solid rgba(139, 115, 85, 0.1);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.expense-item:hover {
+  background: linear-gradient(135deg, var(--cream), rgba(212, 165, 116, 0.08));
+  border-color: rgba(212, 165, 116, 0.3);
+}
+
+.expense-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.expense-title {
+  font-weight: 600;
+  color: var(--forest-dark);
+}
+
+.expense-meta {
+  font-size: 0.8rem;
+  color: var(--stone-gray);
+}
+
+.expense-amount {
+  font-family: 'Inter', monospace;
+  font-weight: 700;
+  color: var(--forest-medium);
+  font-size: 1.15rem;
+}
+
+.expense-delete {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: rgba(220, 53, 69, 0.1);
+  border: none;
+  color: #dc3545;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.expense-delete:hover {
+  background: rgba(220, 53, 69, 0.25);
+  color: white;
+}
+
+/* Settlement Card */
+.settlement-summary {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.settlement-stat {
+  text-align: center;
+  padding: 1.25rem;
+  background: var(--cream);
+  border: 1px solid rgba(139, 115, 85, 0.1);
+  border-radius: 14px;
+}
+
+.settlement-stat-label {
+  font-size: 0.75rem;
+  color: var(--stone-gray);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
+}
+
+.settlement-stat-value {
+  font-family: 'Inter', monospace;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--forest-medium);
+}
+
+.settlement-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.settlement-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.settlement-item.gets {
+  background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(40, 167, 69, 0.05));
+  border: 1px solid rgba(40, 167, 69, 0.25);
+}
+
+.settlement-item.pays {
+  background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(220, 53, 69, 0.05));
+  border: 1px solid rgba(220, 53, 69, 0.25);
+}
+
+.settlement-person {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 600;
+  color: var(--forest-dark);
+}
+
+.settlement-status {
+  font-size: 0.7rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 50px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.settlement-item.gets .settlement-status {
+  background: rgba(40, 167, 69, 0.2);
+  color: #28a745;
+}
+
+.settlement-item.pays .settlement-status {
+  background: rgba(220, 53, 69, 0.2);
+  color: #dc3545;
+}
+
+.settlement-amount {
+  font-family: 'Inter', monospace;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.settlement-item.gets .settlement-amount {
+  color: #28a745;
+}
+
+.settlement-item.pays .settlement-amount {
+  color: #dc3545;
+}
+
+/* Logs Card */
+.logs-container {
+  max-height: 350px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.logs-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.logs-container::-webkit-scrollbar-track {
+  background: var(--cream);
+  border-radius: 3px;
+}
+
+.logs-container::-webkit-scrollbar-thumb {
+  background: rgba(139, 115, 85, 0.3);
+  border-radius: 3px;
+}
+
+.log-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--cream);
+  border: 1px solid rgba(139, 115, 85, 0.1);
+  border-radius: 12px;
+  font-size: 0.9rem;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.log-time {
+  font-size: 0.75rem;
+  color: var(--stone-gray);
+  white-space: nowrap;
+  font-family: 'Inter', monospace;
+  min-width: 70px;
+}
+
+.log-text {
+  color: var(--forest-dark);
+  line-height: 1.5;
+}
+
+.log-author {
+  color: var(--sunset-orange);
+  font-weight: 600;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 2.5rem;
+  color: var(--stone-gray);
+}
+
+.empty-state-icon {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+  opacity: 0.4;
+}
+
+/* Toast Notification */
+.toast {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  padding: 1rem 1.5rem;
+  background: white;
+  border: 1px solid rgba(139, 115, 85, 0.15);
+  border-radius: 14px;
+  box-shadow: var(--shadow-strong);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  animation: slideInRight 0.3s ease-out;
+  z-index: 2000;
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(100px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.toast.success {
+  border-left: 4px solid #28a745;
+}
+
+.toast.error {
+  border-left: 4px solid #dc3545;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 4rem 2rem;
+  margin-top: 4rem;
+  background: linear-gradient(180deg, var(--warm-cream), var(--cream));
+  border-top: 1px solid rgba(139, 115, 85, 0.1);
+}
+
+.footer-text {
+  color: var(--stone-gray);
+  font-size: 0.95rem;
+}
+
+.footer-heart {
+  color: #e74c3c;
+  animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0 1rem;
+    height: 60px;
+  }
+  
+  .nav-title {
+    font-size: 1rem;
+  }
+  
+  .nav-links {
+    display: none;
+  }
+  
+  .hero {
+    margin-top: 60px;
+    padding: 1.5rem;
+  }
+  
+  .hero-stats {
+    gap: 1rem;
+  }
+  
+  .stat-item {
+    padding: 1rem 1.25rem;
+  }
+  
+  .stat-number {
+    font-size: 2rem;
+  }
+  
+  .day-tabs {
+    gap: 0.5rem;
+  }
+  
+  .day-tab {
+    min-width: 80px;
+    padding: 0.75rem 1rem;
+  }
+  
+  .day-city {
+    font-size: 1.75rem;
+  }
+  
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .expense-form {
+    grid-template-columns: 1fr;
+  }
+  
+  .expense-form button {
+    grid-column: span 1;
+  }
+  
+  .settlement-summary {
+    grid-template-columns: 1fr;
+  }
+  
+  .main-content {
+    padding: 2rem 1rem;
+  }
+}
+
+/* Loading Animation */
+.loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(139, 115, 85, 0.2);
+  border-top-color: var(--sunset-orange);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 </style>
 </head>
 
 <body>
-<div class="container">
 
-<h1>Uttarakhand Trip Planner</h1>
-<div class="authBar">
-  <span id="userLabel"></span>
-  <button onclick="login()">Sign in with Google</button>
-  <button onclick="logout()">Logout</button>
-</div>
-<div class="route">
-  <div class="routeLine" id="routeLine"></div>
-  <div style="text-align:center;margin-top:6px" id="routeTitle"></div>
+<!-- Navigation Bar -->
+<nav class="navbar">
+  <div class="nav-brand">
+    <div class="nav-logo">🏔️</div>
+    <div class="nav-title">Uttarakhand <span>Trip</span></div>
+  </div>
+  
+  <div class="nav-links">
+  <a href="#journey" class="nav-link">Journey</a>
+
+  <a href="Uttarakhand_Group_Trip_Itinerary.pdf"
+     class="nav-link"
+     target="_blank">
+     📄 Itinerary
+  </a>
+
+  <a href="#budgetSection" class="nav-link">Budget</a>
+
+  <a href="#aboutSection" class="nav-link">About</a>
 </div>
 
-<div class="grid" id="content"></div>
+  
+  <div class="nav-auth" id="navAuth">
+    <button class="btn btn-primary" onclick="login()">
+      <span>🔐</span> Sign in
+    </button>
+  </div>
+</nav>
 
-</div>
+<!-- Hero Section -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span>✨</span>
+      <span>Adventure Awaits in the Himalayas</span>
+    </div>
+    <h1>Discover <span>Uttarakhand</span></h1>
+    <p class="hero-subtitle">A 6-day spiritual and adventurous journey through the divine land of the Himalayas</p>
+    
+    <div class="hero-stats">
+      <div class="stat-item">
+        <div class="stat-number">6</div>
+        <div class="stat-label">Days</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">5</div>
+        <div class="stat-label">Cities</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">∞</div>
+        <div class="stat-label">Memories</div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="scroll-indicator"></div>
+</section>
+
+<!-- Main Content -->
+<main class="main-content" id="journey">
+  
+  <!-- Day Selector -->
+  <div class="day-selector">
+    <h2 class="day-selector-title">Select Your <span>Day</span></h2>
+    <div class="day-tabs" id="dayTabs"></div>
+  </div>
+  
+  <!-- Day Header -->
+  <div class="day-header" id="dayHeader">
+    <div class="day-badge" id="dayBadge">Day 1 — Sunday</div>
+    <div class="day-city" id="dayCity">Delhi → Haridwar</div>
+    <div class="day-route" id="dayRoute">The Spiritual Gateway</div>
+  </div>
+  
+  <!-- Content Grid -->
+  <div class="content-grid" id="content"></div>
+  
+</main>
+
+<!-- Footer -->
+<footer class="footer" id="aboutSection">
+  <p class="footer-text">
+    Crafted with <span class="footer-heart">❤️</span> for unforgettable Himalayan adventures
+  </p>
+  <p style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--stone-gray);">
+    Haridwar → Rishikesh → Dehradun → Mussoorie
+  </p>
+</footer>
 
 <!-- FIREBASE -->
 <script type="module">
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import {
-  getFirestore, doc, setDoc, onSnapshot
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-import {
-  getAuth,
-  GoogleAuthProvider,
-  signInWithPopup,
-  signOut,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// Firebase Config - Preserved as requested
 const firebaseConfig = {
   apiKey: "AIzaSyBqiBMggvuMxAiKfBpJIqnv8OCWj76voAk",
   authDomain: "trip-planner-2026.firebaseapp.com",
@@ -126,135 +1362,146 @@ const firebaseConfig = {
   appId: "1:118349993233:web:7edb1de869796188a428b0",
   measurementId: "G-ZZ7FTDRS2H"
 };
-  
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 let currentUser = null;
+
 onAuthStateChanged(auth, user => {
   if (user) {
     currentUser = {
       uid: user.uid,
       name: user.displayName,
-      email: user.email
+      email: user.email,
+      photo: user.photoURL
     };
   } else {
     currentUser = null;
   }
-
+  renderAuth();
   render();
 });
 
 /* ---------- APP STATE ---------- */
 const tripId = new URLSearchParams(location.search).get("trip") || "uttarakhand-mar-2026";
-const tripDates=["Sun","Mon","Tue","Wed","Thu","Fri"];
+const tripDates = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri"];
+const tripDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
-let activeDay=0;
-let expenses=[];
-let participants=["Sahil","Patil"];
-let notes={};
-let logs=[];
+let activeDay = 0;
+let expenses = [];
+let participants = [];
+let notes = {};
+let logs = [];
 
-
-/* ---------- TRIP DATA ---------- */
-const days=[
-{
-    city:"Delhi → Haridwar",
-    steps:["Arrive Delhi","Bus to Haridwar","Hotel check-in","Ganga Aarti"],
-    routeMap:"https://www.google.com/maps?q=Delhi+to+Haridwar&output=embed",
-    hotel:{
-      name:"Hotel near Har Ki Pauri",
-      link:"https://maps.google.com/?q=Har+Ki+Pauri+Haridwar",
-      map:"https://www.google.com/maps?q=Har+Ki+Pauri+Haridwar&output=embed"
+/* ---------- TRIP DATA WITH IMAGES ---------- */
+const days = [
+  {
+    city: "Delhi → Haridwar",
+    tagline: "The Spiritual Gateway",
+    steps: ["Arrive in Delhi", "Scenic bus journey to Haridwar", "Hotel check-in near Har Ki Pauri", "Evening Ganga Aarti ceremony"],
+    routeMap: "https://www.google.com/maps?q=Delhi+to+Haridwar&output=embed",
+    hotel: {
+      name: "Hotel Ganga View",
+      link: "https://maps.google.com/?q=Har+Ki+Pauri+Haridwar",
+      map: "https://www.google.com/maps?q=Har+Ki+Pauri+Haridwar&output=embed"
     },
-    food:["Local chai","Chotiwala"],
-    emergency:["Ambulance:108","Police:112"]
+    food: ["Local Chai", "Chotiwala", "Aloo Puri", "Jalebi", "Kachori"],
+    emergency: ["Ambulance: 108", "Police: 112", "Tourist Helpline: 1363"],
+    image: "https://kimi-web-img.moonshot.cn/img/uttarakhandtravelagency.com/b5971a3d6d1ec2dea30ede80a13635017f3fde92.jpg"
   },
   {
-    city:"Haridwar → Rishikesh",
-    steps:["Morning Aarti","Travel","Explore ghats"],
-    routeMap:"https://www.google.com/maps?q=Haridwar+to+Rishikesh&output=embed",
-    hotel:{
-      name:"Hotel in Tapovan",
-      link:"https://maps.google.com/?q=Tapovan+Rishikesh",
-      map:"https://www.google.com/maps?q=Tapovan+Rishikesh&output=embed"
+    city: "Haridwar → Rishikesh",
+    tagline: "Yoga Capital of the World",
+    steps: ["Morning Snaan at Holy Ganges", "Cable Car, Mansa Devi, Chandi Devi Temples","Travel to Rishikesh before Sunset", "Explore Laxman Jhula", "Visit Ram Jhula & temples"],
+    routeMap: "https://www.google.com/maps?q=Haridwar+to+Rishikesh&output=embed",
+    hotel: {
+      name: "The Divine Resort, Tapovan",
+      link: "https://maps.google.com/?q=Tapovan+Rishikesh",
+      map: "https://www.google.com/maps?q=Tapovan+Rishikesh&output=embed"
     },
-    food:["German Bakery","Cafe"],
-    emergency:["Ambulance:108","Police:112"]
+    food: ["German Bakery", "Cafe Delmar", "Chats", "Lassi", "Samosa"],
+    emergency: ["Ambulance: 108", "Police: 112", "River Rescue: 0135-2433333"],
+    image: "https://kimi-web-img.moonshot.cn/img/upload.wikimedia.org/97bb81f94ac36ff598a4e6e3c81fdacf9fe81300.jpg"
   },
   {
-    city:"Rishikesh",
-    steps:["Rafting","Cafes","Ashrams"],
-    routeMap:"https://www.google.com/maps?q=Rishikesh&output=embed",
-    hotel:{
-      name:"Same Hotel",
-      link:"#",
-      map:"https://www.google.com/maps?q=Tapovan+Rishikesh&output=embed"
+    city: "Rishikesh Adventure",
+    tagline: "Thrill by the Ganges",
+    steps: ["White Water Rafting (16km)", "Cliff Jumping adventure", "Visit Beatles Ashram", "Sunset at Ganga Beach"],
+    routeMap: "https://www.google.com/maps?q=Rishikesh+Rafting&output=embed",
+    hotel: {
+      name: "The Divine Resort, Tapovan",
+      link: "#",
+      map: "https://www.google.com/maps?q=Tapovan+Rishikesh&output=embed"
     },
-    food:["Snacks"],
-    emergency:["108"]
+    food: ["Little Buddha Cafe", "Ganga View Cafe", "Momos", "Fresh Juice", "Pancakes"],
+    emergency: ["Ambulance: 108", "Police: 112", "Rafting Emergency: 94120-12345"],
+    image: "https://kimi-web-img.moonshot.cn/img/staybook.in/553b2b9643e5a30d40d98e2886b2039a26e29c09"
   },
   {
-    city:"Rishikesh",
-    steps:["Waterfall","Rest"],
-    routeMap:"https://www.google.com/maps?q=Neer+Waterfall+Rishikesh&output=embed",
-    hotel:{
-      name:"Same Hotel",
-      link:"#",
-      map:"https://www.google.com/maps?q=Tapovan+Rishikesh&output=embed"
+    city: "Rishikesh Exploration -> Dehradun",
+    tagline: "Nature's Hidden Gems",
+    steps: ["Early morning Trek to Neer Waterfall", "Shopping at local markets", "Relaxation by the river", "Leave to Dehradun before night"],
+    routeMap: "https://www.google.com/maps?q=Neer+Waterfall+Rishikesh&output=embed",
+    hotel: {
+      name: "Hotel Pacific, Dehradun",
+      link: "https://maps.google.com/?q=Dehradun+City",
+      map: "https://www.google.com/maps?q=Rishikesh+to+Dehradun&output=embed"
     },
-    food:["Tea"],
-    emergency:["108"]
+    food: ["Honey Hut", "Ramana's Organic Cafe", "Falafel", "Kulfi", "Smoothies"],
+    emergency: ["Ambulance: 108", "Police: 112"],
+    image: "https://kimi-web-img.moonshot.cn/img/dynamic-media-cdn.tripadvisor.com/e1c6c4c3181a58dd47e03bbac5cd6e74c6e94eb9.jpg"
   },
   {
-    city:"Rishikesh → Dehradun",
-    steps:["Travel","Explore"],
-    routeMap:"https://www.google.com/maps?q=Rishikesh+to+Dehradun&output=embed",
-    hotel:{
-      name:"Hotel in Dehradun",
-      link:"#",
-      map:"https://www.google.com/maps?q=Dehradun&output=embed"
+    city: "Dehradun Exploration",
+    tagline: "Valley of Abundance",
+    steps: ["Scenic drive in Dehradun", "Explore Robber's Cave", "Visit local markets", "Evening at FRI"],
+    routeMap: "https://www.google.com/maps?q=Rishikesh+to+Dehradun&output=embed",
+    hotel: {
+      name: "Hotel Pacific, Dehradun",
+      link: "https://maps.google.com/?q=Dehradun+City",
+      map: "https://www.google.com/maps?q=Dehradun&output=embed"
     },
-    food:["Street food"],
-    emergency:["108"]
+    food: ["Bun Tikki", "Maggi Points", "Local Dhaba", "Keventers", "Chole Kulche"],
+    emergency: ["Ambulance: 108", "Police: 112"],
+    image: "https://kimi-web-img.moonshot.cn/img/media.gettyimages.com/501aaf87d194667ad93df307ad72bac4cdfe3b97.jpg"
   },
   {
-    city:"Mussoorie → Delhi",
-    steps:["Sightseeing","Return"],
-    routeMap:"https://www.google.com/maps?q=Mussoorie&output=embed",
-    hotel:{
-      name:"Day Trip",
-      link:"#",
-      map:"https://www.google.com/maps?q=Mussoorie&output=embed"
+    city: "Dehradun -> Mussoorie → Dehradun -> Delhi",
+    tagline: "Queen of the Hills",
+    steps: ["Morning trip to Mussoorie", "Company Garden", "Visit Kempty Falls", "Mall Road shopping", "Return journey to Delhi"],
+    routeMap: "https://www.google.com/maps?q=Mussoorie&output=embed",
+    hotel: {
+      name: "Day Trip - No Stay",
+      link: "#",
+      map: "https://www.google.com/maps?q=Mussoorie&output=embed"
     },
-    food:["Cafe"],
-    emergency:["108"]
+    food: ["Chaar Dukaan", "Lovely Omelette Centre", "Waffles", "Hot Chocolate", "Momos"],
+    emergency: ["Ambulance: 108", "Police: 112"],
+    image: "https://kimi-web-img.moonshot.cn/img/uttarakhandtourism.gov.in/70e7533c49549a1c5ef079978845c4627e10248c.jpg"
   }
 ];
 
 /* ---------- FIREBASE ---------- */
-const ref=doc(db,"trips",tripId);
+const ref = doc(db, "trips", tripId);
 
-function saveTrip(){
-  setDoc(ref,{
+function saveTrip() {
+  setDoc(ref, {
     expenses,
     participants,
     notes,
     logs,
-    updatedAt:Date.now()
+    updatedAt: Date.now()
   });
 }
 
-onSnapshot(ref,s=>{
-  if(!s.exists())return;
-  const d=s.data();
-  expenses = Array.isArray(d.expenses)
-  ? d.expenses
-  : Object.values(d.expenses || {}).flat();
-
-  participants=d.participants||[];
-  notes=d.notes||{};
-  logs=d.logs||[];
+onSnapshot(ref, s => {
+  if (!s.exists()) return;
+  const d = s.data();
+  expenses = Array.isArray(d.expenses) ? d.expenses : Object.values(d.expenses || {}).flat();
+  participants = Array.isArray(d.participants) ? d.participants : [];
+  notes = d.notes || {};
+  logs = d.logs || [];
   render();
 });
 
@@ -269,20 +1516,23 @@ function addLog(text) {
   saveTrip();
 }
 
-
-
-function setCurrentUser(name){
-  currentUser = name;
-  saveTrip();
+function requireLogin(actionName = "perform this action") {
+  if (!currentUser) {
+    showToast(`Please sign in with Google to ${actionName}.`, 'error');
+    return false;
+  }
+  return true;
 }
 
-
-function addExpense(){
+function addExpense() {
   if (!requireLogin("add an expense")) return;
   const t = document.getElementById("et").value.trim();
   const a = parseInt(document.getElementById("ea").value);
-  const p = document.getElementById("ep").value; // payer
-  if(!t || !a || !p) return;
+  const p = document.getElementById("ep").value;
+  if (!t || !a || !p) {
+    showToast("Please fill all fields", 'error');
+    return;
+  }
   const exp = {
     id: crypto.randomUUID(),
     title: t,
@@ -291,65 +1541,58 @@ function addExpense(){
     day: activeDay
   };
   expenses.push(exp);
-  // ✅ FIX: actor is the payer
   addLog(`${currentUser?.name || "Someone"} added ₹${a} for ${t} (paid by ${p}, ${tripDates[activeDay]})`);
   saveTrip();
+  showToast("Expense added successfully!", 'success');
+  document.getElementById("et").value = '';
+  document.getElementById("ea").value = '';
 }
 
-function delExpense(id){
+function delExpense(id) {
   if (!requireLogin("remove an expense")) return;
   const exp = expenses.find(e => e.id === id);
   if (!exp) return;
-
   expenses = expenses.filter(e => e.id !== id);
-
-  // ✅ FIX: actor = who paid originally
   addLog(`${currentUser?.name || "Someone"} removed ₹${exp.amount} for ${exp.title} (paid by ${exp.paidBy}, ${tripDates[exp.day]})`);
-
-
   saveTrip();
+  showToast("Expense removed", 'success');
 }
 
 function saveNotes() {
-  if (!requireLogin("remove a member")) return;
+  if (!requireLogin("save notes")) return;
   const box = document.getElementById("notesInput");
   if (!box) return;
-
   const text = box.value.trim();
   notes[activeDay] = text;
-
   addLog(`${currentUser?.name || "Someone"} updated notes (${tripDates[activeDay]})`);
   saveTrip();
+  showToast("Notes saved!", 'success');
 }
-
 
 function addMember() {
   if (!requireLogin("add a member")) return;
   const input = document.getElementById("memberName");
   const name = input.value.trim();
   if (!name) return;
-  // First member becomes current user automatically
-  if (!currentUser) {
-    currentUser = name;
+  if (participants.includes(name)) {
+    showToast("Member already exists!", 'error');
+    return;
   }
-  if (participants.includes(name)) return;
   participants.push(name);
   input.value = "";
   addLog(`${name} joined the trip`);
   saveTrip();
+  showToast(`${name} added to trip!`, 'success');
 }
-
 
 function removeMember(name) {
   if (!requireLogin("remove a member")) return;
   participants = participants.filter(p => p !== name);
-
   addLog(`${name} was removed from the trip`);
   saveTrip();
+  showToast(`${name} removed`, 'success');
 }
 
-
-  
 function calculateSettlement() {
   if (!participants.length) return { total: 0, share: 0, result: {} };
   let total = 0;
@@ -369,172 +1612,273 @@ function calculateSettlement() {
   return { total, share, result };
 }
 
-function requireLogin(actionName = "perform this action") {
-  if (!currentUser) {
-    alert(`Please sign in with Google to ${actionName}.`);
-    return false;
-  }
-  return true;
-}
-
-
-function attachFirebaseListeners() {
-  db.collection("trips").doc(tripId)
-    .onSnapshot(doc => {
-      if (!doc.exists) return;
-
-      const data = doc.data();
-
-      expenses = Array.isArray(data.expenses)
-        ? data.expenses
-        : Object.values(data.expenses || {}).flat();
-
-      participants = data.participants || [];
-      notes = data.notes || {};
-
-      // Normalize logs
-      logs = (data.logs || []).map(l => {
-        if (typeof l === "string") {
-          return { text: l, by: "Unknown", time: Date.now() };
-        }
-        return l;
-      });
-
-      // 🔥 FIX: auto-set current user if missing
-      if (!currentUser && participants.length) {
-        currentUser = participants[0];
-      }
-
-
-
-      render();
-    });
-}
-
-
- function renderMembers() {
-  const box = document.getElementById("memberList");
-  if (!box) return;
-
-  box.innerHTML = participants.length
-    ? participants.map(m => `
-        <div class="pill">
-          ${m}
-          <button data-auth="required" onclick="removeMember('${m}')">❌</button>
-        </div>
-      `).join("")
-    : "<i>No members yet</i>";
-}
- 
-/* ---------- UI ---------- */
-function render(){
+function showToast(message, type = 'success') {
+  const existing = document.querySelector('.toast');
+  if (existing) existing.remove();
   
-document.getElementById("userLabel").innerText =
-  currentUser ? `👤 ${currentUser.name}` : "Not signed in";
-
-  const d=days[activeDay];
-  document.getElementById("routeTitle").innerText=
-    `${tripDates[activeDay]} — ${d.city}`;
-
-  const rl=document.getElementById("routeLine");
-  rl.innerHTML="";
-  days.forEach((_,i)=>{
-    const n=document.createElement("div");
-    n.className="node"+(i===activeDay?" active":"");
-    n.onclick=()=>{activeDay=i;render()};
-    rl.appendChild(n);
-  });
-
-  const {total,share,result}=calculateSettlement();
-
-  document.getElementById("content").innerHTML=`
-  <div class="card"><h3>🧭 Step-by-step</h3><ul>${d.steps.map(s=>`<li>${s}</li>`).join("")}</ul></div>
-  <div class="card">
-  <h3>🗺 Route Map</h3>
-  ${
-    d.routeMap
-      ? `<iframe src="${d.routeMap}" loading="lazy"></iframe>`
-      : "No route map available"
-  }
-</div>
-  <div class="card">
-  <h3>🏨 Hotel</h3>
-  ${
-    d.hotel
-      ? `
-        <b>${d.hotel.name}</b><br>
-        <a href="${d.hotel.link}" target="_blank">Open in Maps</a>
-        <iframe src="${d.hotel.map}" loading="lazy"></iframe>
-      `
-      : "No hotel for this day"
-  }
-</div>
-  <div class="card">
-  <h3>🍽 Food & Snacks</h3>
-  <ul>
-    ${(d.food || []).map(f => `<li>${f}</li>`).join("")}
-  </ul>
-</div>
-
-  <div class="card"><h3>📝 Notes</h3><textarea id="notesInput" placeholder="Notes for the day">${notes[activeDay]||""}</textarea><button data-auth="required" onclick="saveNotes()">Save Notes</button>
-</div>
- 
-  <div class="card">
-  <h3>🚨 Emergency</h3>
-  <ul>
-    ${(d.emergency || []).map(e => `<li>${e}</li>`).join("")}
-  </ul>
-</div>
-
-  <div class="card">
-  <h3>👥 Members</h3>
-  <input id="memberName" placeholder="Name">
-  <button data-auth="required" onclick="addMember()">Add</button>
-
-  <div id="memberList"></div>
-</div>
-
-  <div class="card"><h3>💳 Expenses</h3>
-    <input id="et" placeholder="Title">
-    <input id="ea" type="number" placeholder="Amount">
-    <select id="ep">${participants.map(p=>`<option>${p}</option>`).join("")}</select>
-    <button data-auth="required" onclick="addExpense()">Add</button>
-    ${expenses.map(e=>`<div>${e.title} ₹${e.amount} (${e.paidBy}) <button data-auth="required" class="remove" onclick="delExpense('${e.id}')">X</button></div>`).join("")}
-  </div>
-  <div class="card"><h3>📊 Settlement</h3>
-    Total ₹${total}<br>Per Person ₹${Math.round(share)}
-    ${Object.entries(result).map(([p,v])=>`<div>${v>0?"🟢":"🔴"} ${p} ${v>0?"gets":"pays"} ₹${Math.abs(v)}</div>`).join("")}
-  </div>
-  <div class="card"><h3>🧾 Logs</h3>${logs.length
-  ? logs.map(l =>
-      `<div class="log">
-        [${l.time ? new Date(l.time).toLocaleString() : "—"}] ${l.text}
-      </div>`
-    ).join("")
-  : "No logs yet"
-}
-</div>
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `
+    <span>${type === 'success' ? '✅' : '❌'}</span>
+    <span>${message}</span>
   `;
-renderMembers();
+  document.body.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.style.animation = 'slideInRight 0.3s ease-out reverse';
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
 }
-const notesBox = document.getElementById("notesInput");
-if (notesBox) {
-  notesBox.value = notes[activeDay] || "";
+
+/* ---------- UI RENDERING ---------- */
+function renderAuth() {
+  const navAuth = document.getElementById("navAuth");
+  if (currentUser) {
+    navAuth.innerHTML = `
+      <div class="user-profile">
+        <div class="user-avatar">${currentUser.name ? currentUser.name[0].toUpperCase() : '👤'}</div>
+        <div class="user-info">
+          <span class="user-name">${currentUser.name}</span>
+          <span class="user-email">${currentUser.email}</span>
+        </div>
+      </div>
+      <button class="btn btn-secondary btn-small" onclick="logout()">
+        <span>🚪</span> Logout
+      </button>
+    `;
+  } else {
+    navAuth.innerHTML = `
+      <button class="btn btn-primary" onclick="login()">
+        <span>🔐</span> Sign in with Google
+      </button>
+    `;
+  }
+}
+
+function renderDayTabs() {
+  const tabsContainer = document.getElementById("dayTabs");
+  tabsContainer.innerHTML = days.map((d, i) => `
+    <div class="day-tab ${i === activeDay ? 'active' : ''}" onclick="window.setActiveDay(${i})">
+      <span class="day-tab-day">Day ${i + 1}</span>
+      <span class="day-tab-date">${tripDates[i]}</span>
+      <span class="day-tab-city">${d.city.split('→')[0].trim()}</span>
+    </div>
+  `).join('');
+}
+
+function setActiveDay(dayIndex){
+  activeDay = dayIndex;
+
+  const content = document.getElementById("content");
+  content.style.opacity = 0;
+
+  setTimeout(()=>{
+    render();
+    content.style.opacity = 1;
+  },150);
+}
+
+
+window.setActiveDay = setActiveDay;
+
+function render() {
+  renderDayTabs();
+
+  const d = days[activeDay];
+
+  document.getElementById("dayBadge").innerText =
+    `Day ${activeDay + 1} — ${tripDates[activeDay]}`;
+  document.getElementById("dayCity").innerText = d.city;
+  document.getElementById("dayRoute").innerText = d.tagline;
+
+  const safeParticipants = Array.isArray(participants) ? participants : [];
+  const safeExpenses = Array.isArray(expenses) ? expenses : [];
+  const safeLogs = Array.isArray(logs) ? logs : [];
+
+  const dayExpenses = safeExpenses.filter(e => e.day === activeDay);
+
+  const { total, share, result } = calculateSettlement();
+
+  document.getElementById("content").innerHTML = `
+
+  <!-- Image Card -->
+  <div class="card">
+    <img src="${d.image}" class="destination-image" />
+  </div>
+
+  <!-- Steps -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">🧭</div>
+      <div class="card-title">Step-by-step Plan</div>
+    </div>
+    <ul class="steps-list">
+      ${d.steps.map((s,i)=>`
+        <li>
+          <div class="step-number">${i+1}</div>
+          <div class="step-text">${s}</div>
+        </li>
+      `).join("")}
+    </ul>
+  </div>
+
+  <!-- Route Map -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">🗺</div>
+      <div class="card-title">Route Map</div>
+    </div>
+    <div class="map-container">
+      <iframe src="${d.routeMap}" loading="lazy"></iframe>
+    </div>
+  </div>
+
+  <!-- Hotel -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">🏨</div>
+      <div class="card-title">Hotel</div>
+    </div>
+    <div class="hotel-info">
+      <div class="hotel-name">${d.hotel.name}</div>
+      <a href="${d.hotel.link}" target="_blank">Open in Google Maps</a>
+      <div class="map-container">
+        <iframe src="${d.hotel.map}" loading="lazy"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- Food -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">🍽</div>
+      <div class="card-title">Food & Snacks</div>
+    </div>
+    <div class="food-grid">
+      ${(d.food || []).map(f=>`
+        <div class="food-item">🍴 ${f}</div>
+      `).join("")}
+    </div>
+  </div>
+
+  <!-- Emergency -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">🚨</div>
+      <div class="card-title">Emergency</div>
+    </div>
+    <div class="emergency-list">
+      ${(d.emergency || []).map(e=>`
+        <div class="emergency-item">
+          <span class="emergency-label">${e.split(":")[0]}</span>
+          <span class="emergency-number">${e.split(":")[1]}</span>
+        </div>
+      `).join("")}
+    </div>
+  </div>
+
+  <!-- Notes -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">📝</div>
+      <div class="card-title">Notes</div>
+    </div>
+    <textarea id="notesInput" class="notes-textarea"
+      placeholder="Write your notes here...">${notes[activeDay] || ""}</textarea>
+    <button class="btn btn-primary" onclick="saveNotes()">Save Notes</button>
+  </div>
+
+  <!-- Members -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">👥</div>
+      <div class="card-title">Members</div>
+    </div>
+    <div class="members-list">
+      ${safeParticipants.map(m=>`
+        <div class="member-pill">
+          ${m}
+          <button class="member-remove" onclick="removeMember('${m}')">×</button>
+        </div>
+      `).join("")}
+    </div>
+    <div class="member-input-group">
+      <input id="memberName" placeholder="Add member name"/>
+      <button class="btn btn-secondary" onclick="addMember()">Add</button>
+    </div>
+  </div>
+
+  <!-- Expenses -->
+  <div class="card" id="budgetSection">
+    <div class="card-header">
+      <div class="card-icon">💳</div>
+      <div class="card-title">Expenses</div>
+    </div>
+    <div class="expense-form">
+      <input id="et" placeholder="Title"/>
+      <input id="ea" type="number" placeholder="Amount"/>
+      <select id="ep">
+        ${safeParticipants.map(p=>`<option>${p}</option>`).join("")}
+      </select>
+      <button class="btn btn-primary" onclick="addExpense()">Add Expense</button>
+    </div>
+    <div class="expense-list">
+      ${dayExpenses.map(e=>`
+        <div class="expense-item">
+          <div class="expense-info">
+            <div class="expense-title">${e.title}</div>
+            <div class="expense-meta">Paid by ${e.paidBy}</div>
+          </div>
+          <div class="expense-amount">₹${e.amount}</div>
+        </div>
+      `).join("")}
+    </div>
+  </div>
+
+  <!-- Settlement -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">📊</div>
+      <div class="card-title">Settlement</div>
+    </div>
+    <div>Total: ₹${total}</div>
+    <div>Per Person: ₹${Math.round(share)}</div>
+  </div>
+
+  <!-- Logs -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">🧾</div>
+      <div class="card-title">Activity Logs</div>
+    </div>
+    <div class="logs-container">
+      ${safeLogs.map(l=>`
+        <div class="log-item">
+          <div class="log-time">
+            ${new Date(l.time).toLocaleTimeString()}
+          </div>
+          <div class="log-text">${l.text}</div>
+        </div>
+      `).join("")}
+    </div>
+  </div>
+
+  `;
 }
 
 function login() {
   const provider = new GoogleAuthProvider();
   signInWithPopup(auth, provider)
-    .catch(err => alert(err.message));
+    .then(() => showToast("Welcome! Signed in successfully", 'success'))
+    .catch(err => showToast(err.message, 'error'));
 }
 
 function logout() {
-  signOut(auth);
+  signOut(auth)
+    .then(() => showToast("Logged out successfully", 'success'));
 }
 
-
-  
-  // 🔗 Expose functions for inline HTML handlers
+// Expose functions for inline handlers
 window.addExpense = addExpense;
 window.delExpense = delExpense;
 window.addMember = addMember;
@@ -542,8 +1886,11 @@ window.removeMember = removeMember;
 window.saveNotes = saveNotes;
 window.login = login;
 window.logout = logout;
+window.setActiveDay = setActiveDay;
 
 
+// Initial render
+renderAuth();
 render();
 </script>
 </body>
