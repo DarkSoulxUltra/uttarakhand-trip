@@ -67,11 +67,6 @@ body{
   gap: 0.75rem;
 }
 
-
-.navbar {
-  flex-wrap: wrap;
-}
-
 .navbar .nav-links {
   flex-wrap: wrap;
 }
@@ -173,13 +168,20 @@ body{
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 100%;
+    /* width: 100%; */
   }
   .nav-auth {
-  display: flex;
-  justify-content: flex-end;
   width: 100%;
+  justify-content: flex-end;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
+
+.nav-auth .btn {
+  white-space: nowrap;
+}
+
 
   .trip-controls {
     width: 100%;
@@ -222,8 +224,13 @@ body{
 .nav-auth {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 12px;
 }
+
+.nav-auth .btn {
+  white-space: nowrap;
+}
+
 
 .user-profile {
   display: flex;
@@ -1270,6 +1277,7 @@ body{
   }
   
   .hero {
+    margin-top: 0;
     padding: 1.5rem;
   }
   
@@ -1286,13 +1294,24 @@ body{
   }
   
   .day-tabs {
-    gap: 0.5rem;
-  }
-  
-  .day-tab {
-    min-width: 80px;
-    padding: 0.75rem 1rem;
-  }
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.day-tab {
+  min-width: 0;
+  padding: 12px 6px;
+  border-radius: 14px;
+  text-align: center;
+}
+
+.day-tab-city {
+  font-size: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
   
   .day-city {
     font-size: 1.75rem;
