@@ -55,17 +55,27 @@ body{
   top: 0;
   left: 0;
   right: 0;
-  height: 70px;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(139, 115, 85, 0.15);
   z-index: 1000;
   display: flex;
+  flex-wrap: wrap;  /* THIS is important */
   align-items: center;
   justify-content: space-between;
-  padding: 0 2rem;
-  box-shadow: var(--shadow-soft);
+  padding: 0.75rem 1.25rem;
+  gap: 0.75rem;
 }
+
+
+.navbar {
+  flex-wrap: wrap;
+}
+
+.navbar .nav-links {
+  flex-wrap: wrap;
+}
+
 
 .nav-brand {
   display: flex;
@@ -129,6 +139,84 @@ body{
 .nav-link:hover::after {
   width: 100%;
 }
+
+/* ---------- Trip Controls Styling ---------- */
+
+.trip-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.trip-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.trip-code {
+  font-size: 13px;
+  font-weight: 600;
+  color: #2e3d2f;
+}
+  
+/* ===== MOBILE NAVBAR FIX ===== */
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    align-items: stretch;
+    height: auto;
+    padding: 12px 16px;
+    gap: 14px;
+  }
+  .nav-brand {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+  .nav-auth {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+  .trip-controls {
+    width: 100%;
+    background: white;
+    padding: 12px;
+    border-radius: 16px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+  }
+  .trip-buttons {
+    display: flex;
+    gap: 8px;
+  }
+  .trip-buttons .btn {
+    flex: 1;
+    font-size: 13px;
+  }
+  .trip-code {
+    text-align: center;
+    margin-top: 6px;
+  }
+  .nav-links {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  width: 100%;
+}
+
+.nav-link {
+  text-align: center;
+  padding: 8px;
+  background: var(--cream);
+  border-radius: 8px;
+}
+
+}
+
+
 
 /* Auth Section in Navbar */
 .nav-auth {
@@ -226,7 +314,7 @@ body{
   align-items: center;
   text-align: center;
   padding: 2rem;
-  margin-top: 70px;
+  margin-top: 0;
   overflow: hidden;
 }
 
@@ -1175,21 +1263,13 @@ body{
 
 /* Responsive */
 @media (max-width: 768px) {
-  .navbar {
-    padding: 0 1rem;
-    height: 60px;
-  }
+
   
   .nav-title {
     font-size: 1rem;
   }
   
-  .nav-links {
-    display: none;
-  }
-  
   .hero {
-    margin-top: 60px;
     padding: 1.5rem;
   }
   
@@ -1217,7 +1297,17 @@ body{
   .day-city {
     font-size: 1.75rem;
   }
-  
+  .days-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    justify-items: center;
+  }
+
+  .day-card {
+    width: 100%;
+    max-width: 140px;
+  }
   .content-grid {
     grid-template-columns: 1fr;
   }
@@ -1260,28 +1350,43 @@ body{
 
 <!-- Navigation Bar -->
 <nav class="navbar">
+  <div class="navbar-top">
   <div class="nav-brand">
     <div class="nav-logo">🏔️</div>
     <div class="nav-title">Uttarakhand <span>Trip</span></div>
+    <div class="nav-auth" id="navAuth">
+    <button class="btn btn-primary" onclick="login()">
+      <span>🔐</span> Sign in
+    </button>
+      <button class="btn btn-secondary btn-small" onclick="logout()">
+        <span>🚪</span> Logout
+      </button>
+  </div>
+  </div>
   </div>
   
-  <div class="trip-controls" style="display:flex; flex-direction:column; align-items:center; gap:4px;">
-
-  <div style="display:flex; gap:8px;">
+  
+  <div class="trip-controls">
+  <div class="trip-buttons">
     <button onclick="createNewTrip()" class="btn btn-primary">
-      Create Trip
+      Create
     </button>
 
     <button onclick="joinTrip()" class="btn btn-secondary">
-      Join Trip
+      Join
+    </button>
+
+    <button onclick="leaveTrip()" class="btn btn-outline">
+      Leave
     </button>
   </div>
 
-  <div style="font-size:12px; color:#666;">
-    Trip Code: <strong id="tripDisplay">---</strong>
+  <div class="trip-code">
+    Trip: <strong id="tripDisplay">---</strong>
   </div>
 
 </div>
+
 
 
   <div class="nav-links">
@@ -1304,11 +1409,7 @@ body{
 </div>
 
   
-  <div class="nav-auth" id="navAuth">
-    <button class="btn btn-primary" onclick="login()">
-      <span>🔐</span> Sign in
-    </button>
-  </div>
+  
 </nav>
 
 
@@ -1637,23 +1738,29 @@ function removeMember(name) {
 }
 
 function calculateSettlement() {
-  if (!participants.length) return { total: 0, share: 0, result: {} };
-  let total = 0;
-  let paid = {};
-  participants.forEach(p => paid[p] = 0);
-  expenses.forEach(e => {
-    total += e.amount || 0;
-    if (paid[e.paidBy] !== undefined) {
-      paid[e.paidBy] += e.amount;
-    }
+
+  const total = expenses.reduce((sum, e) => sum + e.amount, 0);
+  const share = participants.length ? total / participants.length : 0;
+
+  const balances = {};
+
+  participants.forEach(p => balances[p] = 0);
+
+  expenses.forEach(exp => {
+    balances[exp.paidBy] += exp.amount;
   });
-  const share = total / participants.length;
-  let result = {};
-  participants.forEach(p => {
-    result[p] = Math.round(paid[p] - share);
+
+  const result = participants.map(p => {
+    return {
+      name: p,
+      balance: balances[p] - share
+    };
   });
+
   return { total, share, result };
 }
+
+
 
 function showToast(message, type = 'success') {
   const existing = document.querySelector('.toast');
@@ -1676,27 +1783,32 @@ function showToast(message, type = 'success') {
 /* ---------- UI RENDERING ---------- */
 function renderAuth() {
   const navAuth = document.getElementById("navAuth");
+
   if (currentUser) {
     navAuth.innerHTML = `
       <div class="user-profile">
-        <div class="user-avatar">${currentUser.name ? currentUser.name[0].toUpperCase() : '👤'}</div>
+        <div class="user-avatar">
+          ${currentUser.name ? currentUser.name[0].toUpperCase() : '👤'}
+        </div>
         <div class="user-info">
           <span class="user-name">${currentUser.name}</span>
           <span class="user-email">${currentUser.email}</span>
         </div>
       </div>
+
       <button class="btn btn-secondary btn-small" onclick="logout()">
-        <span>🚪</span> Logout
+        🚪 Logout
       </button>
     `;
   } else {
     navAuth.innerHTML = `
       <button class="btn btn-primary" onclick="login()">
-        <span>🔐</span> Sign in with Google
+        🔐 Sign in with Google
       </button>
     `;
   }
 }
+
 
 function renderDayTabs() {
   const tabsContainer = document.getElementById("dayTabs");
@@ -1743,10 +1855,16 @@ function joinTrip() {
   if (!code) return;
   window.location.search = "?trip=" + code.trim();
 }
+function leaveTrip() {
+  const confirmLeave = confirm("Leave this trip?");
+  if (!confirmLeave) return;
+
+  window.location.href = window.location.pathname;
+}
 
 window.createNewTrip = createNewTrip;
 window.joinTrip = joinTrip;
-
+window.leaveTrip = leaveTrip;
 
 function render() {
   renderDayTabs();
@@ -1762,7 +1880,7 @@ function render() {
   const safeExpenses = Array.isArray(expenses) ? expenses : [];
   const safeLogs = Array.isArray(logs) ? logs : [];
 
-  const dayExpenses = safeExpenses.filter(e => e.day === activeDay);
+  const dayExpenses = safeExpenses.filter(e => Number(e.day) === Number(activeDay));
 
   const { total, share, result } = calculateSettlement();
 
@@ -1912,14 +2030,31 @@ function render() {
   </div>
 
   <!-- Settlement -->
-  <div class="card">
-    <div class="card-header">
-      <div class="card-icon">📊</div>
-      <div class="card-title">Settlement</div>
-    </div>
-    <div>Total: ₹${total}</div>
-    <div>Per Person: ₹${Math.round(share)}</div>
+<div class="card">
+  <div class="card-header">
+    <div class="card-icon">📊</div>
+    <div class="card-title">Settlement</div>
   </div>
+
+  <div>Total: ₹${total}</div>
+  <div>Per Person: ₹${Math.round(share)}</div>
+
+  <hr style="margin:10px 0;">
+
+  ${result.map(p => `
+    <div>
+      ${
+        p.balance > 0
+          ? `${p.name} should receive ₹${Math.round(p.balance)}`
+          : p.balance < 0
+            ? `${p.name} owes ₹${Math.round(Math.abs(p.balance))}`
+            : `${p.name} is settled`
+      }
+    </div>
+  `).join("")}
+
+</div>
+
 
   <!-- Logs -->
   <div class="card">
@@ -1953,6 +2088,9 @@ function logout() {
   signOut(auth)
     .then(() => showToast("Logged out successfully", 'success'));
 }
+
+
+
 
 // Expose functions for inline handlers
 window.addExpense = addExpense;
