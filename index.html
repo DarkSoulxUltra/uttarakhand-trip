@@ -1432,6 +1432,31 @@ body{
   transform: scale(1.05);
 }
 
+/* ============================= */
+/* DARK MODE – TRIP BUTTON FIX  */
+/* ============================= */
+
+body.dark .trip-controls {
+  background: #0f1b2a;
+}
+
+body.dark .trip-buttons .btn-secondary {
+  background: transparent;
+  color: #ffffff;
+  border: 2px solid rgba(255,255,255,0.35);
+}
+
+body.dark .trip-buttons .btn-secondary:hover {
+  background: linear-gradient(135deg, var(--forest-medium), var(--mountain-blue));
+  border-color: transparent;
+  color: #ffffff;
+}
+
+body.dark .trip-buttons .btn-outline {
+  background: rgba(255,255,255,0.05);
+  color: #ffffff;
+  border: 2px solid rgba(255,255,255,0.25);
+}
 
 </style>
 </head>
