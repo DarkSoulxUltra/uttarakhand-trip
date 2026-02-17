@@ -78,30 +78,35 @@ body.dark .log-item {
   border: 1px solid rgba(255,255,255,0.05);
 }
 
-/* ===== DARK MODE BUTTON FIX ===== */
-/* ===== DARK MODE BUTTONS ===== */
+/* ===================================
+   DARK MODE BUTTON SYSTEM (CLEAN)
+=================================== */
 
-body.dark .btn-secondary {
+body.dark .btn-primary,
+body.dark .btn-secondary,
+body.dark .btn-outline {
   background: rgba(255,255,255,0.08);
   border: 1.5px solid rgba(255,255,255,0.35);
   color: #ffffff;
+  transition: all 0.25s ease;
 }
 
+/* CREATE + JOIN hover = green */
+body.dark .btn-primary:hover,
 body.dark .btn-secondary:hover {
   background: linear-gradient(135deg, #2e7d32, #66bb6a);
+  border-color: #66bb6a;
   color: #ffffff;
+  transform: translateY(-2px);
 }
 
-body.dark .btn-outline {
-  background: transparent;
-  border: 1.5px solid rgba(255,255,255,0.35);
-  color: #ffffff;
-}
-
+/* LEAVE hover = red */
 body.dark .btn-outline:hover {
-  background: rgba(255,255,255,0.12);
+  background: linear-gradient(135deg, #c62828, #ef5350);
+  border-color: #ef5350;
+  color: #ffffff;
+  transform: translateY(-2px);
 }
-
 
 *{
   box-sizing: border-box;
@@ -2266,7 +2271,6 @@ function render() {
     </div>
   </div>
 `).join("")}
-
     </div>
   </div>
 
@@ -2276,10 +2280,8 @@ function render() {
     <div class="card-icon">📊</div>
     <div class="card-title">Settlement</div>
   </div>
-
   <div>Total: ₹${total}</div>
   <div>Per Person: ₹${Math.round(share)}</div>
-
   <hr style="margin:10px 0;">
 
   ${result.map(p => `
@@ -2295,7 +2297,6 @@ function render() {
   `).join("")}
 
 </div>
-
 
   <!-- Logs -->
   <div class="card">
@@ -2314,10 +2315,9 @@ function render() {
       `).join("")}
     </div>
   </div>
-
   `;
 }
-
+  
 function login() {
   const provider = new GoogleAuthProvider();
   signInWithPopup(auth, provider)
@@ -2327,7 +2327,6 @@ function login() {
 
 async function shareTrip() {
   const url = window.location.href;
-
   try {
     if (navigator.share) {
       await navigator.share({
@@ -2346,65 +2345,48 @@ async function shareTrip() {
 
 window.shareTrip = shareTrip;
 
-
 function logout() {
   signOut(auth)
     .then(() => showToast("Logged out successfully", 'success'));
 }
 
-
 /* ================= DARK MODE LOGIC ================= */
-
 function applyTheme(theme) {
   const body = document.body;
   const toggleBtn = document.getElementById("themeToggle");
-
   if (theme === "dark") {
     body.classList.add("dark");
-
     if (toggleBtn) {
       toggleBtn.innerText = "☀️";
       toggleBtn.style.transform = "rotate(360deg)";
     }
-
     // update browser theme color
     document.querySelector('meta[name="theme-color"]')
       .setAttribute("content", "#111827");
-
   } else {
     body.classList.remove("dark");
-
     if (toggleBtn) {
       toggleBtn.innerText = "🌙";
       toggleBtn.style.transform = "rotate(0deg)";
     }
-
     document.querySelector('meta[name="theme-color"]')
       .setAttribute("content", "#2d4a2d");
   }
 }
 
-
 function toggleDarkMode() {
   const body = document.body;
   const isDark = body.classList.contains("dark");
-
   body.classList.add("theme-transition");
-
   setTimeout(() => {
     const newTheme = isDark ? "light" : "dark";
     localStorage.setItem("theme", newTheme);
     applyTheme(newTheme);
-
     setTimeout(() => {
       body.classList.remove("theme-transition");
     }, 150);
-
   }, 150);
 }
-
-
-
 
 // Expose functions for inline handlers
 window.addExpense = addExpense;
@@ -2417,7 +2399,6 @@ window.logout = logout;
 window.setActiveDay = setActiveDay;
 window.toggleDarkMode = toggleDarkMode;
 
-
 // Restore theme BEFORE rendering
 const savedTheme = localStorage.getItem("theme") || "light";
 applyTheme(savedTheme);
@@ -2425,8 +2406,6 @@ applyTheme(savedTheme);
 // Initial render
 renderAuth();
 render();
-
-
 
 </script>
 </body>
