@@ -1774,6 +1774,24 @@ body.dark::before {
   z-index: 0;
 }
 
+/* ------ Mobile Transition Optimization ------ */
+@media (max-width: 768px) {
+  body.dark .aurora {
+    animation-duration: 30s;
+  }
+
+  body.dark .stars::before,
+  body.dark .stars::after,
+  body.dark .snow::before {
+    animation-duration: 40s;
+  }
+
+  body.dark .shooting-stars::before,
+  body.dark .shooting-stars::after {
+    display: none;
+  }
+}
+
 
 
 </style>
