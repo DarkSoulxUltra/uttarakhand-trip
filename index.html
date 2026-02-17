@@ -79,20 +79,27 @@ body.dark .log-item {
 }
 
 /* ===== DARK MODE BUTTON FIX ===== */
+/* ===== DARK MODE BUTTONS ===== */
 
 body.dark .btn-secondary {
   background: rgba(255,255,255,0.08);
-  border: 1.5px solid rgba(255,255,255,0.25);
+  border: 1.5px solid rgba(255,255,255,0.35);
   color: #ffffff;
 }
 
 body.dark .btn-secondary:hover {
-  background: linear-gradient(135deg, var(--forest-medium), var(--mountain-blue));
+  background: linear-gradient(135deg, #2e7d32, #66bb6a);
   color: #ffffff;
 }
 
-body.dark .btn-secondary {
-  backdrop-filter: blur(6px);
+body.dark .btn-outline {
+  background: transparent;
+  border: 1.5px solid rgba(255,255,255,0.35);
+  color: #ffffff;
+}
+
+body.dark .btn-outline:hover {
+  background: rgba(255,255,255,0.12);
 }
 
 
@@ -251,11 +258,12 @@ body{
 
   .trip-controls {
     width: 100%;
-    background: white;
+    background: var(--pure-white);
     padding: 12px;
     border-radius: 16px;
     box-shadow: 0 6px 16px rgba(0,0,0,0.08);
   }
+
   .trip-buttons {
     display: flex;
     gap: 8px;
@@ -333,6 +341,17 @@ body{
   background: var(--cream);
   border-color: var(--sunset-orange);
 }
+.btn-outline {
+  background: transparent;
+  border: 1.5px solid var(--earth-brown);
+  color: var(--forest-dark);
+}
+
+.btn-outline:hover {
+  background: var(--cream);
+  border-color: var(--sunset-orange);
+}
+
 
 .btn-small {
   padding: 0.4rem 0.875rem;
@@ -1465,18 +1484,6 @@ body.dark {
   background: #0f172a;
 }
 
-/* Fix Join Button Visibility in Dark Mode */
-body.dark .btn-outline {
-  background: transparent;
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.6);
-}
-
-body.dark .btn-outline:hover {
-  background: #2e7d32;
-  color: #ffffff;
-  border: 1px solid #2e7d32;
-}
 
 
 /* Dark Mode – Day Tabs Visibility Fix */
@@ -2269,8 +2276,10 @@ function render() {
     <div class="card-icon">📊</div>
     <div class="card-title">Settlement</div>
   </div>
+
   <div>Total: ₹${total}</div>
   <div>Per Person: ₹${Math.round(share)}</div>
+
   <hr style="margin:10px 0;">
 
   ${result.map(p => `
@@ -2286,6 +2295,8 @@ function render() {
   `).join("")}
 
 </div>
+
+
   <!-- Logs -->
   <div class="card">
     <div class="card-header">
@@ -2303,6 +2314,7 @@ function render() {
       `).join("")}
     </div>
   </div>
+
   `;
 }
 
@@ -2315,6 +2327,7 @@ function login() {
 
 async function shareTrip() {
   const url = window.location.href;
+
   try {
     if (navigator.share) {
       await navigator.share({
@@ -2333,30 +2346,39 @@ async function shareTrip() {
 
 window.shareTrip = shareTrip;
 
+
 function logout() {
   signOut(auth)
     .then(() => showToast("Logged out successfully", 'success'));
 }
-  
+
+
 /* ================= DARK MODE LOGIC ================= */
+
 function applyTheme(theme) {
   const body = document.body;
   const toggleBtn = document.getElementById("themeToggle");
+
   if (theme === "dark") {
     body.classList.add("dark");
+
     if (toggleBtn) {
       toggleBtn.innerText = "☀️";
       toggleBtn.style.transform = "rotate(360deg)";
     }
+
     // update browser theme color
     document.querySelector('meta[name="theme-color"]')
       .setAttribute("content", "#111827");
+
   } else {
     body.classList.remove("dark");
+
     if (toggleBtn) {
       toggleBtn.innerText = "🌙";
       toggleBtn.style.transform = "rotate(0deg)";
     }
+
     document.querySelector('meta[name="theme-color"]')
       .setAttribute("content", "#2d4a2d");
   }
@@ -2366,16 +2388,23 @@ function applyTheme(theme) {
 function toggleDarkMode() {
   const body = document.body;
   const isDark = body.classList.contains("dark");
+
   body.classList.add("theme-transition");
+
   setTimeout(() => {
     const newTheme = isDark ? "light" : "dark";
     localStorage.setItem("theme", newTheme);
     applyTheme(newTheme);
+
     setTimeout(() => {
       body.classList.remove("theme-transition");
     }, 150);
+
   }, 150);
 }
+
+
+
 
 // Expose functions for inline handlers
 window.addExpense = addExpense;
@@ -2388,13 +2417,17 @@ window.logout = logout;
 window.setActiveDay = setActiveDay;
 window.toggleDarkMode = toggleDarkMode;
 
+
 // Restore theme BEFORE rendering
 const savedTheme = localStorage.getItem("theme") || "light";
 applyTheme(savedTheme);
-  
+
 // Initial render
 renderAuth();
 render();
+
+
+
 </script>
 </body>
 </html>
