@@ -78,6 +78,23 @@ body.dark .log-item {
   border: 1px solid rgba(255,255,255,0.05);
 }
 
+/* ===== DARK MODE BUTTON FIX ===== */
+
+body.dark .btn-secondary {
+  background: rgba(255,255,255,0.08);
+  border: 1.5px solid rgba(255,255,255,0.25);
+  color: #ffffff;
+}
+
+body.dark .btn-secondary:hover {
+  background: linear-gradient(135deg, var(--forest-medium), var(--mountain-blue));
+  color: #ffffff;
+}
+
+body.dark .btn-secondary {
+  backdrop-filter: blur(6px);
+}
+
 
 *{
   box-sizing: border-box;
