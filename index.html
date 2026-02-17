@@ -1432,9 +1432,44 @@ body{
   transform: scale(1.05);
 }
 
-body {
-  transition: background 0.4s ease, color 0.4s ease;
+/* ===== THEME TOGGLE ANIMATION ===== */
+
+#themeToggle {
+  transition: all 0.4s ease, transform 0.6s ease;
+  font-size: 18px;
 }
+
+body.dark #themeToggle {
+  box-shadow: 0 0 12px rgba(255, 204, 0, 0.7),
+              0 0 25px rgba(255, 204, 0, 0.5);
+  transform: rotate(360deg);
+}
+
+body:not(.dark) #themeToggle {
+  transform: rotate(0deg);
+}
+
+
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: #f5f3ee;
+  color: #1f2937;
+  transition: background 0.4s ease,
+              color 0.4s ease,
+              opacity 0.3s ease;
+}
+
+body.dark {
+  position: relative;
+  background: #0f172a;
+}
+
+
+body.theme-transition {
+  opacity: 0.85;
+}
+
 
 .card,
 .navbar,
@@ -1445,12 +1480,58 @@ body {
   transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease;
 }
 
+/* ===== DARK MODE STAR FIELD ===== */
+
+.stars {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background: transparent;
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+body.dark .stars {
+  opacity: 1;
+}
+
+.stars::before,
+.stars::after {
+  content: "";
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  background-image:
+    radial-gradient(2px 2px at 20px 30px, white, transparent),
+    radial-gradient(1.5px 1.5px at 100px 150px, white, transparent),
+    radial-gradient(2px 2px at 200px 80px, white, transparent),
+    radial-gradient(1.5px 1.5px at 300px 200px, white, transparent),
+    radial-gradient(2px 2px at 400px 120px, white, transparent);
+  background-repeat: repeat;
+  animation: twinkle 8s linear infinite;
+  opacity: 0.25;
+}
+
+.stars::after {
+  animation-duration: 12s;
+  opacity: 0.15;
+}
+
+@keyframes twinkle {
+  from { transform: translateY(0px); }
+  to { transform: translateY(-200px); }
+}
 
 
 </style>
 </head>
 
 <body>
+<div class="stars"></div>
 
 <!-- Navigation Bar -->
 <nav class="navbar">
@@ -2238,20 +2319,48 @@ function applyTheme(theme) {
 
   if (theme === "dark") {
     body.classList.add("dark");
-    if (toggleBtn) toggleBtn.innerText = "☀️";
+
+    if (toggleBtn) {
+      toggleBtn.innerText = "☀️";
+      toggleBtn.style.transform = "rotate(360deg)";
+    }
+
+    // update browser theme color
+    document.querySelector('meta[name="theme-color"]')
+      .setAttribute("content", "#111827");
+
   } else {
     body.classList.remove("dark");
-    if (toggleBtn) toggleBtn.innerText = "🌙";
+
+    if (toggleBtn) {
+      toggleBtn.innerText = "🌙";
+      toggleBtn.style.transform = "rotate(0deg)";
+    }
+
+    document.querySelector('meta[name="theme-color"]')
+      .setAttribute("content", "#2d4a2d");
   }
 }
 
-function toggleDarkMode() {
-  const isDark = document.body.classList.contains("dark");
-  const newTheme = isDark ? "light" : "dark";
 
-  localStorage.setItem("theme", newTheme);
-  applyTheme(newTheme);
+function toggleDarkMode() {
+  const body = document.body;
+  const isDark = body.classList.contains("dark");
+
+  body.classList.add("theme-transition");
+
+  setTimeout(() => {
+    const newTheme = isDark ? "light" : "dark";
+    localStorage.setItem("theme", newTheme);
+    applyTheme(newTheme);
+
+    setTimeout(() => {
+      body.classList.remove("theme-transition");
+    }, 150);
+
+  }, 150);
 }
+
 
 
 
