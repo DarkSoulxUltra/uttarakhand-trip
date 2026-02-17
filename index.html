@@ -1368,7 +1368,12 @@ body{
   
   .day-city {
     font-size: 1.75rem;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.4;
   }
+
   .days-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -1573,11 +1578,197 @@ body.dark .stars {
   to { transform: translateY(-200px); }
 }
 
+/* ===================================
+   ULTRA HIMALAYAN DARK MODE
+=================================== */
+
+/* Smooth theme transition */
+body {
+  transition: background 0.5s ease, color 0.4s ease;
+}
+
+/* Deep night base */
+body.dark {
+  background: radial-gradient(circle at 20% 20%, #0d1b2a, #050d1a 70%);
+}
+
+/* -------------------------
+   AURORA GLOW
+-------------------------- */
+
+.aurora {
+  position: fixed;
+  top: -30%;
+  left: -30%;
+  width: 160%;
+  height: 160%;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 0;
+  transition: opacity 0.6s ease;
+}
+
+body.dark .aurora {
+  opacity: 0.5;
+  background:
+  radial-gradient(circle at 20% 30%, hsla(var(--aurora-hue, 200), 100%, 60%, 0.25), transparent 50%),
+  radial-gradient(circle at 80% 40%, hsla(calc(var(--aurora-hue, 200) + 60), 100%, 60%, 0.25), transparent 50%),
+  radial-gradient(circle at 50% 80%, hsla(calc(var(--aurora-hue, 200) + 120), 100%, 60%, 0.25), transparent 50%);
+  animation: auroraMove 18s ease-in-out infinite alternate;
+}
+
+@keyframes auroraMove {
+  0% {
+    transform: translateX(-5%) translateY(-5%) scale(1);
+  }
+  100% {
+    transform: translateX(5%) translateY(5%) scale(1.1);
+  }
+}
+
+/* -------------------------
+   SHOOTING STARS
+-------------------------- */
+
+.shooting-stars {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+body.dark .shooting-stars::before,
+body.dark .shooting-stars::after {
+  content: "";
+  position: absolute;
+  width: 2px;
+  height: 80px;
+  background: linear-gradient(to bottom, white, transparent);
+  opacity: 0;
+  animation: shootingStar 6s linear infinite;
+}
+
+body.dark .shooting-stars::before {
+  top: 10%;
+  left: 20%;
+  animation-delay: 1s;
+}
+
+body.dark .shooting-stars::after {
+  top: 30%;
+  left: 70%;
+  animation-delay: 4s;
+}
+
+@keyframes shootingStar {
+  0% {
+    transform: translateY(-100px) translateX(0) rotate(45deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(600px) translateX(200px) rotate(45deg);
+    opacity: 0;
+  }
+}
+
+/* -------------------------
+   Glow on Navbar in Dark
+-------------------------- */
+
+body.dark .navbar {
+  background: linear-gradient(90deg, #0d1b2a, #112240);
+  box-shadow: 0 0 25px rgba(0,150,255,0.15);
+}
+
+/* Elevate content above effects */
+.navbar,
+.trip-controls,
+.section,
+.card,
+.hero {
+  position: relative;
+  z-index: 2;
+}
+
+/* -------------------------
+   FLOATING SNOW PARTICLES
+-------------------------- */
+
+.snow {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+body.dark .snow::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(255,255,255,0.15), transparent 60%);
+  animation: shimmer 4s ease-in-out infinite alternate;
+}
+
+@keyframes shimmer {
+  0% { opacity: 0.1; }
+  100% { opacity: 0.3; }
+}
+
+
+body.dark .snow {
+  opacity: 0.4;
+}
+
+.snow::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 200%;
+  background-image:
+    radial-gradient(2px 2px at 10% 20%, white, transparent),
+    radial-gradient(3px 3px at 30% 40%, white, transparent),
+    radial-gradient(2px 2px at 70% 60%, white, transparent),
+    radial-gradient(3px 3px at 90% 30%, white, transparent),
+    radial-gradient(2px 2px at 50% 80%, white, transparent);
+  background-repeat: repeat;
+  animation: snowFall 20s linear infinite;
+}
+
+
+
+@keyframes snowFall {
+  0% { transform: translateY(-20%); }
+  100% { transform: translateY(0%); }
+}
+
+body.dark::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 15% 25%, white, transparent),
+    radial-gradient(1px 1px at 45% 75%, white, transparent),
+    radial-gradient(1px 1px at 75% 35%, white, transparent),
+    radial-gradient(1px 1px at 85% 85%, white, transparent);
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: 0;
+}
+
 
 </style>
 </head>
 
 <body>
+<div class="aurora"></div>
+<div class="shooting-stars"></div>
+<div class="snow"></div>
 <div class="stars"></div>
 
 <!-- Navigation Bar -->
@@ -2271,6 +2462,7 @@ function render() {
     </div>
   </div>
 `).join("")}
+
     </div>
   </div>
 
@@ -2280,8 +2472,10 @@ function render() {
     <div class="card-icon">📊</div>
     <div class="card-title">Settlement</div>
   </div>
+
   <div>Total: ₹${total}</div>
   <div>Per Person: ₹${Math.round(share)}</div>
+
   <hr style="margin:10px 0;">
 
   ${result.map(p => `
@@ -2297,6 +2491,7 @@ function render() {
   `).join("")}
 
 </div>
+
 
   <!-- Logs -->
   <div class="card">
@@ -2315,9 +2510,10 @@ function render() {
       `).join("")}
     </div>
   </div>
+
   `;
 }
-  
+
 function login() {
   const provider = new GoogleAuthProvider();
   signInWithPopup(auth, provider)
@@ -2327,6 +2523,7 @@ function login() {
 
 async function shareTrip() {
   const url = window.location.href;
+
   try {
     if (navigator.share) {
       await navigator.share({
@@ -2345,48 +2542,65 @@ async function shareTrip() {
 
 window.shareTrip = shareTrip;
 
+
 function logout() {
   signOut(auth)
     .then(() => showToast("Logged out successfully", 'success'));
 }
 
+
 /* ================= DARK MODE LOGIC ================= */
+
 function applyTheme(theme) {
   const body = document.body;
   const toggleBtn = document.getElementById("themeToggle");
+
   if (theme === "dark") {
     body.classList.add("dark");
+
     if (toggleBtn) {
       toggleBtn.innerText = "☀️";
       toggleBtn.style.transform = "rotate(360deg)";
     }
+
     // update browser theme color
     document.querySelector('meta[name="theme-color"]')
       .setAttribute("content", "#111827");
+
   } else {
     body.classList.remove("dark");
+
     if (toggleBtn) {
       toggleBtn.innerText = "🌙";
       toggleBtn.style.transform = "rotate(0deg)";
     }
+
     document.querySelector('meta[name="theme-color"]')
       .setAttribute("content", "#2d4a2d");
   }
 }
 
+
 function toggleDarkMode() {
   const body = document.body;
   const isDark = body.classList.contains("dark");
+
   body.classList.add("theme-transition");
+
   setTimeout(() => {
     const newTheme = isDark ? "light" : "dark";
     localStorage.setItem("theme", newTheme);
     applyTheme(newTheme);
+
     setTimeout(() => {
       body.classList.remove("theme-transition");
     }, 150);
+
   }, 150);
 }
+
+
+
 
 // Expose functions for inline handlers
 window.addExpense = addExpense;
@@ -2399,13 +2613,30 @@ window.logout = logout;
 window.setActiveDay = setActiveDay;
 window.toggleDarkMode = toggleDarkMode;
 
+
 // Restore theme BEFORE rendering
 const savedTheme = localStorage.getItem("theme") || "light";
 applyTheme(savedTheme);
 
+
+/* ===== AURORA COLOR SHIFT ON SCROLL ===== */
+
+window.addEventListener("scroll", () => {
+  if (!document.body.classList.contains("dark")) return;
+
+  const scrollPercent =
+    window.scrollY / (document.body.scrollHeight - window.innerHeight);
+
+  const hue = 180 + Math.floor(scrollPercent * 120); // 180 → 300
+  document.documentElement.style.setProperty("--aurora-hue", hue);
+});
+
+
 // Initial render
 renderAuth();
 render();
+
+
 
 </script>
 </body>
