@@ -1473,30 +1473,35 @@ body{
 /* ===== THEME TOGGLE ANIMATION ===== */
 
 #themeToggle {
-  transition: all 0.4s ease, transform 0.6s ease;
   font-size: 18px;
+  transition: transform 0.6s cubic-bezier(.4,0,.2,1),
+              box-shadow 0.4s ease;
+  will-change: transform;
 }
 
 body.dark #themeToggle {
-  box-shadow: 0 0 12px rgba(255, 204, 0, 0.7),
-              0 0 25px rgba(255, 204, 0, 0.5);
   transform: rotate(360deg);
+  box-shadow:
+    0 0 10px rgba(255, 204, 0, 0.7),
+    0 0 25px rgba(255, 204, 0, 0.5);
 }
 
 body:not(.dark) #themeToggle {
   transform: rotate(0deg);
+  box-shadow: none;
 }
+
 
 
 body {
-  margin: 0;
-  font-family: 'Poppins', sans-serif;
-  background: #f5f3ee;
-  color: #1f2937;
-  transition: background 0.4s ease,
-              color 0.4s ease,
-              opacity 0.3s ease;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--warm-cream);
+  color: var(--forest-dark);
+  min-height: 100vh;
+  overflow-x: hidden;
+
 }
+
 
 body.dark {
   position: relative;
@@ -1537,9 +1542,7 @@ body.theme-transition {
 .trip-controls {
   transition: background 0.4s ease, color 0.4s ease, border 0.4s ease;
 }
-* {
-  transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease;
-}
+
 
 /* ===== DARK MODE STAR FIELD ===== */
 
@@ -1593,8 +1596,9 @@ body.dark .stars {
 
 /* Smooth theme transition */
 body {
-  transition: background 0.5s ease, color 0.4s ease;
+  transition: background-color 0.4s ease, color 0.4s ease;
 }
+
 
 /* Deep night base */
 body.dark {
@@ -1769,6 +1773,7 @@ body.dark::before {
   pointer-events: none;
   z-index: 0;
 }
+
 
 
 </style>
@@ -2471,7 +2476,6 @@ function render() {
     </div>
   </div>
 `).join("")}
-
     </div>
   </div>
 
@@ -2484,9 +2488,7 @@ function render() {
 
   <div>Total: ₹${total}</div>
   <div>Per Person: ₹${Math.round(share)}</div>
-
   <hr style="margin:10px 0;">
-
   ${result.map(p => `
     <div>
       ${
@@ -2498,9 +2500,7 @@ function render() {
       }
     </div>
   `).join("")}
-
 </div>
-
 
   <!-- Logs -->
   <div class="card">
@@ -2519,7 +2519,6 @@ function render() {
       `).join("")}
     </div>
   </div>
-
   `;
 }
 
@@ -2529,7 +2528,7 @@ function login() {
     .then(() => showToast("Welcome! Signed in successfully", 'success'))
     .catch(err => showToast(err.message, 'error'));
 }
-
+  
 async function shareTrip() {
   const url = window.location.href;
 
@@ -2548,68 +2547,53 @@ async function shareTrip() {
     showToast("Sharing cancelled or failed.", "error");
   }
 }
-
 window.shareTrip = shareTrip;
-
 
 function logout() {
   signOut(auth)
     .then(() => showToast("Logged out successfully", 'success'));
 }
 
-
 /* ================= DARK MODE LOGIC ================= */
-
 function applyTheme(theme) {
   const body = document.body;
   const toggleBtn = document.getElementById("themeToggle");
-
+  // Smooth transition only for theme change
+     document.body.style.transition = "background-color 0.4s ease, color 0.4s ease";
   if (theme === "dark") {
     body.classList.add("dark");
-
     if (toggleBtn) {
       toggleBtn.innerText = "☀️";
       toggleBtn.style.transform = "rotate(360deg)";
     }
-
     // update browser theme color
     document.querySelector('meta[name="theme-color"]')
       .setAttribute("content", "#111827");
-
   } else {
     body.classList.remove("dark");
-
     if (toggleBtn) {
       toggleBtn.innerText = "🌙";
       toggleBtn.style.transform = "rotate(0deg)";
     }
-
     document.querySelector('meta[name="theme-color"]')
       .setAttribute("content", "#2d4a2d");
   }
 }
 
-
 function toggleDarkMode() {
   const body = document.body;
   const isDark = body.classList.contains("dark");
-
   body.classList.add("theme-transition");
-
   setTimeout(() => {
     const newTheme = isDark ? "light" : "dark";
     localStorage.setItem("theme", newTheme);
     applyTheme(newTheme);
-
     setTimeout(() => {
       body.classList.remove("theme-transition");
     }, 150);
 
   }, 150);
 }
-
-
-
 
 // Expose functions for inline handlers
 window.addExpense = addExpense;
@@ -2622,30 +2606,23 @@ window.logout = logout;
 window.setActiveDay = setActiveDay;
 window.toggleDarkMode = toggleDarkMode;
 
-
 // Restore theme BEFORE rendering
 const savedTheme = localStorage.getItem("theme") || "light";
 applyTheme(savedTheme);
-
 
 /* ===== AURORA COLOR SHIFT ON SCROLL ===== */
 
 window.addEventListener("scroll", () => {
   if (!document.body.classList.contains("dark")) return;
-
   const scrollPercent =
     window.scrollY / (document.body.scrollHeight - window.innerHeight);
-
   const hue = 180 + Math.floor(scrollPercent * 120); // 180 → 300
   document.documentElement.style.setProperty("--aurora-hue", hue);
 });
 
-
 // Initial render
 renderAuth();
 render();
-
-
 
 </script>
 </body>
